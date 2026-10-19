@@ -1,13 +1,19 @@
 [
     {
         "budget_id": "T001",
-        "monthly_income": 150000,
+        "monthly_income": 200000,
         "expenses": [],
         "target_limit": {
-            "Food": "5000",
-            "Data": "5000",
-            "Clothing": "25000",
-            "Gadgets": "15000"
+            "Food": 25000,
+            "Data": 10000,
+            "transport": 10000,
+            "Cloths": 25000
         }
+    },
+    {
+        "budget_id": "T002",
+        "monthly_income": 150000,
+        "expenses": [],
+        "target_limit": {}
     }
 ]
