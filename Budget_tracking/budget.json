@@ -1,5 +1,16 @@
-{
-    "budget_id": "F001",
-    "monthly_income": "30000",
-    "expenses": []
-}
+[
+    {
+        "budget_id": "T001",
+        "monthly_income": "200000",
+        "expenses": [
+            {
+                "budget_id": "F001",
+                "category": "Network",
+                "amount": "1200",
+                "description": "bought airtime",
+                "time": "08:42:23 AM",
+                "date": "October-19-2026"
+            }
+        ]
+    }
+]

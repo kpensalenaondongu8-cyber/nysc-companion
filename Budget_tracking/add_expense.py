@@ -2,33 +2,37 @@ import json
 from datetime import datetime
 
 
-def add_expense(budget_id, category, amount, description):  
-        
+def add_expense(budget_id, category, amount, description):
     with open("budget.json", "r") as file:
-        data = json.load(file)  
+        data = json.load(file)
+        
         budget_id_found = False
-        for budget in data: 
-            if str(budget['budget_id']).strip() == str(budget_id).strip():
+        for items in data:
+            if str(items['budget_id']).strip() == str(budget_id).strip():
                 budget_id_found = True
-            if "expenses" not in budget:
-                budget['expenses'] = []
             
-            now = datetime.now()
-            expense_id = len(budget['expenses'])+1
+            if "expenses" not in items:
+                items['expenses'] = []
+
+            id = len(items['expenses']) + 1
+            expense_id = f"F{id:03d}"
+            time = datetime.now()
+
 
             new_expense = {
-                "expense_id": expense_id,
+                "budget_id": expense_id,
                 "category": category,
                 "amount": amount,
                 "description": description,
-                "date": now.strftime("%B-%d-%Y")
-
+                "time": time.strftime("%I:%M:%S %p"),
+                "date": time.strftime("%B-%d-%Y")
             }
-            for item in data:
-                item["expenses"].append(new_expense)
 
-            with open("budget.json", "w") as file:
-                json.dump(item, file, indent=4)    
-        if budget_id_found == False:
-            print("Budget id not found")
-            return False
+            items['expenses'].append(new_expense)
+
+        if not budget_id_found:
+            print("Budget_id not found!")
+
+        with open("budget.json", "w") as file:
+            json.dump(data, file, indent=4)
+            print("expense added successfully")

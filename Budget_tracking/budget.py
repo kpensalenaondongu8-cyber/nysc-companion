@@ -8,11 +8,12 @@ def budget_track(monthly_income: float):
             print("file not found")  
             return
     budget_id = len(data)+1 
+    full_id = f"T{budget_id:03d}"
 
     new_budget_entry = {
-        "budget_id": budget_id,
+        "budget_id": full_id,
         "monthly_income": monthly_income,
-        "expenses": [] 
+        "expense": []
     }
     
     data.append(new_budget_entry)
