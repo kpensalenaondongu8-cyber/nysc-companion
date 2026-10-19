@@ -2,7 +2,16 @@
     {
         "budget_id": "T001",
         "monthly_income": 200000,
-        "expenses": [],
+        "expenses": [
+            {
+                "expense_id": "F001",
+                "category": "data",
+                "amount": 15000,
+                "description": "bought data",
+                "time": "10:17:18 PM",
+                "date": "October-19-2026"
+            }
+        ],
         "target_limit": {
             "Food": 25000,
             "Data": 10000,

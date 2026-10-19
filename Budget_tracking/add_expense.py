@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from threshhold_check import check_threshhold
 
 
 def add_expense(budget_id, category, amount, description):
@@ -11,26 +12,28 @@ def add_expense(budget_id, category, amount, description):
         for items in data:
             if str(items['budget_id']).strip() == str(budget_id).strip():
                 budget_id_found = True
-            
-            if "expenses" not in items:
-                items['expenses'] = []
 
-            id = len(items['expenses']) + 1
-            expense_id = f"F{id:03d}"
-            time = datetime.now()
+                check_threshhold(items, category, amount)   
+                
+                if "expenses" not in items:
+                    items['expenses'] = []
+
+                id = len(items['expenses']) + 1
+                expense_id = f"F{id:03d}"
+                time = datetime.now()
 
 
-            new_expense = {
-                "expense_id": expense_id,
-                "category": category,
-                "amount": amount,
-                "description": description,
-                "time": time.strftime("%I:%M:%S %p"),
-                "date": time.strftime("%B-%d-%Y")
-            }
-            
-            items['expenses'].append(new_expense)
-            break
+                new_expense = {
+                    "expense_id": expense_id,
+                    "category": category,
+                    "amount": amount,
+                    "description": description,
+                    "time": time.strftime("%I:%M:%S %p"),
+                    "date": time.strftime("%B-%d-%Y")
+                }
+                
+                items['expenses'].append(new_expense)
+                break
 
         if not budget_id_found:
             print("Budget_id not found!")
