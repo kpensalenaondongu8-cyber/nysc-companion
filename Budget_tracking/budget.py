@@ -13,7 +13,7 @@ def budget_track(monthly_income: float):
     new_budget_entry = {
         "budget_id": full_id,
         "monthly_income": monthly_income,
-        "expense": []
+        "expenses": []
     }
     
     data.append(new_budget_entry)

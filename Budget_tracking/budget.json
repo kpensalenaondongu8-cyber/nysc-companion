@@ -1,16 +1,13 @@
 [
     {
         "budget_id": "T001",
-        "monthly_income": "200000",
-        "expenses": [
-            {
-                "budget_id": "F001",
-                "category": "Network",
-                "amount": "1200",
-                "description": "bought airtime",
-                "time": "08:42:23 AM",
-                "date": "October-19-2026"
-            }
-        ]
+        "monthly_income": 150000,
+        "expenses": [],
+        "target_limit": {
+            "Food": "5000",
+            "Data": "5000",
+            "Clothing": "25000",
+            "Gadgets": "15000"
+        }
     }
 ]
