@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from threshhold_check import check_threshhold
+from budget_tracking.threshhold_check import check_threshhold
 
 
 def add_expense(budget_id, category, amount, description):
