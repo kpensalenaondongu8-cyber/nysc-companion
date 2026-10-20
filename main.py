@@ -3,14 +3,21 @@ from budget_tracking.add_expense import add_expense
 from budget_tracking.history import budget_history
 from budget_tracking.limit_expense import limit_expense
 from user_auth.create_acct import create_account
+from user_auth.login import login
 
 user_input = input("1. Login\n2. Create_account\n")
 
-if user_input == "2git add ":
+if user_input == "1":
+     user_input1 = input("Enter Number: ")
+     user_input2 = input("Enter Password: ")
+     login(user_input1, user_input2)
+
+elif user_input == "2":
      user_input1 = input("Enter first_name: ")
      user_input2 = input("Enter middle_name: ")
      user_input3 = input("Enter Last_name: ")
-     user_input4 = int(input("Enter number: "))
+     
+     user_input4 = (input("Enter number: "))
      user_input5 = input("Enter email: ")
      user_input6 = input("Enter password: ")
      create_account(user_input1, user_input2, user_input3, user_input4, user_input5, user_input6)

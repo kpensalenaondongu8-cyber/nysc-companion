@@ -1,20 +1,35 @@
-import json
+# import sqlite3
+# from argon2 import PasswordHasher
+# from argon2.exceptions import VerifyMismatchError
 
-def create_account(first_name, middle_name, last_name, number, email, password):
-    with open("users.json", "r") as file:
-        data = json.load(file)
 
-        new_account = {
-           "first_name": first_name,
-           "middle_name": middle_name,
-           "last_name": last_name,
-           "number": number, 
-           "email": email,
-           "password": password
-        }
+# ph = PasswordHasher()
+# def create_account(first_name, middle_name, last_name, number, email, password):
+    
+#     conn = sqlite3.connect("nysc_companion.db")
+#     cursor = conn.cursor()
+#     hashed_password = ph.hash(password)    
+#     cursor.execute(
+#         "INSERT INTO users (first_name, middle_name, last_name, number, email, password) VALUES (?, ?, ?, ?, ?, ?)",
+#         (first_name, middle_name, last_name, number, email, hashed_password)
+#     )
+#     conn.commit()
+#     conn.close()
 
-        data.append(new_account)
+#     print("Table Created and values assigned successfully!")
+import sqlite3
+from argon2 import PasswordHasher
 
-    with open("users.json", "w") as file:
-        json.dump(data, file, indent=4)   
-        print("account created successfully") 
+ph = PasswordHasher()
+def create_acct(name1, name2, name3, number, email, password):
+    conn = sqlite3.connect("nysc_companion.db")
+    cursor = conn.cursor()
+    hashed_password = ph.hash(password)
+
+    cursor.execute(
+        "INSERT INTO users (name1, name2, name3, number, email, password) VALUES (?, ?, ?, ?, ?, ?)"
+        (name1, name2, name3, number, email, hashed_password)
+    )
+    conn.commit()
+    conn.close()
+    print("acct created successfully")
