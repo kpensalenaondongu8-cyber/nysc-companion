@@ -1,21 +1,35 @@
-def check_threshhold(budget, category_name, new_amount):
+import sqlite3
 
-    limits = budget.get('target_limit', {})
-    expenses = budget.get('expenses', [])
-    limit_ceiling = limits.get(category_name)
-    
-    if category_name not in limits:
-        print("there is no limit set to this category")
+def check_threshhold(budget_id, category_name, new_amount):
+    conn = sqlite3.connect("nysc_companion.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""SELECT max_amount FROM target_limits WHERE budget_id = ? AND category_name = ?;
+                  """, (budget_id, category_name))
+    result = cursor.fetchone()
+    if not result:
+        print("Limit not configured!")
+        conn.close()
         return False
+    max_amount = result[0]
 
-    count = 0
-    for items in expenses:
-        if items.get('category') == category_name:
-            count += items['amount']
+    cursor.execute("""SELECT SUM(amount) FROM expenses WHERE budget_id = ? AND category = ?;
+                   """, (budget_id, category_name))
+    row = cursor.fetchone()
+    conn.close()
 
-    projected_total = count + float(new_amount)
-
-    if projected_total > limit_ceiling:
-        print("you are exceeded your limit")
+    if row[0] is None:
+        past_spent = 0.0
     else:
-        print("expense added successfully")         
+        past_spent = row[0]
+
+    projected_total = past_spent + new_amount
+
+    if projected_total > max_amount:
+            print(f"You are exceeding your expense limit for this category! Total: {projected_total:,.2f} / Max: {max_amount:,.2f}")
+            return True
+    else:
+            print("Transaction within budget limit. ")
+            return False 
+    
+          
