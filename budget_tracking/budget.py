@@ -5,7 +5,7 @@ def budget_track(user_id, monthly_income: float):
     cursor = conn.cursor()
 
     cursor.execute("""
-    INSERT INTO budget (user_id, monthly_income) VALUES (?, ?, ?, ?) 
+    INSERT INTO budgets (user_id, monthly_income) VALUES (?, ?) 
     """, (user_id, monthly_income))
     conn.commit()
     conn.close()
