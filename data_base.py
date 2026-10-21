@@ -23,7 +23,7 @@ def init__db():
 
     cursor.execute("""
        CREATE TABLE IF NOT EXISTS budgets (
-         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         budget_id INTEGER PRIMARY KEY AUTOINCREMENT,
          user_id INTEGER NOT NULL,
          monthly_income FLOAT NOT NULL, 
          FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE              
@@ -57,6 +57,7 @@ def init__db():
     """)
     print("created expenses table")
 
+    
     conn.commit()
     print("Commiting data base")
     conn.close()
