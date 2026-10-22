@@ -1,66 +1,99 @@
-from budget_tracking.budget import budget_track
-from budget_tracking.add_expense import add_expense
-from budget_tracking.history import budget_history
-from budget_tracking.limit_expense import limit_expense
+import sys
+from data_base import init__db
 from user_auth.create_acct import create_account
 from user_auth.login import login
+from budget_tracking.budget import budget_track
+from budget_tracking.limit_expense import limit_expense
+from budget_tracking.add_expense import  add_expense
+from budget_tracking.history import  view_history
 
-user_input = input("1. Login\n2. Create_account\n")
+def main_menu():
+    init__db()
+    
+    current_user_id = None
+    active_budget_id = None
 
-if user_input == "1":
-     user_input1 = input("Enter Number: ")
-     user_input2 = input("Enter Password: ")
-     login(user_input1, user_input2)
+    while True:
+        print("\n=================== 🇳🇬 NYSC COMPANION ENGINE ===================")
+        if not current_user_id:
+            print("1. 📝 Create Account (Sign Up)")
+            print("2. 🔑 Login")
+            print("3. ❌ Exit")
+        else:
+            print(f"👤 Logged In User ID: {current_user_id} | Active Budget Cycle: {active_budget_id}")
+            print("4. 💰 Initialize Monthly Budget Allowance")
+            print("5. 🎯 Set Category Target Spending Limits")
+            print("6. 💸 Log a New Expense Receipt")
+            print("7. 📋 View Transaction History Statement")
+            print("8. 🚪 Logout")
+            print("9. ❌ Exit")
+        print("==================================================================")
+        
+        choice = input("Select an action item index: ").strip()
 
-elif user_input == "2":
-     user_input1 = input("Enter first_name: ")
-     user_input2 = input("Enter middle_name: ")
-     user_input3 = input("Enter Last_name: ")
-     
-     user_input4 = (input("Enter number: "))
-     user_input5 = input("Enter email: ")
-     user_input6 = input("Enter password: ")
-     create_account(user_input1, user_input2, user_input3, user_input4, user_input5, user_input6)
+        if choice == "1" and not current_user_id:
+            f_name = input("First Name: ").strip()
+            m_name = input("Middle Name: ").strip()
+            l_name = input("Last Name: ").strip()
+            num = input("Phone Number: ").strip()
+            email = input("Email Address: ").strip()
+            pwd = input("Password: ").strip()
+            create_account(f_name, m_name, l_name, num, email, pwd)
 
+        elif choice == "2" and not current_user_id:
+            num = input("Registered Phone Number: ").strip()
+            pwd = input("Password: ").strip()
+            user_id = login(num, pwd) 
+            if user_id:
+                current_user_id = user_id
 
-
-current_limits = {}
-while True:
-        print("---- Friendly Budget Tracker----")
-        print()
-        user_input = input("select mode/n 1.add budget/n2.limit target/n3.add expense/n4.history : ")
-        print() 
-
-
-        if user_input == "1":
+        elif choice == "4" and current_user_id:
+            income = input("Enter Monthly Income Allowance (e.g. 33000): ").strip()
             try:
-               userinput1 = int(input("Enter Monthly_allowance: "))
-               budget_track(userinput1)
+                b_id = budget_track(current_user_id, float(income))
+                active_budget_id = b_id
             except ValueError:
-                print("Invalid Input") 
+                print("❌ Mathematical format error: Input must be a number.")
+
+        elif choice == "5" and current_user_id:
+            if not active_budget_id:
+                print("⚠️ Action required: Initialize a monthly budget cycle first (Option 4)!")
                 continue
+            cat = input("Enter Category Target Name (e.g., 'Food', 'Data'): ").strip()
+            limit = input(f"Enter Maximum Spending Limit for '{cat}': ").strip()
+            try:
+                limit_expense(active_budget_id, cat, float(limit))
+            except ValueError:
+                print("❌ Mathematical format error: Limit must be a decimal value.")
 
-        elif user_input == "2":
-             user_input1 = input("Enter budget_id: ")
-             limit_expense(user_input1)
-             continue
+        elif choice == "6" and current_user_id:
+            if not active_budget_id:
+                print("⚠️ Action required: Open a budget cycle first (Option 4)!")
+                continue
+            cat = input("Expense Category (e.g., 'Food', 'Data'): ").strip()
+            amt = input("Transaction Cost Amount: ").strip()
+            desc = input("Item/Receipt Description: ").strip()
+            try:
+                add_expense(active_budget_id, cat, float(amt), desc)
+            except ValueError:
+                print("❌ Mathematical format error: Amount must be numeric.")
 
-        elif user_input == "3":
-              userinput1 =  input("Enter budget_id: ")
-              user_input2 = input("Enter category: ") 
-              try:
-                 user_input3 = int(input("Enter amount: "))
-              except ValueError:
-                   print("Invalid Input!")
-                   continue   
-              user_input4 = input("Enter description: ")
-              add_expense(userinput1, user_input2, user_input3, user_input4)
-              continue
-        
-        elif user_input == "4":
-              user_input1 = input("Enter Budget_id: ")
-              print()
-              budget_history(user_input1)
-              continue
-        
-              
+        elif choice == "7" and current_user_id:
+            if not active_budget_id:
+                print("⚠️ No statement history found: Open an active budget cycle first.")
+                continue
+            view_history(active_budget_id)
+
+        elif choice == "8" and current_user_id:
+            current_user_id = None
+            active_budget_id = None
+            print("🚪 Logged out cleanly.")
+
+        elif choice in ["3", "9"]:
+            print("👋 System shutting down safely. Goodbye!")
+            sys.exit()
+        else:
+            print("❌ Selection out of bounds or unauthorized. Try again.")
+
+if __name__ == "__main__":
+    main_menu()

@@ -3,8 +3,6 @@ import sqlite3
 def init__db():
     conn = sqlite3.connect("nysc_companion.db")
     cursor = conn.cursor()
-    print("Opening data base")
-
     cursor.execute("PRAGMA foreign_keys = ON;")
 
 
@@ -19,7 +17,6 @@ def init__db():
             password TEXT NOT NULL                 
              );
     """)
-    print("Created users table")
 
     cursor.execute("""
        CREATE TABLE IF NOT EXISTS budgets (
@@ -29,7 +26,6 @@ def init__db():
          FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE              
         );
     """)
-    print("created budget table")
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS target_limits (
@@ -41,7 +37,6 @@ def init__db():
             FOREIGN KEY (budget_id) REFERENCES budgets (budget_id) ON DELETE CASCADE
         );
     """)
-    print("created target_limit table")
 
     cursor.execute("""
        CREATE TABLE IF NOT EXISTS expenses(
@@ -55,13 +50,9 @@ def init__db():
         FOREIGN KEY (budget_id) REFERENCES budgets (budget_id) ON DELETE CASCADE          
       );
     """)
-    print("created expenses table")
 
     
     conn.commit()
-    print("Commiting data base")
     conn.close()
-    print("closing data base")
-    print("Data tables created successfully!")
 if __name__ == "__main__":
     init__db()

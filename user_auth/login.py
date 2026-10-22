@@ -8,7 +8,7 @@ def login(user_number, user_password):
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT password FROM users WHERE number = ?",
+        "SELECT id, password FROM users WHERE number = ?",
         (user_number,)
     )
     result = cursor.fetchone()
@@ -17,11 +17,13 @@ def login(user_number, user_password):
     if result == None:
         print("Login Failed!")
         return False
+    user_db_id = result[0]
     hashed_password = result[0]
     try:
         ph.verify(hashed_password, user_password)
-        print("LOgin Succesful! Access granted")
-        return True
+        print("Login Succesful! Access granted")
+        return user_db_id
+    
     except VerifyMismatchError:
         print("Login Failed: Incorrect passowrd!")
         return False    
