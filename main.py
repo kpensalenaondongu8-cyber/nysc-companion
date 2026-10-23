@@ -7,6 +7,7 @@ from budget_tracking.budget import budget_track
 from budget_tracking.limit_expense import limit_expense
 from budget_tracking.add_expense import  add_expense
 from budget_tracking.history import  view_history
+from budget_tracking.view_balance import view_balance
 
 def main_menu():
     init__db()
@@ -26,8 +27,9 @@ def main_menu():
             print("5. 🎯 Set Category Target Spending Limits")
             print("6. 💸 Log a New Expense Receipt")
             print("7. 📋 View Transaction History Statement")
-            print("8. 🚪 Logout")
-            print("9. ❌ Exit")
+            print("8. View_Balance")
+            print("9. 🚪 Logout")
+            print("0. ❌ Exit")
         print("==================================================================")
         
         choice = input("Select an action item index: ").strip()
@@ -98,13 +100,14 @@ def main_menu():
                 print("⚠️ No statement history found: Open an active budget cycle first.")
                 continue
             view_history(active_budget_id)
-
         elif choice == "8" and current_user_id:
+            view_balance(active_budget_id)
+        elif choice == "9" and current_user_id:
             current_user_id = None
             active_budget_id = None
             print("🚪 Logged out cleanly.")
 
-        elif choice in ["3", "9"]:
+        elif choice in ["3", "0"]:
             print("👋 System shutting down safely. Goodbye!")
             sys.exit()
         else:
