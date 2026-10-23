@@ -18,7 +18,7 @@ def login(user_number, user_password):
         print("Login Failed!")
         return False
     user_db_id = result[0]
-    hashed_password = result[0]
+    hashed_password = result[1]
     try:
         ph.verify(hashed_password, user_password)
         print("Login Succesful! Access granted")
