@@ -5,7 +5,7 @@ def limit_expense(budget_id, category_name, max_amount):
     cursor = conn.cursor()
 
     cursor.execute("""
-      INSERT INTO target_limits(budget_id, category_name, max_amount) VALUES (?, ?, ?) 
+      INSERT INTO target_limits(budget_id, category_name, max_amount) VALUES (?, ?, ?, ?) 
     """, (budget_id, category_name, float(max_amount)))
 
     conn.commit()

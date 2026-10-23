@@ -69,15 +69,17 @@ def main_menu():
                 print("❌ Mathematical format error: Input must be a number.")
 
         elif choice == "5" and current_user_id:
-            if not active_budget_id:
-                print("⚠️ Action required: Initialize a monthly budget cycle first (Option 4)!")
-                continue
-            cat = input("Enter Category Target Name (e.g., 'Food', 'Data'): ").strip()
-            limit = input(f"Enter Maximum Spending Limit for '{cat}': ").strip()
-            try:
-                limit_expense(active_budget_id, cat, float(limit))
-            except ValueError:
-                print("❌ Mathematical format error: Limit must be a decimal value.")
+            while True:
+                print("\n🎯 Configuring targets... (Type 'quit' as the category to stop)")
+                cat = input("Enter Category Name: ").strip()
+                if cat.lower() == 'quit':
+                    break
+                    
+                limit = input(f"Enter Spending Limit for '{cat}': ").strip()
+                try:
+                    limit_expense(active_budget_id, cat, float(limit))
+                except ValueError:
+                    print("❌ Limit must be a valid number.")
 
         elif choice == "6" and current_user_id:
             if not active_budget_id:
