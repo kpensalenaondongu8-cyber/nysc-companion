@@ -1,4 +1,5 @@
 import sys
+import sqlite3
 from data_base import init__db
 from user_auth.create_acct import create_account
 from user_auth.login import login
@@ -44,8 +45,20 @@ def main_menu():
             num = input("Registered Phone Number: ").strip()
             pwd = input("Password: ").strip()
             user_id = login(num, pwd) 
+            
             if user_id:
                 current_user_id = user_id
+                
+                conn = sqlite3.connect("nysc_companion.db")
+                cursor = conn.cursor()
+                
+                cursor.execute("SELECT budget_id FROM budgets WHERE user_id = ?", (user_id,))
+                existing_budget = cursor.fetchone()
+                conn.close()
+                
+                if existing_budget:
+                    active_budget_id = existing_budget[0]
+                    print(f"📂 Welcome back! Loaded active budget cycle ID: {active_budget_id}")
 
         elif choice == "4" and current_user_id:
             income = input("Enter Monthly Income Allowance (e.g. 33000): ").strip()

@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime
+from budget_tracking.threshhold_check import check_threshhold
 
 
 
@@ -8,16 +9,18 @@ def add_expense(budget_id, category, amount, description):
     cursor = conn.cursor()
 
 
-    cursor.execute("SELECT COUNT(*) FROM expenses WHERE budget_id = ?", (budget_id,))
+    cursor.execute("SELECT COUNT(*) FROM expenses")
     current_count = cursor.fetchone()[0]
     time = datetime.now()
     time_format = time.strftime("%I:%M:%S %p")
     date_format =  time.strftime("%B-%d-%Y")
     next_id = current_count + 1
     expense_uuid = f"F{next_id:03d}"
-    
-
-
+                
+    is_overspent = check_threshhold(budget_id, category, amount)   
+                
+    if is_overspent == True:
+        print("⚠️ BUDGET BREACH IN PROGRESS!")
     cursor.execute(
        """INSERT INTO expenses(expense_uuid, budget_id, category, amount, description, time, date) VALUES (?, ?, ?, ?, ?, ?, ?)""",  
         (expense_uuid, budget_id, category, float(amount), description, time_format, date_format)
