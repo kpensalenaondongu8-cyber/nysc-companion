@@ -8,7 +8,7 @@ def view_balance(budget_id):
     cursor.execute("SELECT monthly_income FROM budgets WHERE budget_id = ?", (budget_id,))
     result = cursor.fetchone()
     if not result:
-        print("Monthly_indome not innitialized")
+        print("Monthly_income not innitialized")
         return False
     amount = result[0]
 
