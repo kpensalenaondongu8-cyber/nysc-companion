@@ -1,8 +1,7 @@
 import sqlite3
 
-
 def view_balance(budget_id):
-    conn = sqlite3.connect("nysc_companion.db")
+    conn = sqlite3.connect("nysc_companion.db", timeout=10)
     cursor = conn.cursor()
 
     cursor.execute("SELECT monthly_income FROM budgets WHERE budget_id = ?", (budget_id,))
@@ -12,13 +11,14 @@ def view_balance(budget_id):
         return False
     amount = result[0]
 
-
     cursor.execute("SELECT SUM(amount) FROM expenses WHERE budget_id = ?", (budget_id,))
     result_sum = cursor.fetchone()
     if not result_sum:
         print("Internal Server error!")
+    amount_sum = result_sum[0]    
+    conn.close()
 
-    remaining = amount - result_sum
+    remaining = amount - amount_sum
 
     if remaining <= 0.0:
         print(f"Warning: You have overspent your entire allowance by {remaining}")

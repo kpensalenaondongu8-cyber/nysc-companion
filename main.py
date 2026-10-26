@@ -51,7 +51,7 @@ def main_menu():
             if user_id:
                 current_user_id = user_id
                 
-                conn = sqlite3.connect("nysc_companion.db")
+                conn = sqlite3.connect("nysc_companion.db", timeout=10)
                 cursor = conn.cursor()
                 
                 cursor.execute("SELECT budget_id FROM budgets WHERE user_id = ?", (user_id,))

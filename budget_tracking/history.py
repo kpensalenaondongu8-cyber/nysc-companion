@@ -1,7 +1,7 @@
 import sqlite3
 
 def view_history(budget_id):
-    conn = sqlite3.connect("nysc_companion.db")
+    conn = sqlite3.connect("nysc_companion.db", timeout=10)
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM expenses WHERE budget_id = ?", (budget_id,))

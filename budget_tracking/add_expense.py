@@ -5,7 +5,7 @@ from budget_tracking.threshhold_check import check_threshhold
 
 
 def add_expense(budget_id, category, amount, description):
-    conn = sqlite3 .connect("nysc_companion.db")
+    conn = sqlite3 .connect("nysc_companion.db", timeout=10)
     cursor = conn.cursor()
 
 

@@ -1,7 +1,7 @@
 import sqlite3
 
 def budget_track(user_id, monthly_income: float):
-    conn = sqlite3.connect("nysc_companion.db")
+    conn = sqlite3.connect("nysc_companion.db", timeout=10)
     cursor = conn.cursor()
 
     cursor.execute("""

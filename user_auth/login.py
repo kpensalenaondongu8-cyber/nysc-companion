@@ -4,7 +4,7 @@ from argon2.exceptions import VerifyMismatchError
 
 ph = PasswordHasher()
 def login(user_number, user_password):
-    conn = sqlite3.connect("nysc_companion.db")
+    conn = sqlite3.connect("nysc_companion.db", timeout=10)
     cursor = conn.cursor()
 
     cursor.execute(

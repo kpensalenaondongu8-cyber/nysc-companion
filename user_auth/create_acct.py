@@ -4,7 +4,7 @@ from argon2 import PasswordHasher
 ph = PasswordHasher()
 def create_account(first_name, middle_name, last_name, number, email, password):
     
-    conn = sqlite3.connect("nysc_companion.db")
+    conn = sqlite3.connect("nysc_companion.db", timeout=10)
     cursor = conn.cursor()
     hashed_password = ph.hash(password)    
     cursor.execute(
@@ -14,4 +14,4 @@ def create_account(first_name, middle_name, last_name, number, email, password):
     conn.commit()
     conn.close()
 
-    print("Table Created and values assigned successfully!")
+    print("Account Created and values assigned successfully!")
