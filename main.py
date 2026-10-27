@@ -1,6 +1,6 @@
 import sys
 import sqlite3
-from data_base import init__db
+from db_repository.data_base import init__db
 from user_auth.create_acct import create_account
 from user_auth.login import login
 from budget_tracking.budget import budget_track
