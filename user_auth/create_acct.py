@@ -11,7 +11,7 @@ def create_account(first_name, middle_name, last_name, number, email, password):
         "INSERT INTO users (first_name, middle_name, last_name, number, email, password) VALUES (?, ?, ?, ?, ?, ?)",
         (first_name, middle_name, last_name, number, email, hashed_password)
     )
+    print("Account Created and values assigned successfully!")
     conn.commit()
     conn.close()
 
-    print("Account Created and values assigned successfully!")
