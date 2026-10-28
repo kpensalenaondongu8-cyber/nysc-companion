@@ -37,9 +37,10 @@ class ExpenseRequest(BaseModel):
     amount_d: float
     description_d: str
 
+
 time = datetime.now()
-time_format = time.strftime("%I:%M:%S %p")
-date_format = time.strftime("%B-%d-%Y")
+time_d = time.strftime("%I:%M:%S %p")
+date_d = time.strftime("%B-%d-%Y")
 
 @app.get("/")
 def home():
@@ -105,9 +106,19 @@ def budget(budget_data: BudgetRequest):
 
 @app.post("/budget_tracking/history")
 def view_history(history_data: HistoryRequest):
-    view_history(
-        budget_id = history_data.budget
-    )
+    data_records = view_history(budget_id= history_data.budget)
+    if not data_records:
+        return {
+            "status": "Success",
+            "Message": "No expense Logged yet!",
+            "history": []
+        }
+    return{
+        "status": "Success",
+        "total_records": len(data_records),
+        "history": data_records
+    }  
+  
 @app.post("/budget_track/add_expense")
 def add_new_expense(expense_data: ExpenseRequest):
     try:
@@ -115,7 +126,7 @@ def add_new_expense(expense_data: ExpenseRequest):
             budget_id = expense_data.budget_d,
             category = expense_data.category_d,
             amount = expense_data.amount_d,
-            description = expense_data.description_d,
+            description = expense_data.description_d
         )
         return{
             "status": "successful",
