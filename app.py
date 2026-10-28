@@ -9,6 +9,7 @@ from user_auth.create_acct import create_account
 from user_auth.login import login
 from pydantic import BaseModel, EmailStr
 import sqlite3
+from datetime import datetime
 
 app = FastAPI()
 class SignUpRequest(BaseModel):
@@ -26,7 +27,20 @@ class LoginRequest(BaseModel):
 class BudgetRequest(BaseModel):
     user_id: int
     monthly_income: float
-    
+
+class HistoryRequest(BaseModel):
+    budget: int
+
+class ExpenseRequest(BaseModel):
+    budget_d: int
+    category_d: str
+    amount_d: float
+    description_d: str
+
+time = datetime.now()
+time_format = time.strftime("%I:%M:%S %p")
+date_format = time.strftime("%B-%d-%Y")
+
 @app.get("/")
 def home():
     return{"message": "Welcome to the NYSC Companion Web Server!"}
@@ -89,4 +103,23 @@ def budget(budget_data: BudgetRequest):
     except Exception as e:
         print(f"Failed: {str(e)}")  
 
-@app.get("/budget_tracking/history")
+@app.post("/budget_tracking/history")
+def view_history(history_data: HistoryRequest):
+    view_history(
+        budget_id = history_data.budget
+    )
+@app.post("/budget_track/add_expense")
+def add_new_expense(expense_data: ExpenseRequest):
+    try:
+        add_expense(
+            budget_id = expense_data.budget_d,
+            category = expense_data.category_d,
+            amount = expense_data.amount_d,
+            description = expense_data.description_d,
+        )
+        return{
+            "status": "successful",
+            "Message": "Expense added successfully"
+        }
+    except Exception as e:
+        print(f"Error: {str(e)}") 
