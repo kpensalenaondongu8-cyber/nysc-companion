@@ -32,15 +32,18 @@ def signup(user_data: SignUpRequest):
     return{"Status": "Ok",
            "Message": f"Hey {user_data.first_name} your request reached the server"}
 @app.post("/auth/login")
-def login(login_data: LoginRequest):
+def login_user(login_data: LoginRequest):
     user_id = login(
         user_number = login_data.number,
         user_password = login_data.password
     )
     if user_id:
-        return {"status": "Ok",
-                "message": "Login Successful!"
+        return {"status": "Success",
+                "message": "Login Successful! Access granted.",
+                "user_id": user_id
                 }
     else:
-        return{"status": "failed",
-               "message": "Login Failed: Wrong number or password."}  
+        return{
+               "status": "failed",
+               "message": "Login Failed: Invalid phone number or password."
+               }  
