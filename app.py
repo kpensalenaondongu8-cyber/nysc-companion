@@ -29,7 +29,7 @@ class BudgetRequest(BaseModel):
     monthly_income: float
 
 class HistoryRequest(BaseModel):
-    budget: int
+    budget_id: int
 
 class ExpenseRequest(BaseModel):
     budget_d: int
@@ -37,6 +37,10 @@ class ExpenseRequest(BaseModel):
     amount_d: float
     description_d: str
 
+class LimitRequest(BaseModel):
+    budget_d: int
+    category_nam: str
+    amount_d: float
 
 time = datetime.now()
 time_d = time.strftime("%I:%M:%S %p")
@@ -106,7 +110,7 @@ def budget(budget_data: BudgetRequest):
 
 @app.post("/budget_tracking/history")
 def view_history(history_data: HistoryRequest):
-    data_records = view_history(budget_id= history_data.budget)
+    data_records = view_history(history_data.budget_id)
     if not data_records:
         return {
             "status": "Success",
@@ -134,3 +138,18 @@ def add_new_expense(expense_data: ExpenseRequest):
         }
     except Exception as e:
         print(f"Error: {str(e)}") 
+
+@app.post("/budget/tracking/limit")
+def limit_exp(limit: LimitRequest):
+  try:  
+        limit_expense(
+            budget_id = limit.budget_d,
+            category_name = limit.category_nam,
+            max_amount = limit.amount_d
+        )
+        return {
+            "status": "Success",
+            "Message": "limit set successfully."
+        }
+  except Exception as e:
+      print(f"Error{str(e)}")  
