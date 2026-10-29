@@ -29,7 +29,7 @@ class BudgetRequest(BaseModel):
     monthly_income: float
 
 class HistoryRequest(BaseModel):
-    budget_id: int
+    budget_d: int
 
 class ExpenseRequest(BaseModel):
     budget_d: int
@@ -41,6 +41,8 @@ class LimitRequest(BaseModel):
     budget_d: int
     category_nam: str
     amount_d: float
+class BalanceRequest(BaseModel):
+    budget_d : int
 
 time = datetime.now()
 time_d = time.strftime("%I:%M:%S %p")
@@ -109,17 +111,11 @@ def budget(budget_data: BudgetRequest):
         print(f"Failed: {str(e)}")  
 
 @app.post("/budget_tracking/history")
-def view_history(history_data: HistoryRequest):
-    data_records = view_history(history_data.budget_id)
-    if not data_records:
-        return {
-            "status": "Success",
-            "Message": "No expense Logged yet!",
-            "history": []
-        }
+def view_history1(history_data: HistoryRequest):
+    data_records = view_history(budget_id= history_data.budget_d)
     return{
         "status": "Success",
-        "total_records": len(data_records),
+        # "total_records": len(data_records),
         "history": data_records
     }  
   
@@ -139,7 +135,7 @@ def add_new_expense(expense_data: ExpenseRequest):
     except Exception as e:
         print(f"Error: {str(e)}") 
 
-@app.post("/budget/tracking/limit")
+@app.post("/budget_track/limit")
 def limit_exp(limit: LimitRequest):
   try:  
         limit_expense(
@@ -153,3 +149,11 @@ def limit_exp(limit: LimitRequest):
         }
   except Exception as e:
       print(f"Error{str(e)}")  
+
+@app.post("/budget_track/balance")
+def view_balance1(balance: BalanceRequest):
+    result = view_balance(budget_id= balance.budget_d)
+    return {
+        "status": "Success",
+        "Message": f"Your balance is {result}"
+    }
