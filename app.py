@@ -9,7 +9,6 @@ from user_auth.create_acct import create_account
 from user_auth.login import login
 from pydantic import BaseModel, EmailStr
 import sqlite3
-from datetime import datetime
 
 app = FastAPI()
 class SignUpRequest(BaseModel):
@@ -44,9 +43,6 @@ class LimitRequest(BaseModel):
 class BalanceRequest(BaseModel):
     budget_d : int
 
-time = datetime.now()
-time_d = time.strftime("%I:%M:%S %p")
-date_d = time.strftime("%B-%d-%Y")
 
 @app.get("/")
 def home():
@@ -115,7 +111,6 @@ def view_history1(history_data: HistoryRequest):
     data_records = view_history(budget_id= history_data.budget_d)
     return{
         "status": "Success",
-        # "total_records": len(data_records),
         "history": data_records
     }  
   
@@ -155,5 +150,5 @@ def view_balance1(balance: BalanceRequest):
     result = view_balance(budget_id= balance.budget_d)
     return {
         "status": "Success",
-        "Message": f"Your balance is {result}"
+        "Message": f"{result}"
     }

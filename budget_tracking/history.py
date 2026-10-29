@@ -8,10 +8,18 @@ def view_history(budget_id):
 
     result = cursor.fetchall()
     if not result:
-        print("Empty: No expense logged yet!")
-    else:
-        for row in result:
-            uuid, budget_id, category, amount, description,  time, date = row
-            print(f"Expense_id: {uuid}\nBudget_id: {budget_id}\nCategory: {category}\nAmount: {float(amount):,.2f}\nDescription: {description}\nTimestamp: {date} at {time}")     
+        return("Empty: No expense logged yet!")
+    history_statement = []
 
+    for row in result:
+            uuid, budget_id, category, amount, description,  time, date = row
+            transaction_line = {"Expense_id": uuid,
+                                 "Budget_id": budget_id,
+                                "Category": category,
+                                "Amount": float(amount),
+                                "Description": description,
+                                "Timestamp": f"{date} at {time}"
+            }     
+            history_statement.append(transaction_line)
+    return history_statement        
     

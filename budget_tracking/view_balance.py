@@ -27,5 +27,6 @@ def view_balance(budget_id):
     print(f"Total Amount Spent So Far: {result_sum}") 
     print("-"*40) 
     print(f"Net Remaining Balance Available: {remaining}")    
+    return(f"Net Remaining Balance Available: {remaining}")    
 
     
