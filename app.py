@@ -9,8 +9,19 @@ from user_auth.create_acct import create_account
 from user_auth.login import login
 from pydantic import BaseModel, EmailStr
 import sqlite3
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],      
+    allow_credentials=True,
+    allow_methods=["*"],    
+    allow_headers=["*"],
+)
+
+
 class SignUpRequest(BaseModel):
     first_name: str
     middle_name: str
@@ -42,8 +53,7 @@ class LimitRequest(BaseModel):
     amount_d: float
 class BalanceRequest(BaseModel):
     budget_d : int
-
-
+ 
 @app.get("/")
 def home():
     return{"message": "Welcome to the NYSC Companion Web Server!"}

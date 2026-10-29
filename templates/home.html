@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NYSC Companion Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 1px 20px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        h2 {
+            text-align: center;
+            color: #2e7d32; 
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 25px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bolder;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 7px;
+            box-sizing: border-box;
+            border: 3px solid green;
+            border-radius: 7px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #2e7d32;
+            color: white;
+            border:none;
+            border-radius: 1px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1b5e20;
+        }
+        #response-msg {
+            margin-top: 10px;
+            text-align: center;
+            font-weight: unset;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <h2>🇳🇬 NYSC Login</h2>
+        
+        <div class="input-group">
+            <label>Phone Number</label>
+            <input type="text" id="phone" placeholder="Enter registered number">
+        </div>
+        
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Enter password">
+        </div>
+        
+        <button id="loginBtn">Access Dashboard</button>
+        
+        <div id="response-msg"></div>
+    </div>
+
+    <script>
+        document.getElementById("loginBtn").addEventListener("click", async function() {
+            
+            const userPhone = document.getElementById("phone").value.strip ? document.getElementById("phone").value.strip() : document.getElementById("phone").value;
+            const userPassword = document.getElementById("password").value;
+            const messageElement = document.getElementById("response-msg");
+
+            messageElement.style.color = "blue";
+            messageElement.innerText = "Connecting to server...";
+
+            const payload = {
+                number: userPhone,
+                password: userPassword
+            };
+
+            try {
+                const response = await fetch("http://127.0.0", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload) 
+                });
+
+                const data = await response.json();
+
+                if (data.status === "Success") {
+                    messageElement.style.color = "green";
+                    messageElement.innerText = `✅ Success! User ID ${data.user_id} Verified.`;
+                } else {
+                    messageElement.style.color = "red";
+                    messageElement.innerText = `❌ Error: ${data.message}`;
+                }
+
+            } catch (error) {
+                messageElement.style.color = "red";
+                messageElement.innerText = "⚠️ Server offline or connection refused!";
+            }
+        });
+    </script>
+</body>
+</html>
