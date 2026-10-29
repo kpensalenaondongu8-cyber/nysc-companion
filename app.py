@@ -24,8 +24,8 @@ class LoginRequest(BaseModel):
     password: str
 
 class BudgetRequest(BaseModel):
-    user_id: int
-    monthly_income: float
+    user_d: int
+    monthly_d: float
 
 class HistoryRequest(BaseModel):
     budget_d: int
@@ -96,8 +96,8 @@ def login_user(login_data: LoginRequest):
 def budget(budget_data: BudgetRequest):
     try: 
         budget_track(
-            user_id = budget_data.user_id,
-            monthly_income = budget_data.monthly_income
+            user_id = budget_data.user_d,
+            monthly_income = budget_data.monthly_d
         ) 
         return{
             "status": "Success",
