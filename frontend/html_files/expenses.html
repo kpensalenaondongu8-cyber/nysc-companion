@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYSC Companion - Expense Tracker</title>
+    <link rel="stylesheet" href="..css/expense.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-brand">NYSC Companion</div>
+        <div class="nav-user">
+            <span id="userDisplayName">Welcome, Corp Member</span>
+            <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <!-- Overview Cards -->
+        <section class="summary-cards">
+            <div class="card">
+                <h3>Current Balance</h3>
+                <p id="balanceAmount" class="amount">₦0.00</p>
+            </div>
+            <div class="card">
+                <h3>Monthly Limit</h3>
+                <p id="spendingLimit" class="amount">₦0.00</p>
+            </div>
+            <div class="card">
+                <h3>Status</h3>
+                <p id="thresholdStatus" class="status-ok">Within Budget</p>
+            </div>
+        </section>
+
+        <!-- Add Expense Section -->
+        <section class="content-grid">
+            <div class="card form-card">
+                <h3>Add Expense</h3>
+                <form id="addExpenseForm">
+                    <div class="form-group">
+                        <label for="expenseCategory">Category</label>
+                        <select id="expenseCategory" name="category" required>
+                            <option value="Food">Food & Groceries</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Utilities">Bills & Utilities</option>
+                            <option value="Personal">Personal / Savings</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseAmount">Amount (₦)</label>
+                        <input type="number" id="expenseAmount" name="amount" min="1" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseDescription">Description</label>
+                        <input type="text" id="expenseDescription" name="description" placeholder="e.g. Transport to PPA">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Record Expense</button>
+                </form>
+            </div>
+
+            <!-- Expense History List -->
+            <div class="card history-card">
+                <h3>Expense History</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenseHistoryTable">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/expenses/expense.js"></script>
+</body>
+</html>

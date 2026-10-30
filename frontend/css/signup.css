@@ -1,0 +1,8 @@
+@import url('base.css');
+@import url('login.css');
+
+.meter { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 2px; }
+.meter i { height: 4px; border-radius: 4px; background: var(--line); }
+.meter[data-s="1"] i:nth-child(-n+1) { background: var(--danger); }
+.meter[data-s="2"] i:nth-child(-n+2) { background: var(--gold); }
+.meter[data-s="3"] i:nth-child(-n+3), .meter[data-s="4"] i:nth-child(-n+4) { background: var(--green-600); }

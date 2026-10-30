@@ -58,7 +58,7 @@ class BalanceRequest(BaseModel):
 def home():
     return{"message": "Welcome to the NYSC Companion Web Server!"}
 
-@app.post("/user_auth/create_acct)")
+@app.post("/user_auth/create_acct")
 def signup(user_data: SignUpRequest):
     try:  
             create_account(
@@ -102,7 +102,7 @@ def login_user(login_data: LoginRequest):
                "status": "failed",
                "message": "Login Failed: Invalid phone number or password."
                }  
-@app.post("/budget_tracking/budget") 
+@app.post("/budget_track/budget") 
 def budget(budget_data: BudgetRequest):
     try: 
         budget_track(
@@ -116,7 +116,7 @@ def budget(budget_data: BudgetRequest):
     except Exception as e:
         print(f"Failed: {str(e)}")  
 
-@app.post("/budget_tracking/history")
+@app.post("/budget_track/history")
 def view_history1(history_data: HistoryRequest):
     data_records = view_history(budget_id= history_data.budget_d)
     return{
@@ -153,7 +153,8 @@ def limit_exp(limit: LimitRequest):
             "Message": "limit set successfully."
         }
   except Exception as e:
-      print(f"Error{str(e)}")  
+    return {"status": "Error", "message": f"Failed: {str(e)}"}
+          
 
 @app.post("/budget_track/balance")
 def view_balance1(balance: BalanceRequest):
