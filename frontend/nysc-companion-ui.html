@@ -1,0 +1,567 @@
+<title>NYSC Companion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+/* Layout: split-screen auth (green brand panel + white form), then a top-bar dashboard:
+   allowance summary, category limits, quick expense entry, statement list. */
+:root {
+  --green-900: #06402b;
+  --green-700: #0b6b3f;
+  --green-600: #008751;
+  --gold: #c99a1b;
+  --gold-soft: #f4e6b8;
+  --bg: #f4f7f3;
+  --surface: #ffffff;
+  --ink: #14231c;
+  --muted: #55665b;
+  --line: #d9e3db;
+  --primary: #008751;
+  --primary-ink: #ffffff;
+  --primary-hover: #0b6b3f;
+  --tint: #e6f2ea;
+  --gold-text: #7a5a00;
+  --danger: #b3261e;
+  --danger-tint: #fbe6e4;
+  --warn-tint: #fbf0cf;
+  --shadow: 0 1px 2px rgba(6, 64, 43, .06), 0 8px 24px rgba(6, 64, 43, .06);
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a140f; --surface: #112019; --ink: #e8f1ea; --muted: #9bb0a2; --line: #24382c;
+    --primary: #1d9d64; --primary-hover: #25b475; --tint: #17301f; --gold-text: #e3c25a;
+    --danger: #ff8a80; --danger-tint: #3a1a18; --warn-tint: #3a3015; --gold-soft: #3a3015;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a140f; --surface: #112019; --ink: #e8f1ea; --muted: #9bb0a2; --line: #24382c;
+  --primary: #1d9d64; --primary-hover: #25b475; --tint: #17301f; --gold-text: #e3c25a;
+  --danger: #ff8a80; --danger-tint: #3a1a18; --warn-tint: #3a3015; --gold-soft: #3a3015;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px;
+}
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -.01em; }
+p { margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+.num { font-variant-numeric: tabular-nums; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- views ---------- */
+.view { max-width: 1180px; margin-inline: auto; }
+
+/* ---------- brand mark ---------- */
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand svg { width: 46px; height: 46px; flex: none; }
+.brand b { display: block; font-family: var(--font-display); font-size: 19px; line-height: 1.15; }
+.brand small { display: block; font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; opacity: .8; }
+
+/* ---------- auth ---------- */
+.auth { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); min-height: calc(100vh - 32px); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+.auth-side {
+  position: relative; color: #fff; padding: 40px; display: flex; flex-direction: column; justify-content: space-between; gap: 32px;
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.035) 0 2px, transparent 2px 22px),
+    linear-gradient(160deg, var(--green-600) 0%, var(--green-700) 45%, var(--green-900) 100%);
+}
+.auth-side::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 6px; background: linear-gradient(90deg, var(--gold), #e8c55a 50%, var(--gold)); }
+.auth-side .brand small { color: var(--gold-soft); opacity: 1; }
+.auth-side h2 { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.12; max-width: 14em; }
+.auth-side h2 em { font-style: normal; color: #f0cf6a; }
+.auth-side p.lede { margin-top: 14px; color: rgba(255,255,255,.86); max-width: 32em; }
+.stat-card { background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.22); border-radius: 12px; padding: 16px 18px; max-width: 360px; }
+.stat-card .k { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-soft); }
+.stat-card .v { font-family: var(--font-display); font-size: 30px; font-weight: 700; margin-top: 2px; }
+.stat-card .bar { height: 8px; border-radius: 99px; background: rgba(255,255,255,.2); margin-top: 12px; overflow: hidden; }
+.stat-card .bar i { display: block; height: 100%; width: 38%; background: linear-gradient(90deg, #e8c55a, var(--gold)); border-radius: 99px; }
+.stat-card .s { font-size: 13px; color: rgba(255,255,255,.8); margin-top: 8px; }
+.auth-foot { font-size: 12.5px; color: rgba(255,255,255,.72); }
+
+.auth-main { padding: 40px; display: flex; align-items: center; justify-content: center; }
+.auth-box { width: 100%; max-width: 440px; }
+.auth-box .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-text); }
+.auth-box h1 { font-size: 32px; margin-top: 6px; }
+.auth-box .sub { color: var(--muted); margin-top: 6px; }
+form.stack { display: grid; gap: 16px; margin-top: 26px; }
+.row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field label { font-size: 13px; font-weight: 600; }
+.field .opt { font-weight: 400; color: var(--muted); }
+.input-wrap { position: relative; display: flex; }
+.input, select.input {
+  width: 100%; min-width: 0; height: 46px; padding: 0 14px; border-radius: 8px;
+  background: var(--surface); border: 1.5px solid var(--line); transition: border-color .15s, box-shadow .15s;
+}
+.input::placeholder { color: color-mix(in srgb, var(--muted) 70%, transparent); }
+.input:hover { border-color: color-mix(in srgb, var(--green-600) 45%, var(--line)); }
+.input:focus { outline: none; border-color: var(--green-600); box-shadow: 0 0 0 4px color-mix(in srgb, var(--green-600) 20%, transparent); }
+.input.has-prefix { padding-left: 44px; }
+.prefix { position: absolute; left: 0; top: 0; bottom: 0; width: 38px; display: grid; place-items: center; color: var(--muted); font-weight: 600; pointer-events: none; }
+.toggle-pw { position: absolute; right: 6px; top: 6px; bottom: 6px; padding: 0 10px; border: 0; background: transparent; color: var(--green-700); font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; }
+:root[data-theme="dark"] .toggle-pw { color: var(--gold-text); }
+.hint { font-size: 12.5px; color: var(--muted); }
+.field.bad .input { border-color: var(--danger); }
+.field .err { display: none; font-size: 12.5px; color: var(--danger); }
+.field.bad .err { display: block; }
+.meter { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 2px; }
+.meter i { height: 4px; border-radius: 4px; background: var(--line); }
+.meter[data-s="1"] i:nth-child(-n+1) { background: var(--danger); }
+.meter[data-s="2"] i:nth-child(-n+2) { background: var(--gold); }
+.meter[data-s="3"] i:nth-child(-n+3), .meter[data-s="4"] i:nth-child(-n+4) { background: var(--green-600); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 22px;
+  border-radius: 8px; border: 1.5px solid transparent; font-weight: 600; cursor: pointer; text-decoration: none;
+  background: var(--primary); color: var(--primary-ink); transition: background .15s, transform .05s;
+}
+.btn:hover { background: var(--primary-hover); }
+.btn:active { transform: translateY(1px); }
+.btn.gold { background: var(--gold); color: #1c1500; }
+.btn.gold:hover { background: #dcae2c; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.ghost:hover { background: var(--tint); }
+.btn.sm { height: 38px; padding: 0 14px; font-size: 14px; }
+.btn.block { width: 100%; }
+.link { color: var(--green-700); font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--gold); }
+:root[data-theme="dark"] .link { color: var(--gold-text); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .link, :root:not([data-theme="light"]) .toggle-pw { color: var(--gold-text); } }
+.between { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--muted); }
+.check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--green-600); flex: none; }
+.switch-line { margin-top: 22px; text-align: center; color: var(--muted); }
+.legal { margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+
+/* ---------- app shell ---------- */
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  background: linear-gradient(100deg, var(--green-700), var(--green-900)); color: #fff;
+  border-radius: 14px; padding: 12px 18px; box-shadow: var(--shadow); border-bottom: 4px solid var(--gold);
+}
+.topbar .brand svg { width: 40px; height: 40px; }
+.topbar .brand small { color: var(--gold-soft); }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--gold); color: #1c1500; display: grid; place-items: center; font-weight: 700; font-size: 13px; }
+.who { line-height: 1.2; font-size: 13.5px; }
+.who small { display: block; color: var(--gold-soft); font-size: 12px; }
+.btn.light { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.28); }
+.btn.light:hover { background: rgba(255,255,255,.22); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+
+.page-head { margin: 28px 0 18px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.page-head h1 { font-size: 30px; }
+.page-head p { color: var(--muted); margin-top: 4px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: var(--gold-soft); color: var(--gold-text); }
+.pill.ok { background: var(--tint); color: var(--green-700); }
+:root[data-theme="dark"] .pill.ok { color: #7fe0ae; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pill.ok { color: #7fe0ae; } }
+.pill.bad { background: var(--danger-tint); color: var(--danger); }
+
+.summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow); min-width: 0; }
+.tile .k { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.tile .v { font-family: var(--font-display); font-size: clamp(26px, 3vw, 34px); font-weight: 700; margin-top: 4px; }
+.tile.main { background: linear-gradient(150deg, var(--green-600), var(--green-900)); color: #fff; border-color: transparent; }
+.tile.main .k { color: var(--gold-soft); }
+.progress { height: 10px; border-radius: 99px; background: color-mix(in srgb, currentColor 16%, transparent); margin-top: 14px; overflow: hidden; }
+.progress i { display: block; height: 100%; border-radius: 99px; background: var(--green-600); transition: width .4s ease; }
+.tile.main .progress i { background: linear-gradient(90deg, #e8c55a, var(--gold)); }
+.tile .s { font-size: 13px; margin-top: 8px; color: var(--muted); }
+.tile.main .s { color: rgba(255,255,255,.82); }
+
+.grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px; margin-top: 16px; align-items: start; }
+.col { display: grid; gap: 16px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); min-width: 0; }
+.panel > header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.panel > header h2 { font-size: 20px; }
+.panel .body { padding: 18px 20px; }
+
+.limits { display: grid; gap: 16px; }
+.limit .top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.limit .name { font-weight: 600; }
+.limit .amt { font-size: 13.5px; color: var(--muted); }
+.limit .amt b { color: var(--ink); }
+.limit .progress { margin-top: 8px; background: var(--tint); }
+.limit.warn .progress i { background: var(--gold); }
+.limit.over .progress i { background: var(--danger); }
+.limit .note { font-size: 12.5px; margin-top: 6px; }
+.limit.warn .note { color: var(--gold-text); }
+.limit.over .note { color: var(--danger); font-weight: 600; }
+.unalloc { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 18px; padding: 12px 14px; border-radius: 8px; background: var(--gold-soft); color: var(--gold-text); font-size: 13.5px; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { height: 32px; padding: 0 12px; border-radius: 99px; border: 1.5px solid var(--line); background: transparent; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted); }
+.chip:hover { background: var(--tint); }
+.chip[aria-pressed="true"] { background: var(--green-700); border-color: var(--green-700); color: #fff; }
+
+.statement { list-style: none; margin: 0; padding: 0; }
+.tx { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+.tx:last-child { border-bottom: 0; }
+.tx .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--tint); display: grid; place-items: center; font-weight: 700; font-size: 13px; color: var(--green-700); }
+:root[data-theme="dark"] .tx .ic { color: #7fe0ae; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tx .ic { color: #7fe0ae; } }
+.tx .d { font-weight: 600; overflow-wrap: anywhere; }
+.tx .m { font-size: 12.5px; color: var(--muted); }
+.tx .a { font-weight: 700; text-align: right; white-space: nowrap; }
+.empty { padding: 28px 20px; color: var(--muted); text-align: center; }
+
+.notice { display: none; margin-top: 14px; padding: 10px 12px; border-radius: 8px; font-size: 13.5px; }
+.notice.show { display: block; }
+.notice.ok { background: var(--tint); color: var(--green-700); }
+:root[data-theme="dark"] .notice.ok { color: #7fe0ae; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .notice.ok { color: #7fe0ae; } }
+.notice.warn { background: var(--warn-tint); color: var(--gold-text); }
+.notice.bad { background: var(--danger-tint); color: var(--danger); }
+.sample { margin-top: 20px; text-align: center; font-size: 12.5px; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .auth { grid-template-columns: 1fr; min-height: 0; }
+  .auth-side { padding: 28px 24px; }
+  .stat-card { display: none; }
+  .auth-main { padding: 28px 20px 32px; }
+  .grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .summary { grid-template-columns: 1fr; }
+  .row2, .row3 { grid-template-columns: 1fr; }
+  .who { display: none; }
+  .page-head h1 { font-size: 26px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="nysc-mark" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="30" fill="#ffffff"/>
+    <circle cx="32" cy="32" r="30" fill="none" stroke="#c99a1b" stroke-width="3"/>
+    <circle cx="32" cy="32" r="24" fill="#008751"/>
+    <path d="M32 14l4.2 8.9 9.8 1.2-7.2 6.7 1.9 9.7L32 35.7l-8.7 4.8 1.9-9.7-7.2-6.7 9.8-1.2z" fill="#f0cf6a"/>
+    <path d="M14 44c6 7 12 9 18 9s12-2 18-9" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<!-- ======================= LOGIN ======================= -->
+<main class="view" id="view-login" hidden>
+  <div class="auth">
+    <aside class="auth-side">
+      <div class="brand"><svg role="img" aria-label="NYSC"><use href="#nysc-mark"/></svg><div><b>NYSC Companion</b><small>National Youth Service Corps</small></div></div>
+      <div>
+        <h2>Serve with purpose. <em>Spend with a plan.</em></h2>
+        <p class="lede">Track your monthly allowance, set spending limits for food, transport and data, and see your balance before the month runs out.</p>
+      </div>
+      <div class="stat-card" aria-hidden="true">
+        <div class="k">Monthly allowance · example</div> 
+        <div class="k">PPA Locator</div>
+         <div class="bar"><i></i></div>
+      </div>
+      <p class="auth-foot">An NYSC companion tool for corps members.</p>
+    </aside>
+    <section class="auth-main">
+      <div class="auth-box">
+        <p class="eyebrow">Corps member sign in</p>
+        <h1>Welcome back</h1>
+        <p class="sub">Log in with the phone number you registered with.</p>
+        <form class="stack" id="login-form" novalidate>
+          <div class="field" id="f-l-phone">
+            <label for="l-phone">Phone number</label>
+            <div class="input-wrap"><span class="prefix">🇳🇬</span><input class="input has-prefix" id="l-phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="0803 000 0000" required></div>
+            <span class="err">Enter an 11-digit Nigerian number, like 08030000000.</span>
+          </div>
+          <div class="field" id="f-l-pw">
+            <label for="l-pw">Password</label>
+            <div class="input-wrap"><input class="input" id="l-pw" name="password" type="password" autocomplete="current-password" placeholder="Your password" required><button type="button" class="toggle-pw" data-toggle="l-pw" aria-label="Show password">Show</button></div>
+            <span class="err">Enter your password.</span>
+          </div>
+          <div class="between">
+            <label class="check" style="align-items:center"><input type="checkbox" id="remember"> Keep me signed in</label>
+          </div>
+          <button class="btn block" type="submit">Log in</button>
+        </form>
+        <p class="switch-line">New to the app? <a class="link" href="#create-account">Create an account</a></p>
+        <p class="legal">Your password is stored as a secure hash and never shown in plain text.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ======================= CREATE ACCOUNT ======================= -->
+<main class="view" id="view-create-account" hidden>
+  <div class="auth">
+    <aside class="auth-side">
+      <div class="brand"><svg role="img" aria-label="NYSC"><use href="#nysc-mark"/></svg><div><b>NYSC Companion</b><small>National Youth Service Corps</small></div></div>
+      <div>
+        <h2>Your service year, <em>in order.</em></h2>
+        <p class="lede">Create your account in a minute. Then add your monthly allowance and start logging expenses.</p>
+      </div>
+      <div class="stat-card" aria-hidden="true" style="max-width:none">
+        <div class="k">What you get</div>
+        <div class="s" style="margin-top:10px;font-size:14px;line-height:1.9">✔ Monthly allowance budget<br>✔ Limits for each spending category<br>✔ Full statement of every expense<br>✔ Live balance, always</div>
+      </div>
+      <p class="auth-foot">An independent budgeting tool for corps members.</p>
+    </aside>
+    <section class="auth-main">
+      <div class="auth-box">
+        <p class="eyebrow">Corps member registration</p>
+        <h1>Create your account</h1>
+        <p class="sub">Use your own phone number. You will log in with it.</p>
+        <form class="stack" id="signup-form" novalidate>
+          <div class="row3">
+            <div class="field" id="f-s-first"><label for="s-first">First name</label><input class="input" id="s-first" autocomplete="given-name" required><span class="err">Required.</span></div>
+            <div class="field" id="f-s-mid"><label for="s-mid">Middle name</label><input class="input" id="s-mid" autocomplete="additional-name" required><span class="err">Required.</span></div>
+            <div class="field" id="f-s-last"><label for="s-last">Last name</label><input class="input" id="s-last" autocomplete="family-name" required><span class="err">Required.</span></div>
+          </div>
+          <div class="field" id="f-s-phone">
+            <label for="s-phone">Phone number</label>
+            <div class="input-wrap"><span class="prefix">🇳🇬</span><input class="input has-prefix" id="s-phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="0803 000 0000" required></div>
+            <span class="err">Enter an 11-digit Nigerian number, like 08030000000.</span>
+          </div>
+          <div class="field" id="f-s-email">
+            <label for="s-email">Email address</label>
+            <input class="input" id="s-email" type="email" autocomplete="email" placeholder="name@example.com" required>
+            <span class="err">Enter a valid email address.</span>
+          </div>
+          <div class="row2">
+            <div class="field" id="f-s-pw">
+              <label for="s-pw">Password</label>
+              <div class="input-wrap"><input class="input" id="s-pw" type="password" autocomplete="new-password" placeholder="At least 8 characters" required><button type="button" class="toggle-pw" data-toggle="s-pw" aria-label="Show password">Show</button></div>
+              <div class="meter" id="meter" data-s="0" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+              <span class="err">Use at least 8 characters.</span>
+            </div>
+            <div class="field" id="f-s-pw2">
+              <label for="s-pw2">Confirm password</label>
+              <input class="input" id="s-pw2" type="password" autocomplete="new-password" placeholder="Repeat password" required>
+              <span class="err">Passwords do not match.</span>
+            </div>
+          </div>
+          <div class="field" id="f-s-terms">
+            <label class="check"><input type="checkbox" id="s-terms"> I understand this is an independent budgeting tool and not an official NYSC platform.</label>
+            <span class="err">Tick the box to continue.</span>
+          </div>
+          <button class="btn gold block" type="submit">Create account</button>
+        </form>
+        <p class="switch-line">Already registered? <a class="link" href="#login">Log in</a></p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ======================= EXPENSE TRACKER ======================= -->
+<div class="view" id="view-expenses" hidden>
+  <header class="topbar">
+    <div class="brand"><svg role="img" aria-label="NYSC"><use href="#nysc-mark"/></svg><div><b>NYSC Companion</b><small>Expense tracker</small></div></div>
+    <div class="topbar-actions">
+      <div class="who"><span>Corps Member</span><small>Allowance cycle · October 2026</small></div>
+      <div class="avatar" aria-hidden="true">CM</div>
+      <a class="btn sm light" href="#login">Log out</a>
+    </div>
+  </header>
+
+  <div class="page-head">
+    <div><h1>Allowance overview</h1><p>Everything you have spent this month, against what you planned.</p></div>
+    <span class="pill" id="cycle-pill">Sample data</span>
+  </div>
+
+  <section class="summary" aria-label="Summary">
+    <div class="tile main"><div class="k">Balance left</div><div class="v num" id="t-balance">₦0</div><div class="progress"><i id="t-bar" style="width:0"></i></div><div class="s num" id="t-bar-s"></div></div>
+    <div class="tile"><div class="k">Monthly allowance</div><div class="v num" id="t-income">₦0</div><div class="s">Paid into your account each month</div></div>
+    <div class="tile"><div class="k">Spent so far</div><div class="v num" id="t-spent">₦0</div><div class="s num" id="t-count"></div></div>
+  </section>
+
+  <div class="grid">
+    <div class="col">
+      <section class="panel" aria-labelledby="h-add">
+        <header><h2 id="h-add">Log an expense</h2></header>
+        <div class="body">
+          <form class="stack" id="expense-form" style="margin-top:0" novalidate>
+            <div class="row2">
+              <div class="field" id="f-e-cat"><label for="e-cat">Category</label><select class="input" id="e-cat"></select></div>
+              <div class="field" id="f-e-amt"><label for="e-amt">Amount</label><div class="input-wrap"><span class="prefix">₦</span><input class="input has-prefix num" id="e-amt" type="number" inputmode="numeric" min="1" step="1" placeholder="2,500"></div><span class="err">Enter an amount above zero.</span></div>
+            </div>
+            <div class="field" id="f-e-desc"><label for="e-desc">What was it for?</label><input class="input" id="e-desc" placeholder="e.g. Keke to CDS meeting" maxlength="80"><span class="err">Add a short description.</span></div>
+            <div class="between"><span class="hint">Date and time are saved automatically.</span><button class="btn" type="submit">Add expense</button></div>
+          </form>
+          <div class="notice" id="e-notice" role="status"></div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-hist">
+        <header><h2 id="h-hist">Transaction history</h2><div class="chips" id="filters" role="group" aria-label="Filter by category"></div></header>
+        <ul class="statement" id="statement"></ul>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="panel" aria-labelledby="h-lim">
+        <header><h2 id="h-lim">Spending limits</h2><span class="hint">Per category, this month</span></header>
+        <div class="body">
+          <div class="limits" id="limits"></div>
+          <div class="unalloc num" id="unalloc"></div>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="h-set">
+        <header><h2 id="h-set">Set a limit</h2></header>
+        <div class="body">
+          <form class="stack" id="limit-form" style="margin-top:0" novalidate>
+            <div class="row2">
+              <div class="field"><label for="l-cat">Category</label><select class="input" id="l-cat"></select></div>
+              <div class="field" id="f-l-amt"><label for="l-amt">Limit</label><div class="input-wrap"><span class="prefix">₦</span><input class="input has-prefix num" id="l-amt" type="number" inputmode="numeric" min="0" step="500" placeholder="10,000"></div><span class="err">Enter a number.</span></div>
+            </div>
+            <button class="btn ghost" type="submit">Save limit</button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+  <p class="sample">Figures shown are sample data for the design preview.</p>
+</div>
+
+<script>
+/* ---------- tiny router ---------- */
+const views = { login: 'view-login', 'create-account': 'view-create-account', expenses: 'view-expenses' };
+function route() {
+  const key = (location.hash || '#login').slice(1);
+  const id = views[key] ? key : 'login';
+  Object.entries(views).forEach(([k, v]) => { document.getElementById(v).hidden = k !== id; });
+  const titles = { login: 'Log in', 'create-account': 'Create account', expenses: 'Expense tracker' };
+  document.title = 'NYSC Companion · ' + titles[id];
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', route);
+route();
+
+/* ---------- helpers ---------- */
+const $ = (id) => document.getElementById(id);
+const naira = (n) => '₦' + Math.round(n).toLocaleString('en-NG');
+const phoneOk = (v) => /^0[789][01]\d{8}$/.test(v.replace(/[\s-]/g, ''));
+function setBad(fid, bad) { $(fid).classList.toggle('bad', bad); return bad; }
+
+document.querySelectorAll('.toggle-pw').forEach((b) => b.addEventListener('click', () => {
+  const inp = $(b.dataset.toggle); const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password'; b.textContent = show ? 'Hide' : 'Show';
+  b.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+}));
+
+/* ---------- login ---------- */
+$('login-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const a = setBad('f-l-phone', !phoneOk($('l-phone').value));
+  const b = setBad('f-l-pw', !$('l-pw').value);
+  if (!a && !b) location.hash = '#expenses';   // connect to your login() backend here
+});
+
+/* ---------- create account ---------- */
+function strength(p) {
+  let s = 0; if (p.length >= 8) s++; if (/[A-Z]/.test(p) && /[a-z]/.test(p)) s++; if (/\d/.test(p)) s++; if (/[^A-Za-z0-9]/.test(p)) s++;
+  return p ? Math.max(1, s) : 0;
+}
+$('s-pw').addEventListener('input', (e) => { $('meter').dataset.s = strength(e.target.value); });
+$('signup-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const checks = [
+    setBad('f-s-first', !$('s-first').value.trim()),
+    setBad('f-s-mid', !$('s-mid').value.trim()),
+    setBad('f-s-last', !$('s-last').value.trim()),
+    setBad('f-s-phone', !phoneOk($('s-phone').value)),
+    setBad('f-s-email', !/^\S+@\S+\.\S+$/.test($('s-email').value)),
+    setBad('f-s-pw', $('s-pw').value.length < 8),
+    setBad('f-s-pw2', $('s-pw2').value !== $('s-pw').value || !$('s-pw2').value),
+    setBad('f-s-terms', !$('s-terms').checked),
+  ];
+  if (!checks.some(Boolean)) location.hash = '#expenses';   // connect to your create_account() backend here
+});
+
+/* ---------- tracker state (sample) ---------- */
+const CATS = ['Food', 'Transport', 'Data & Airtime', 'Toiletries', 'CDS & Contributions', 'Other'];
+const state = {
+  income: 77000,
+  limits: { 'Food': 25000, 'Transport': 10000, 'Data & Airtime': 8000, 'Toiletries': 6000, 'CDS & Contributions': 3000, 'Other': 5000 },
+  filter: 'All',
+  expenses: [
+    { c: 'Food', a: 6500, d: 'Rice and stew, market', t: '2026-10-28T18:40' },
+    { c: 'Transport', a: 1500, d: 'Keke to CDS venue', t: '2026-10-29T08:10' },
+    { c: 'Data & Airtime', a: 3500, d: 'Monthly data bundle', t: '2026-10-27T09:05' },
+    { c: 'Food', a: 4200, d: 'Garri, beans and oil', t: '2026-10-25T16:20' },
+    { c: 'Toiletries', a: 1500, d: 'Soap and detergent', t: '2026-10-22T11:00' },
+    { c: 'Transport', a: 2000, d: 'Bus to local government office', t: '2026-10-20T07:30' },
+    { c: 'Food', a: 8000, d: 'Weekly provisions', t: '2026-10-18T17:15' },
+    { c: 'CDS & Contributions', a: 500, d: 'CDS group dues', t: '2026-10-15T10:00' },
+    { c: 'Data & Airtime', a: 1000, d: 'Airtime top-up', t: '2026-10-12T19:45' },
+    { c: 'CDS & Contributions', a: 500, d: 'Platoon contribution', t: '2026-10-05T12:00' },
+  ],
+};
+const ABBR = { 'Food': 'FD', 'Transport': 'TR', 'Data & Airtime': 'DT', 'Toiletries': 'TL', 'CDS & Contributions': 'CD', 'Other': 'OT' };
+const spentBy = (c) => state.expenses.filter((x) => x.c === c).reduce((s, x) => s + x.a, 0);
+const fmtWhen = (iso) => new Date(iso).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+
+function render() {
+  const spent = state.expenses.reduce((s, x) => s + x.a, 0);
+  const left = state.income - spent;
+  const pct = Math.min(100, Math.max(0, (left / state.income) * 100));
+  $('t-balance').textContent = naira(left);
+  $('t-income').textContent = naira(state.income);
+  $('t-spent').textContent = naira(spent);
+  $('t-bar').style.width = pct + '%';
+  $('t-bar-s').textContent = Math.round(pct) + '% of your allowance remains';
+  $('t-count').textContent = state.expenses.length + ' transactions';
+
+  $('limits').innerHTML = CATS.map((c) => {
+    const lim = state.limits[c] || 0, sp = spentBy(c);
+    const ratio = lim ? sp / lim : (sp ? 1 : 0);
+    const cls = ratio > 1 ? 'over' : ratio >= 0.8 ? 'warn' : '';
+    const note = ratio > 1 ? `Over by ${naira(sp - lim)}` : ratio >= 0.8 ? `${naira(lim - sp)} left, nearly at your limit` : '';
+    return `<div class="limit ${cls}"><div class="top"><span class="name">${c}</span><span class="amt num"><b>${naira(sp)}</b> of ${lim ? naira(lim) : 'no limit'}</span></div>
+      <div class="progress" role="progressbar" aria-label="${c} spending" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(Math.min(ratio, 1) * 100)}"><i style="width:${Math.min(ratio, 1) * 100}%"></i></div>
+      ${note ? `<div class="note num">${note}</div>` : ''}</div>`;
+  }).join('');
+  const planned = Object.values(state.limits).reduce((s, v) => s + v, 0);
+  $('unalloc').innerHTML = `<span>Limits set: <b>${naira(planned)}</b></span><span>Left to save: <b>${naira(state.income - planned)}</b></span>`;
+
+  const f = ['All', ...CATS];
+  $('filters').innerHTML = f.map((c) => `<button type="button" class="chip" data-f="${c}" aria-pressed="${state.filter === c}">${c === 'Data & Airtime' ? 'Data' : c === 'CDS & Contributions' ? 'CDS' : c}</button>`).join('');
+  const list = state.expenses.filter((x) => state.filter === 'All' || x.c === state.filter).sort((a, b) => b.t.localeCompare(a.t));
+  $('statement').innerHTML = list.length ? list.map((x) => `<li class="tx"><div class="ic" aria-hidden="true">${ABBR[x.c]}</div><div><div class="d"></div><div class="m">${x.c} · ${fmtWhen(x.t)}</div></div><div class="a num">−${naira(x.a)}</div></li>`).join('') : '<li class="empty">No expenses in this category yet.</li>';
+  [...$('statement').querySelectorAll('.d')].forEach((el, i) => { el.textContent = list[i].d; });
+}
+$('e-cat').innerHTML = CATS.map((c) => `<option>${c}</option>`).join('');
+$('l-cat').innerHTML = CATS.map((c) => `<option>${c}</option>`).join('');
+$('filters').addEventListener('click', (e) => { const b = e.target.closest('[data-f]'); if (b) { state.filter = b.dataset.f; render(); } });
+
+function say(msg, kind) { const n = $('e-notice'); n.textContent = msg; n.className = 'notice show ' + kind; }
+$('expense-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const amt = Number($('e-amt').value), desc = $('e-desc').value.trim(), cat = $('e-cat').value;
+  const bad1 = setBad('f-e-amt', !(amt > 0)), bad2 = setBad('f-e-desc', !desc);
+  if (bad1 || bad2) return;
+  const now = new Date(); const pad = (n) => String(n).padStart(2, '0');
+  state.expenses.push({ c: cat, a: amt, d: desc, t: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}` });
+  $('e-amt').value = ''; $('e-desc').value = '';
+  const lim = state.limits[cat], sp = spentBy(cat);
+  if (lim && sp > lim) say(`Added. You are ${naira(sp - lim)} over your ${cat} limit.`, 'bad');
+  else if (lim && sp / lim >= 0.8) say(`Added. ${naira(lim - sp)} left in ${cat}.`, 'warn');
+  else say('Expense added.', 'ok');
+  render();
+});
+$('limit-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const v = $('l-amt').value;
+  if (setBad('f-l-amt', v === '' || Number(v) < 0)) return;
+  state.limits[$('l-cat').value] = Number(v); $('l-amt').value = ''; render();
+});
+render();
+</script>
