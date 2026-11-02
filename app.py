@@ -100,7 +100,7 @@ def register_page():
 def expenses_page():
     return FileResponse("frontend/html_files/expenses.html")
 
-@app.post("/user_auth/create_acct)")
+@app.post("/user_auth/create_acct")
 def signup(user_data: SignUpRequest):
     try:  
             create_account(
