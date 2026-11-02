@@ -1,39 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NYSC Companion - Create Account</title>
-    <link rel="stylesheet" href="..css/signup.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/frontend/nysc-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="/frontend/css/base.css">
+<link rel="stylesheet" href="/frontend/css/login.css">
+<link rel="stylesheet" href="/frontend/css/signup.css">
+<title>NYSC Companion · Create account</title>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <h2>Create Account</h2>
-            <p class="subtitle">Join NYSC Companion to track your monthly allowance</p>
-            
-            <form id="registerForm">
-                <div class="form-group">
-                    <label for="regUsername">Username</label>
-                    <input type="text" id="regUsername" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="regEmail">Email Address</label>
-                    <input type="email" id="regEmail" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="regPassword">Password</label>
-                    <input type="password" id="regPassword" name="password" required autocomplete="new-password">
-                </div>
-                <button type="submit" class="btn btn-primary">Sign Up</button>
-            </form>
-            
-            <p class="auth-link">
-                Already have an account? <a href="login.html">Log In</a>
-            </p>
-        </div>
-    </div>
+<main class="view">
+  <div class="auth">
+    <aside class="auth-side">
+      <div class="brand">
+        <span class="logo-chip"><img src="/frontend/nysc-logo.png" alt="National Youth Service Corps logo"></span>
+        <div><b>NYSC Companion</b><small>National Youth Service Corps</small></div>
+      </div>
+      <div>
+        <h2>Your service year, <em>sorted.</em></h2>
+        <p class="lede">Create your account in a minute, save your PPA, and find where to live around it.</p>
+      </div>
+      <ul class="perks">
+        <li>Save your PPA and search around it</li>
+        <li>Houses for rent by state, LGA and town</li>
+        <li>House agents who cover your area</li>
+        <li>Allowance and expense tracker</li>
+      </ul>
+      <p class="auth-foot">An independent companion app for corps members.</p>
+    </aside>
 
-    <script src="js/auth/register.js"></script>
+    <section class="auth-main">
+      <div class="auth-box">
+        <p class="eyebrow">Corps member registration</p>
+        <h1>Create your account</h1>
+        <p class="sub">Use your own phone number. You will log in with it.</p>
+
+        <div class="notice" id="notice" role="alert"></div>
+
+        <form class="stack" id="signup-form" novalidate>
+          <div class="row3">
+            <div class="field" id="f-first"><label for="first">First name</label><input class="input" id="first" autocomplete="given-name" required><span class="err">Required.</span></div>
+            <div class="field"><label for="mid">Middle <span class="opt">(optional)</span></label><input class="input" id="mid" autocomplete="additional-name"></div>
+            <div class="field" id="f-last"><label for="last">Last name</label><input class="input" id="last" autocomplete="family-name" required><span class="err">Required.</span></div>
+          </div>
+          <div class="field" id="f-phone">
+            <label for="phone">Phone number</label>
+            <div class="input-wrap"><span class="prefix">🇳🇬</span><input class="input has-prefix" id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="0803 000 0000" required></div>
+            <span class="err">Enter an 11-digit Nigerian number, like 08030000000.</span>
+          </div>
+          <div class="field" id="f-email">
+            <label for="email">Email address</label>
+            <input class="input" id="email" type="email" autocomplete="email" placeholder="name@example.com" required>
+            <span class="err">Enter a valid email address.</span>
+          </div>
+          <div class="row2">
+            <div class="field" id="f-pw">
+              <label for="pw">Password</label>
+              <div class="input-wrap"><input class="input" id="pw" type="password" autocomplete="new-password" placeholder="Min. 8 characters" required><button type="button" class="toggle-pw" data-toggle="pw" aria-label="Show password">Show</button></div>
+              <div class="meter" id="meter" data-s="0" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+              <span class="err">Use at least 8 characters.</span>
+            </div>
+            <div class="field" id="f-pw2">
+              <label for="pw2">Confirm password</label>
+              <input class="input" id="pw2" type="password" autocomplete="new-password" placeholder="Repeat password" required>
+              <span class="err">Passwords do not match.</span>
+            </div>
+          </div>
+          <div class="field" id="f-terms">
+            <label class="check"><input type="checkbox" id="terms"> I understand this is an independent companion app and not an official NYSC platform.</label>
+            <span class="err">Tick the box to continue.</span>
+          </div>
+          <button class="btn gold block" type="submit" id="submit">Create account</button>
+        </form>
+
+        <p class="switch-line">Already registered? <a class="link" href="/login">Log in</a></p>
+      </div>
+    </section>
+  </div>
+</main>
+<script src="/frontend/js/api.js"></script>
+<script src="/frontend/js/auth/signup.js"></script>
 </body>
 </html>

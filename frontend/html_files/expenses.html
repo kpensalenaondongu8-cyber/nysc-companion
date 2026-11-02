@@ -1,86 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NYSC Companion - Expense Tracker</title>
-    <link rel="stylesheet" href="..css/expense.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/frontend/nysc-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="/frontend/css/base.css">
+<link rel="stylesheet" href="/frontend/css/app.css">
+<link rel="stylesheet" href="/frontend/css/expenses.css">
+<title>NYSC Companion · Expense tracker</title>
 </head>
 <body>
-    <header class="navbar">
-        <div class="nav-brand">NYSC Companion</div>
-        <div class="nav-user">
-            <span id="userDisplayName">Welcome, Corp Member</span>
-            <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+<div class="view">
+  <div id="topbar"></div>
+
+  <p class="notice show bad" id="load-error" role="alert" hidden></p>
+
+  <!-- Step 1 for a new user: set the monthly allowance -->
+  <section class="panel setup" id="setup" hidden aria-labelledby="setup-h">
+    <div class="body">
+      <span class="logo-chip"><img src="/frontend/nysc-logo.png" alt=""></span>
+      <h1 id="setup-h">Welcome, <span id="setup-name">corps member</span></h1>
+      <p>Start by telling us your monthly allowance. Every expense you log is taken from it.</p>
+      <form class="stack" id="setup-form" novalidate>
+        <div class="field" id="f-setup">
+          <label for="setup-amt">Monthly allowance</label>
+          <div class="input-wrap"><span class="prefix">₦</span><input class="input has-prefix num" id="setup-amt" type="number" inputmode="decimal" min="1" step="any" placeholder="e.g. 77,000"></div>
+          <span class="err">Enter an amount above zero.</span>
         </div>
-    </header>
+        <button class="btn gold block" type="submit">Start tracking</button>
+      </form>
+    </div>
+  </section>
 
-    <main class="dashboard-container">
-        <!-- Overview Cards -->
-        <section class="summary-cards">
-            <div class="card">
-                <h3>Current Balance</h3>
-                <p id="balanceAmount" class="amount">₦0.00</p>
-            </div>
-            <div class="card">
-                <h3>Monthly Limit</h3>
-                <p id="spendingLimit" class="amount">₦0.00</p>
-            </div>
-            <div class="card">
-                <h3>Status</h3>
-                <p id="thresholdStatus" class="status-ok">Within Budget</p>
-            </div>
+  <!-- The tracker, shown once an allowance exists -->
+  <div id="tracker" hidden>
+    <div class="page-head">
+      <div><h1>Expense tracker</h1><p>Keep your monthly allowance in check while you serve.</p></div>
+      <span class="pill" id="pill"></span>
+    </div>
+
+    <section class="summary" aria-label="Summary">
+      <div class="tile main" id="tile-main"><div class="k">Balance left</div><div class="v num" id="t-balance">₦0</div><div class="progress"><i id="t-bar" style="width:0"></i></div><div class="s num" id="t-bar-s"></div></div>
+      <div class="tile"><div class="k">Monthly allowance</div><div class="v num" id="t-income">₦0</div><div class="s">Your total for the month</div></div>
+      <div class="tile"><div class="k">Spent so far</div><div class="v num" id="t-spent">₦0</div><div class="s num" id="t-count"></div></div>
+    </section>
+
+    <div class="grid">
+      <div class="col">
+        <section class="panel" aria-labelledby="h-add">
+          <header><h2 id="h-add">Log an expense</h2></header>
+          <div class="body">
+            <form class="stack" id="expense-form" novalidate>
+              <div class="row2">
+                <div class="field"><label for="e-cat">Category</label><select class="input" id="e-cat"></select></div>
+                <div class="field" id="f-e-amt"><label for="e-amt">Amount</label><div class="input-wrap"><span class="prefix">₦</span><input class="input has-prefix num" id="e-amt" type="number" inputmode="decimal" min="0" step="any" placeholder="2,500"></div><span class="err">Enter an amount above zero.</span></div>
+              </div>
+              <div class="field" id="f-e-desc"><label for="e-desc">What was it for?</label><input class="input" id="e-desc" placeholder="e.g. Keke to CDS meeting" maxlength="80"><span class="err">Add a short description.</span></div>
+              <div class="between"><span class="hint">Date and time are saved automatically.</span><button class="btn" type="submit">Add expense</button></div>
+            </form>
+            <div class="notice" id="e-notice" role="status"></div>
+          </div>
         </section>
 
-        <!-- Add Expense Section -->
-        <section class="content-grid">
-            <div class="card form-card">
-                <h3>Add Expense</h3>
-                <form id="addExpenseForm">
-                    <div class="form-group">
-                        <label for="expenseCategory">Category</label>
-                        <select id="expenseCategory" name="category" required>
-                            <option value="Food">Food & Groceries</option>
-                            <option value="Transport">Transport</option>
-                            <option value="Utilities">Bills & Utilities</option>
-                            <option value="Personal">Personal / Savings</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="expenseAmount">Amount (₦)</label>
-                        <input type="number" id="expenseAmount" name="amount" min="1" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="expenseDescription">Description</label>
-                        <input type="text" id="expenseDescription" name="description" placeholder="e.g. Transport to PPA">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Record Expense</button>
-                </form>
-            </div>
-
-            <!-- Expense History List -->
-            <div class="card history-card">
-                <h3>Expense History</h3>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Category</th>
-                                <th>Description</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody id="expenseHistoryTable">
-                            <!-- Populated dynamically via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <section class="panel" aria-labelledby="h-hist">
+          <header><h2 id="h-hist">Transaction history</h2><div class="chips" id="filters" role="group" aria-label="Filter by category"></div></header>
+          <ul class="statement" id="statement"></ul>
         </section>
-    </main>
+      </div>
 
-    <script src="js/expenses/expense.js"></script>
+      <div class="col">
+        <section class="panel" aria-labelledby="h-lim">
+          <header><h2 id="h-lim">Spending limits</h2><span class="hint">Per category</span></header>
+          <div class="body">
+            <div class="limits" id="limits"></div>
+            <div class="unalloc num" id="unalloc"></div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="h-set">
+          <header><h2 id="h-set">Set a limit</h2></header>
+          <div class="body">
+            <form class="stack" id="limit-form" novalidate>
+              <div class="row2">
+                <div class="field"><label for="l-cat">Category</label><select class="input" id="l-cat"></select></div>
+                <div class="field" id="f-l-amt"><label for="l-amt">Limit</label><div class="input-wrap"><span class="prefix">₦</span><input class="input has-prefix num" id="l-amt" type="number" inputmode="decimal" min="0" step="any" placeholder="10,000"></div><span class="err">Enter a number.</span></div>
+              </div>
+              <button class="btn ghost" type="submit">Save limit</button>
+            </form>
+            <div class="notice" id="l-notice" role="status"></div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="h-allow">
+          <header><h2 id="h-allow">Monthly allowance</h2></header>
+          <div class="body">
+            <form class="stack" id="allowance-form" novalidate>
+              <div class="field" id="f-a-amt"><label for="a-amt">Change your allowance</label><div class="input-wrap"><span class="prefix">₦</span><input class="input has-prefix num" id="a-amt" type="number" inputmode="decimal" min="0" step="any"></div><span class="err">Enter an amount above zero.</span></div>
+              <button class="btn ghost" type="submit">Update allowance</button>
+            </form>
+            <div class="notice" id="a-notice" role="status"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/frontend/js/api.js"></script>
+<script src="/frontend/js/nav.js"></script>
+<script src="/frontend/js/expenses/expense.js"></script>
 </body>
 </html>

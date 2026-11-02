@@ -1,29 +1,29 @@
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+// Already logged in? Skip straight to the tracker.
+if (Session.token()) window.location.href = '/home';
 
-    try {
-        const response = await fetch('http://localhost:8000/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
+if (new URLSearchParams(location.search).has('expired')) {
+  say('notice', 'Your session has ended. Please log in again.', 'warn');
+}
 
-        const data = await response.json();
-        if (response.ok) {
-            // Save token/user context to localStorage
-            localStorage.setItem('user', JSON.stringify(data.user || { username }));
-            localStorage.setItem('token', data.token || '');
-            
-            // Redirect to expense dashboard
-            window.location.href = 'expenses.html';
-        } else {
-            alert(data.message || 'Login failed.');
-        }
-    } catch (err) {
-        console.error('Login Error:', err);
-        alert('Server error. Make sure your local server is running.');
-    }
+$('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const phone = $('phone').value;
+  const password = $('pw').value;
+
+  // Check the boxes first; only talk to the server if both are fine.
+  const phoneBad = setBad('f-phone', !phoneOk(phone));
+  const pwBad = setBad('f-pw', !password);
+  if (phoneBad || pwBad) return;
+
+  $('submit').disabled = true;
+  say('notice', '', '');
+  try {
+    const data = await api('POST', '/api/login', { number: phone, password });
+    Session.save(data.token, data.user, $('remember').checked);
+    window.location.href = '/home';
+  } catch (err) {
+    say('notice', err.message, 'bad');
+    $('submit').disabled = false;
+  }
 });

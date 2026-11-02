@@ -1,26 +1,49 @@
-document.getElementById('registerForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const username = document.getElementById('regUsername').value;
-    const email = document.getElementById('regEmail').value;
-    const password = document.getElementById('regPassword').value;
+if (Session.token()) window.location.href = '/home';
 
-    try {
-        const response = await fetch('http://localhost:8000/auth/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email, password })
-        });
+// Password strength bar: 1 point each for length, mixed case, a digit, a symbol.
+function strength(p) {
+  let s = 0;
+  if (p.length >= 8) s++;
+  if (/[A-Z]/.test(p) && /[a-z]/.test(p)) s++;
+  if (/\d/.test(p)) s++;
+  if (/[^A-Za-z0-9]/.test(p)) s++;
+  return p ? Math.max(1, s) : 0;
+}
+$('pw').addEventListener('input', (e) => { $('meter').dataset.s = strength(e.target.value); });
 
-        const data = await response.json();
-        if (response.ok) {
-            alert('Account created successfully! Redirecting to login...');
-            window.location.href = 'login.html';
-        } else {
-            alert(data.message || 'Registration failed.');
-        }
-    } catch (err) {
-        console.error('Registration Error:', err);
-        alert('Server error. Make sure your backend is running.');
-    }
+$('signup-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const first = $('first').value.trim();
+  const mid = $('mid').value.trim();
+  const last = $('last').value.trim();
+  const phone = $('phone').value;
+  const email = $('email').value.trim();
+  const pw = $('pw').value;
+
+  // Every check runs (no early exit) so all bad fields turn red at once.
+  const problems = [
+    setBad('f-first', !first),
+    setBad('f-last', !last),
+    setBad('f-phone', !phoneOk(phone)),
+    setBad('f-email', !/^\S+@\S+\.\S+$/.test(email)),
+    setBad('f-pw', pw.length < 8),
+    setBad('f-pw2', !$('pw2').value || $('pw2').value !== pw),
+    setBad('f-terms', !$('terms').checked),
+  ];
+  if (problems.some(Boolean)) return;
+
+  $('submit').disabled = true;
+  say('notice', '', '');
+  try {
+    const data = await api('POST', '/api/register', {
+      first_name: first, middle_name: mid, last_name: last,
+      number: phone, email, password: pw,
+    });
+    Session.save(data.token, data.user, true);   // the server logs the new user in
+    window.location.href = '/home';
+  } catch (err) {
+    say('notice', err.message, 'bad');
+    $('submit').disabled = false;
+  }
 });

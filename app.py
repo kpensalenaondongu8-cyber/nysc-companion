@@ -1,4 +1,11 @@
+import os
 from fastapi import FastAPI
+from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from db_directory.data_base import init__db
+from api_routes import router as api_router
+from locator_routes import router as locator_router
+from locator_db import seed_samples
 from budget_tracking.budget import budget_track
 from budget_tracking.add_expense import add_expense
 from budget_tracking.history import view_history
@@ -11,7 +18,17 @@ from pydantic import BaseModel, EmailStr
 import sqlite3
 from fastapi.middleware.cors import CORSMiddleware
 
+# The database file is found by name, so always work from this file's folder.
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+# Create the tables if they don't exist yet (a fresh clone has no .db file).
+init__db()
+seed_samples()            # sample houses and agents, only if those tables are empty
+
 app = FastAPI()
+app.include_router(locator_router)
+app.include_router(api_router)                      # the /api routes the pages use
+app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 
 app.add_middleware(
     CORSMiddleware,
@@ -54,11 +71,36 @@ class LimitRequest(BaseModel):
 class BalanceRequest(BaseModel):
     budget_d : int
  
+# ---------- the website pages ----------
 @app.get("/")
 def home():
-    return{"message": "Welcome to the NYSC Companion Web Server!"}
+    return RedirectResponse("/login")
 
-@app.post("/user_auth/create_acct")
+@app.get("/home")
+def home_page():
+    return FileResponse("frontend/html_files/home.html")
+
+@app.get("/houses")
+def houses_page():
+    return FileResponse("frontend/html_files/houses.html")
+
+@app.get("/agents")
+def agents_page():
+    return FileResponse("frontend/html_files/agents.html")
+
+@app.get("/login")
+def login_page():
+    return FileResponse("frontend/html_files/login.html")
+
+@app.get("/register")
+def register_page():
+    return FileResponse("frontend/html_files/register.html")
+
+@app.get("/expenses")
+def expenses_page():
+    return FileResponse("frontend/html_files/expenses.html")
+
+@app.post("/user_auth/create_acct)")
 def signup(user_data: SignUpRequest):
     try:  
             create_account(
@@ -102,7 +144,7 @@ def login_user(login_data: LoginRequest):
                "status": "failed",
                "message": "Login Failed: Invalid phone number or password."
                }  
-@app.post("/budget_track/budget") 
+@app.post("/budget_tracking/budget") 
 def budget(budget_data: BudgetRequest):
     try: 
         budget_track(
@@ -116,7 +158,7 @@ def budget(budget_data: BudgetRequest):
     except Exception as e:
         print(f"Failed: {str(e)}")  
 
-@app.post("/budget_track/history")
+@app.post("/budget_tracking/history")
 def view_history1(history_data: HistoryRequest):
     data_records = view_history(budget_id= history_data.budget_d)
     return{
@@ -153,8 +195,7 @@ def limit_exp(limit: LimitRequest):
             "Message": "limit set successfully."
         }
   except Exception as e:
-    return {"status": "Error", "message": f"Failed: {str(e)}"}
-          
+      print(f"Error{str(e)}")  
 
 @app.post("/budget_track/balance")
 def view_balance1(balance: BalanceRequest):

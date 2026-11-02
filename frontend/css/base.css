@@ -1,81 +1,104 @@
+/* NYSC Companion - shared styles: colours, buttons, form fields, notices.
+   Brand colours were taken straight from the official NYSC logo:
+   green #01652d, gold #edd423, white. */
+
 :root {
-  --green-900: #06402b;
-  --green-700: #0b6b3f;
-  --green-600: #008751;
-  --gold: #c99a1b;
-  --gold-soft: #f4e6b8;
+  --green: #01652d;        /* NYSC green (from the logo) */
+  --green-deep: #014a21;
+  --green-dark: #013618;
+  --green-tint: #e7f1ea;
+  --gold: #edd423;         /* NYSC gold (from the logo) */
+  --gold-soft: #fbf4bd;
+  --gold-ink: #6b5a00;     /* dark gold, readable as text on white */
+  --white: #ffffff;
   --bg: #f4f7f3;
-  --surface: #ffffff;
-  --ink: #14231c;
-  --muted: #55665b;
-  --line: #d9e3db;
-  --primary: #008751;
-  --primary-ink: #ffffff;
-  --primary-hover: #0b6b3f;
-  --tint: #e6f2ea;
-  --gold-text: #7a5a00;
-  --danger: #b3261e;
-  --danger-tint: #fbe6e4;
-  --warn-tint: #fbf0cf;
-  --shadow: 0 1px 2px rgba(6, 64, 43, .06), 0 8px 24px rgba(6, 64, 43, .06);
+  --ink: #10241a;
+  --muted: #52645a;
+  --line: #d8e2da;
+  --danger: #b51225;       /* the red of the flame in the logo */
+  --danger-tint: #fbe7ea;
+  --shadow: 0 1px 2px rgba(1, 54, 24, .06), 0 8px 24px rgba(1, 54, 24, .07);
   --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
   --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0a140f; --surface: #112019; --ink: #e8f1ea; --muted: #9bb0a2; --line: #24382c;
-    --primary: #1d9d64; --primary-hover: #25b475; --tint: #17301f; --gold-text: #e3c25a;
-    --danger: #ff8a80; --danger-tint: #3a1a18; --warn-tint: #3a3015; --gold-soft: #3a3015;
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0a140f; --surface: #112019; --ink: #e8f1ea; --muted: #9bb0a2; --line: #24382c;
-  --primary: #1d9d64; --primary-hover: #25b475; --tint: #17301f; --gold-text: #e3c25a;
-  --danger: #ff8a80; --danger-tint: #3a1a18; --warn-tint: #3a3015; --gold-soft: #3a3015;
-  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
-  color-scheme: dark;
-}
-
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { min-height: 100%; }
 body {
-  background: var(--bg); color: var(--ink);
+  margin: 0; background: var(--bg); color: var(--ink);
   font-family: var(--font-body); font-size: 15px; line-height: 1.5;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 16px;
+  padding: 16px max(16px, env(safe-area-inset-left, 0px));
 }
 h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -.01em; }
 p { margin: 0; }
 button, input, select { font: inherit; color: inherit; }
-:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; border-radius: 6px; }
 .num { font-variant-numeric: tabular-nums; }
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+.view { max-width: 1180px; margin-inline: auto; }
+
+/* ---------- logo ---------- */
+/* The official logo has black and grey parts, so it always sits on a white chip. */
+.logo-chip { background: var(--white); border-radius: 12px; padding: 5px 8px; display: grid; place-items: center; flex: none; }
+.logo-chip img { height: 46px; width: auto; display: block; }
 .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.brand svg { width: 46px; height: 46px; flex: none; }
 .brand b { display: block; font-family: var(--font-display); font-size: 19px; line-height: 1.15; }
-.brand small { display: block; font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; opacity: .8; }
+.brand small { display: block; font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-soft); }
 
+/* ---------- buttons ---------- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 22px;
   border-radius: 8px; border: 1.5px solid transparent; font-weight: 600; cursor: pointer; text-decoration: none;
-  background: var(--primary); color: var(--primary-ink); transition: background .15s, transform .05s;
+  background: var(--green); color: var(--white); transition: background .15s, transform .05s;
 }
-.btn:hover { background: var(--primary-hover); }
+.btn:hover { background: var(--green-deep); }
 .btn:active { transform: translateY(1px); }
-.btn.gold { background: var(--gold); color: #1c1500; }
-.btn.gold:hover { background: #dcae2c; }
+.btn:disabled { opacity: .6; cursor: progress; }
+.btn.gold { background: var(--gold); color: #1c1700; }
+.btn.gold:hover { background: #f7e04a; }
 .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
-.btn.ghost:hover { background: var(--tint); }
+.btn.ghost:hover { background: var(--green-tint); }
 .btn.sm { height: 38px; padding: 0 14px; font-size: 14px; }
 .btn.block { width: 100%; }
 
-.link { color: var(--green-700); font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--gold); }
-:root[data-theme="dark"] .link { color: var(--gold-text); }
-.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: var(--gold-soft); color: var(--gold-text); }
-.pill.ok { background: var(--tint); color: var(--green-700); }
-.pill.bad { background: var(--danger-tint); color: var(--danger); }
+.link { color: var(--green); font-weight: 600; text-decoration: none; border-bottom: 2px solid var(--gold); }
+
+/* ---------- form fields ---------- */
+form.stack { display: grid; gap: 16px; margin-top: 26px; }
+.row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.row3 { align-items: start; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field label { font-size: 13px; font-weight: 600; }
+.field .opt { font-weight: 400; color: var(--muted); }
+.input-wrap { position: relative; display: flex; }
+.input, select.input {
+  width: 100%; min-width: 0; height: 46px; padding: 0 14px; border-radius: 8px;
+  background: var(--white); border: 1.5px solid var(--line); transition: border-color .15s, box-shadow .15s;
+}
+.input::placeholder { color: #8a9a90; }
+.input:hover { border-color: #9fbaa8; }
+.input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 4px rgba(1, 101, 45, .18); }
+.input.has-prefix { padding-left: 44px; }
+.prefix { position: absolute; left: 0; top: 0; bottom: 0; width: 38px; display: grid; place-items: center; color: var(--muted); font-weight: 600; pointer-events: none; }
+.toggle-pw { position: absolute; right: 6px; top: 6px; bottom: 6px; padding: 0 10px; border: 0; background: transparent; color: var(--green); font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; }
+.hint { font-size: 12.5px; color: var(--muted); }
+.field .err { display: none; font-size: 12.5px; color: var(--danger); }
+.field.bad .input { border-color: var(--danger); }
+.field.bad .err { display: block; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--muted); }
+.check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--green); flex: none; }
+.between { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* ---------- small pieces ---------- */
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: var(--gold-soft); color: var(--gold-ink); }
+.notice { display: none; margin-top: 14px; padding: 10px 12px; border-radius: 8px; font-size: 13.5px; border-left: 4px solid transparent; }
+.notice.show { display: block; }
+.notice.ok { background: var(--green-tint); color: var(--green-deep); border-color: var(--green); }
+.notice.warn { background: var(--gold-soft); color: var(--gold-ink); border-color: var(--gold); }
+.notice.bad { background: var(--danger-tint); color: var(--danger); border-color: var(--danger); }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Keep typed text and placeholders clear of the Show/Hide button. */
+.input-wrap:has(.toggle-pw) .input { padding-right: 64px; }

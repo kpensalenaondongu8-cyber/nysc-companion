@@ -51,7 +51,69 @@ def init__db():
       );
     """)
 
-    
+    # Login sessions for the website: one row per logged-in browser.
+    cursor.execute("""
+       CREATE TABLE IF NOT EXISTS sessions(
+        token TEXT PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+      );
+    """)
+
+    # Each corps member's place of primary assignment (one per user).
+    cursor.execute("""
+       CREATE TABLE IF NOT EXISTS ppas(
+        user_id INTEGER PRIMARY KEY,
+        ppa_name TEXT NOT NULL,
+        address TEXT NOT NULL DEFAULT '',
+        state TEXT NOT NULL,
+        lga TEXT NOT NULL,
+        town TEXT NOT NULL DEFAULT '',
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+      );
+    """)
+
+    # Houses for rent. owner_id is empty for the built-in sample listings.
+    cursor.execute("""
+       CREATE TABLE IF NOT EXISTS houses(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        owner_id INTEGER,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        house_type TEXT NOT NULL,
+        rooms INTEGER NOT NULL,
+        rent_per_year REAL NOT NULL,
+        state TEXT NOT NULL,
+        lga TEXT NOT NULL,
+        town TEXT NOT NULL,
+        address TEXT NOT NULL DEFAULT '',
+        contact_name TEXT NOT NULL,
+        contact_phone TEXT NOT NULL,
+        is_sample INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE CASCADE
+      );
+    """)
+
+    # House agents. towns is a comma-separated list of the areas they cover.
+    cursor.execute("""
+       CREATE TABLE IF NOT EXISTS agents(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        owner_id INTEGER UNIQUE,
+        name TEXT NOT NULL,
+        agency TEXT NOT NULL DEFAULT '',
+        phone TEXT NOT NULL,
+        state TEXT NOT NULL,
+        lga TEXT NOT NULL,
+        towns TEXT NOT NULL DEFAULT '',
+        about TEXT NOT NULL DEFAULT '',
+        is_sample INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE CASCADE
+      );
+    """)
+
     conn.commit()
     conn.close()
 if __name__ == "__main__":
