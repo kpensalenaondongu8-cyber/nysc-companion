@@ -9,21 +9,62 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
 <link rel="stylesheet" href="/frontend/css/base.css">
 <link rel="stylesheet" href="/frontend/css/app.css">
+<link rel="stylesheet" href="/frontend/css/extra.css">
 <title>NYSC Companion · House agents</title>
 </head>
 <body>
 <div class="view">
   <div id="topbar"></div>
   <div class="page-head">
-    <div><h1>House agents</h1><p>Agents who cover the area around your PPA.</p></div>
+    <div><h1>House agents</h1><p id="sub">Agents who cover your area, with ratings from former corps members.</p></div>
     <span class="pill" id="count"></span>
   </div>
-  <div class="notice warn page-note" id="no-ppa" hidden>Save your PPA on the <a class="link" href="/home">Home page</a> and this search will start around it.</div>
+  <div class="notice warn page-note show" id="no-ppa" hidden>Save your PPA on the <a class="link" href="/home">Home page</a> and this list will start around it.</div>
 
   <section class="panel" aria-label="Search">
     <div class="body">
       <form class="filters" id="search-form" novalidate>
-        <div class="field"><label for="s-state">State</label><select class="input" id="s-state"></select></div>
+        <div class="field"><label for="s-state">State</label>
+          <select class="input" id="s-state">
+            <option value="">Any state</option>
+            <option>Abia</option>
+            <option>Adamawa</option>
+            <option>Akwa Ibom</option>
+            <option>Anambra</option>
+            <option>Bauchi</option>
+            <option>Bayelsa</option>
+            <option>Benue</option>
+            <option>Borno</option>
+            <option>Cross River</option>
+            <option>Delta</option>
+            <option>Ebonyi</option>
+            <option>Edo</option>
+            <option>Ekiti</option>
+            <option>Enugu</option>
+            <option>FCT</option>
+            <option>Gombe</option>
+            <option>Imo</option>
+            <option>Jigawa</option>
+            <option>Kaduna</option>
+            <option>Kano</option>
+            <option>Katsina</option>
+            <option>Kebbi</option>
+            <option>Kogi</option>
+            <option>Kwara</option>
+            <option>Lagos</option>
+            <option>Nasarawa</option>
+            <option>Niger</option>
+            <option>Ogun</option>
+            <option>Ondo</option>
+            <option>Osun</option>
+            <option>Oyo</option>
+            <option>Plateau</option>
+            <option>Rivers</option>
+            <option>Sokoto</option>
+            <option>Taraba</option>
+            <option>Yobe</option>
+            <option>Zamfara</option>
+          </select></div>
         <div class="field"><label for="s-lga">LGA</label><input class="input" id="s-lga" placeholder="Any"></div>
         <div class="field"><label for="s-town">Town or area</label><input class="input" id="s-town" placeholder="Any"></div>
         <button class="btn" type="submit">Search</button>
@@ -31,31 +72,12 @@
     </div>
   </section>
 
-  <div class="grid">
-    <div class="cards" id="results" aria-live="polite"></div>
-
-    <section class="panel" aria-labelledby="h-me">
-      <header><h2 id="h-me">List yourself as an agent</h2></header>
-      <div class="body">
-        <form class="stack" id="agent-form" style="margin-top:0" novalidate>
-          <div class="field" id="f-aname"><label for="a-name">Your name</label><input class="input" id="a-name" maxlength="60"><span class="err">Required.</span></div>
-          <div class="field"><label for="a-agency">Agency <span class="opt">(optional)</span></label><input class="input" id="a-agency" maxlength="80"></div>
-          <div class="field" id="f-aphone"><label for="a-phone">Phone (also used for WhatsApp)</label><input class="input" id="a-phone" type="tel" inputmode="numeric" placeholder="08030000000"><span class="err">11-digit number.</span></div>
-          <div class="row2">
-            <div class="field" id="f-astate"><label for="a-state">State</label><select class="input" id="a-state"></select><span class="err">Choose a state.</span></div>
-            <div class="field" id="f-alga"><label for="a-lga">Main LGA</label><input class="input" id="a-lga" maxlength="60"><span class="err">Required.</span></div>
-          </div>
-          <div class="field"><label for="a-towns">Areas you cover <span class="opt">(comma separated)</span></label><input class="input" id="a-towns" maxlength="200" placeholder="e.g. Gboko, Yandev, Aliade"></div>
-          <div class="field"><label for="a-about">About you <span class="opt">(optional)</span></label><input class="input" id="a-about" maxlength="300"></div>
-          <div class="between"><button class="btn danger sm" type="button" id="a-remove" hidden>Remove my listing</button><button class="btn" type="submit" id="a-save">List me</button></div>
-        </form>
-        <div class="notice" id="a-notice" role="status"></div>
-      </div>
-    </section>
-  </div>
+  <div class="cards" id="results" aria-live="polite" style="margin-top:16px"></div>
+  <p class="hint-small" style="margin-top:16px">Are you a house agent? <a class="link" href="/register">Create an agent account</a> to post your houses with pictures.</p>
 </div>
 <script src="/frontend/js/api.js"></script>
 <script src="/frontend/js/nav.js"></script>
+<script src="/frontend/js/ui.js"></script>
 <script src="/frontend/js/agents.js"></script>
 </body>
 </html>

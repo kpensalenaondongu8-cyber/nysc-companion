@@ -1,4 +1,7 @@
-/* The top bar shared by every logged-in page. Put <div id="topbar"></div> in the page. */
+/* The top bar shared by every logged-in page. Put <div id="topbar"></div> in the page.
+   It also keeps each kind of account on its own pages:
+     corper  -> Home, Houses for rent, House agents, Reviews, Expenses
+     agent   -> My listings, Reviews                                                  */
 if (!Session.token()) window.location.href = '/login';
 
 (function () {
@@ -6,20 +9,29 @@ if (!Session.token()) window.location.href = '/login';
   try { user = JSON.parse(localStorage.getItem('nysc_user') || sessionStorage.getItem('nysc_user')) || {}; } catch (e) { /* ignore */ }
   const first = user.first_name || 'Corps';
   const last = user.last_name || 'Member';
+  const isAgent = user.role === 'agent';          // older logins have no role: they are corpers
 
-  const links = [['/home', 'Home'], ['/houses', 'Houses for rent'], ['/agents', 'House agents'], ['/expenses', 'Expenses']];
+  // Send people to the right place if they open a page that is not for them.
+  const path = location.pathname;
+  const agentPages = ['/agent-hub', '/reviews', '/house'];
+  if (isAgent && !agentPages.includes(path)) { window.location.replace('/agent-hub'); }
+  if (!isAgent && path === '/agent-hub') { window.location.replace('/home'); }
+
+  const links = isAgent
+    ? [['/agent-hub', 'My listings'], ['/reviews', 'Reviews']]
+    : [['/home', 'Home'], ['/houses', 'Houses for rent'], ['/agents', 'House agents'], ['/reviews', 'Reviews'], ['/expenses', 'Expenses']];
   const nav = links.map(([href, label]) =>
-    `<a href="${href}"${location.pathname === href ? ' aria-current="page"' : ''}>${label}</a>`).join('');
+    `<a href="${href}"${path === href ? ' aria-current="page"' : ''}>${label}</a>`).join('');
 
   $('topbar').outerHTML = `
     <header class="topbar">
-      <a class="brand" href="/home" style="color:inherit;text-decoration:none">
+      <a class="brand" href="${isAgent ? '/agent-hub' : '/home'}" style="color:inherit;text-decoration:none">
         <span class="logo-chip"><img src="/frontend/nysc-logo.png" alt="National Youth Service Corps logo"></span>
-        <div><b>NYSC Companion</b><small>Your PPA, your home, your allowance</small></div>
+        <div><b>NYSC Companion</b><small>${isAgent ? 'House agent portal' : 'Your PPA, your home, your allowance'}</small></div>
       </a>
       <nav class="topnav" aria-label="Main">${nav}</nav>
       <div class="topbar-actions">
-        <div class="who"><span>${esc(first + ' ' + last)}</span><small>Corps member</small></div>
+        <div class="who"><span>${esc(first + ' ' + last)}</span><small>${isAgent ? 'House agent' : 'Corps member'}</small></div>
         <div class="avatar" aria-hidden="true">${esc((first[0] + last[0]).toUpperCase())}</div>
         <button class="btn sm light" type="button" id="logout">Log out</button>
       </div>

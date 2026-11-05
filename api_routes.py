@@ -6,6 +6,8 @@ add_expense ...) and returns plain JSON for the pages to draw.
 import re
 import sqlite3
 
+from typing import Literal
+
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
@@ -27,6 +29,7 @@ class RegisterBody(BaseModel):
     number: str
     email: str
     password: str = Field(min_length=8, max_length=128)
+    role: Literal["corper", "agent"] = "corper"      # corps member or house agent
 
 class LoginBody(BaseModel):
     number: str
@@ -63,10 +66,20 @@ def current_user_id(authorization: str | None = Header(default=None)):
     return user_id
 
 
+def get_role(user_id):
+    """'corper' or 'agent'."""
+    conn = sqlite3.connect("nysc_companion.db", timeout=10)
+    row = conn.execute("SELECT role FROM users WHERE id = ?", (user_id,)).fetchone()
+    conn.close()
+    return row[0] if row else "corper"
+
+
 def login_response(user_id):
-    """Start a session and send back the token plus the user's name."""
+    """Start a session and send back the token plus the user's name and role."""
     data = build_dashboard(user_id)
-    return {"token": create_session(user_id), "user": data["user"]}
+    user = dict(data["user"])
+    user["role"] = get_role(user_id)
+    return {"token": create_session(user_id), "user": user}
 
 
 # ---------- accounts ----------
@@ -81,14 +94,19 @@ def register(body: RegisterBody):
 
     try:
         create_account(body.first_name.strip(), body.middle_name.strip(), body.last_name.strip(),
-                       number, body.email.strip().lower(), body.password)
+                       number, body.email.strip().lower(), body.password, body.role)
     except sqlite3.IntegrityError as e:
         if "users.email" in str(e):
             raise HTTPException(status_code=409, detail="That email address is already registered.")
         raise HTTPException(status_code=409, detail="That phone number is already registered.")
 
-    # Log them straight in so they land on the tracker.
+    # Log them straight in so they land on their first page.
     user_id = login(number, body.password)
+    if body.role == "agent":
+        # Start the agent's profile with their name and phone; they finish it on their page.
+        import locator_db
+        locator_db.save_my_agent(user_id, (body.first_name + " " + body.last_name).strip(), "",
+                                 number, "", "", "", "")
     return login_response(user_id)
 
 

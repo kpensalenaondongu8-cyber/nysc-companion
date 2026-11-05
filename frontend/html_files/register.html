@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="/frontend/css/base.css">
 <link rel="stylesheet" href="/frontend/css/login.css">
 <link rel="stylesheet" href="/frontend/css/signup.css">
+<link rel="stylesheet" href="/frontend/css/extra.css">
 <title>NYSC Companion · Create account</title>
 </head>
 <body>
@@ -35,13 +36,20 @@
 
     <section class="auth-main">
       <div class="auth-box">
-        <p class="eyebrow">Corps member registration</p>
+        <p class="eyebrow">Create an account</p>
         <h1>Create your account</h1>
         <p class="sub">Use your own phone number. You will log in with it.</p>
 
         <div class="notice" id="notice" role="alert"></div>
 
         <form class="stack" id="signup-form" novalidate>
+          <div class="field">
+            <label>I am a</label>
+            <div class="role-choice" role="radiogroup" aria-label="Account type">
+              <label><input type="radio" name="role" value="corper" checked><b style="display:inline">Corps member</b><small>Find a house near your PPA, track your allowance, read and write reviews.</small></label>
+              <label><input type="radio" name="role" value="agent"><b style="display:inline">House agent</b><small>Post houses with pictures, price and location for corps members.</small></label>
+            </div>
+          </div>
           <div class="row3">
             <div class="field" id="f-first"><label for="first">First name</label><input class="input" id="first" autocomplete="given-name" required><span class="err">Required.</span></div>
             <div class="field"><label for="mid">Middle <span class="opt">(optional)</span></label><input class="input" id="mid" autocomplete="additional-name"></div>

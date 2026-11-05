@@ -1,7 +1,15 @@
-"""Database functions for the PPA locator: PPA, houses for rent, house agents.
-Same style as the rest of the project: open the database, run SQL, close it."""
+"""Database functions for the PPA locator: PPA, houses for rent, house agents, reviews.
+Same style as the rest of the project: open the database, run SQL, close it.
+
+Who can do what:
+  * corper (corps member): saves a PPA, sees houses near it, calls/WhatsApps agents, can read reviews
+                           and (if they say they have served) write reviews.
+  * agent (house agent):   has an agent profile and posts houses with pictures.
+"""
 import sqlite3
 from datetime import datetime
+
+import photo_store
 
 DB = "nysc_companion.db"
 
@@ -9,11 +17,29 @@ DB = "nysc_companion.db"
 def _connect():
     conn = sqlite3.connect(DB, timeout=10)
     conn.row_factory = sqlite3.Row          # lets us read columns by name
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 
 def _rows_to_dicts(rows):
     return [dict(r) for r in rows]
+
+
+# ---------- users ----------
+
+def get_role(user_id):
+    """'corper' or 'agent'."""
+    conn = _connect()
+    row = conn.execute("SELECT role FROM users WHERE id = ?", (user_id,)).fetchone()
+    conn.close()
+    return row["role"] if row else None
+
+
+def get_user_name(user_id):
+    conn = _connect()
+    row = conn.execute("SELECT first_name, last_name FROM users WHERE id = ?", (user_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
 
 
 # ---------- PPA ----------
@@ -41,71 +67,131 @@ def save_ppa(user_id, ppa_name, address, state, lga, town):
 
 
 # ---------- houses ----------
+# A house is visible to corpers if an AGENT posted it (or it is one of the built-in samples).
 
-def search_houses(user_id, state, lga="", town="", max_rent=None, min_rooms=None):
-    """State must match exactly. LGA and town match if the text appears in them."""
-    sql = "SELECT * FROM houses WHERE lower(state) = lower(?)"
-    params = [state]
-    if lga:
-        sql += " AND lower(lga) LIKE ?"
-        params.append("%" + lga.lower() + "%")
+_VISIBLE = "(h.is_sample = 1 OR u.role = 'agent')"
+
+_HOUSE_SELECT = """
+    SELECT h.*,
+           a.id AS agent_id, a.name AS agent_name, a.agency AS agent_agency, a.phone AS agent_phone,
+           (SELECT filename FROM house_photos p WHERE p.house_id = h.id ORDER BY position, id LIMIT 1) AS cover,
+           (SELECT COUNT(*) FROM house_photos p WHERE p.house_id = h.id) AS photo_count,
+           (SELECT ROUND(AVG(rating), 1) FROM reviews r WHERE r.agent_id = a.id) AS agent_rating,
+           (SELECT COUNT(*) FROM reviews r WHERE r.agent_id = a.id) AS agent_reviews
+    FROM houses h
+    LEFT JOIN users u ON u.id = h.owner_id
+    LEFT JOIN agents a ON a.owner_id = h.owner_id
+"""
+
+
+def houses_near_ppa(ppa, town="", max_rent=None, min_rooms=None):
+    """Only houses in the corper's own state and LGA. Houses in their own town come first."""
+    sql = _HOUSE_SELECT + " WHERE lower(h.state) = lower(?) AND lower(h.lga) = lower(?) AND " + _VISIBLE
+    params = [ppa["state"].strip(), ppa["lga"].strip()]
     if town:
-        sql += " AND lower(town) LIKE ?"
+        sql += " AND lower(h.town) LIKE ?"
         params.append("%" + town.lower() + "%")
     if max_rent is not None:
-        sql += " AND rent_per_year <= ?"
+        sql += " AND h.rent_per_year <= ?"
         params.append(max_rent)
     if min_rooms is not None:
-        sql += " AND rooms >= ?"
+        sql += " AND h.rooms >= ?"
         params.append(min_rooms)
-    sql += " ORDER BY id DESC"
+    sql += " ORDER BY CASE WHEN lower(h.town) = lower(?) THEN 0 ELSE 1 END, h.id DESC"
+    params.append((ppa.get("town") or "").strip())
 
     conn = _connect()
     rows = _rows_to_dicts(conn.execute(sql, params).fetchall())
     conn.close()
-    for r in rows:
-        r["mine"] = r["owner_id"] == user_id    # the page shows a Delete button for these
-        del r["owner_id"]
+    return rows
+
+
+def get_house(house_id):
+    """One house with all its pictures and its agent. None if it does not exist."""
+    conn = _connect()
+    row = conn.execute(_HOUSE_SELECT + " WHERE h.id = ?", (house_id,)).fetchone()
+    if row is None:
+        conn.close()
+        return None
+    house = dict(row)
+    house["photos"] = [r["filename"] for r in conn.execute(
+        "SELECT filename FROM house_photos WHERE house_id = ? ORDER BY position, id", (house_id,))]
+    conn.close()
+    return house
+
+
+def my_houses(user_id):
+    """The houses this agent posted."""
+    conn = _connect()
+    rows = _rows_to_dicts(conn.execute(
+        _HOUSE_SELECT + " WHERE h.owner_id = ? ORDER BY h.id DESC", (user_id,)).fetchall())
+    conn.close()
     return rows
 
 
 def add_house(user_id, title, description, house_type, rooms, rent_per_year,
-              state, lga, town, address, contact_name, contact_phone):
+              state, lga, town, address, contact_name, contact_phone, photo_files):
+    """Save the house and its pictures together. Returns the new house id."""
     conn = _connect()
-    conn.execute(
-        """INSERT INTO houses (owner_id, title, description, house_type, rooms, rent_per_year,
-                               state, lga, town, address, contact_name, contact_phone, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (user_id, title, description, house_type, rooms, rent_per_year,
-         state, lga, town, address, contact_name, contact_phone, datetime.now().isoformat())
-    )
-    conn.commit()
-    conn.close()
+    try:
+        cursor = conn.execute(
+            """INSERT INTO houses (owner_id, title, description, house_type, rooms, rent_per_year,
+                                   state, lga, town, address, contact_name, contact_phone, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (user_id, title, description, house_type, rooms, rent_per_year,
+             state, lga, town, address, contact_name, contact_phone, datetime.now().isoformat())
+        )
+        house_id = cursor.lastrowid
+        for position, filename in enumerate(photo_files):
+            conn.execute("INSERT INTO house_photos (house_id, filename, position) VALUES (?, ?, ?)",
+                         (house_id, filename, position))
+        conn.commit()
+        return house_id
+    finally:
+        conn.close()
 
 
 def delete_house(user_id, house_id):
-    """Only the person who posted a house can delete it. Returns True if deleted."""
+    """Only the agent who posted a house can delete it. Returns True if deleted."""
     conn = _connect()
+    files = [r["filename"] for r in conn.execute(
+        """SELECT p.filename FROM house_photos p JOIN houses h ON h.id = p.house_id
+           WHERE h.id = ? AND h.owner_id = ?""", (house_id, user_id))]
     cursor = conn.execute("DELETE FROM houses WHERE id = ? AND owner_id = ?", (house_id, user_id))
     conn.commit()
     deleted = cursor.rowcount > 0
     conn.close()
+    if deleted:
+        photo_store.delete_photos(files)
     return deleted
 
 
 # ---------- agents ----------
 
-def search_agents(user_id, state, lga="", town=""):
-    sql = "SELECT * FROM agents WHERE lower(state) = lower(?)"
-    params = [state]
+_AGENT_SELECT = """
+    SELECT a.*, u.role AS owner_role,
+           (SELECT ROUND(AVG(rating), 1) FROM reviews r WHERE r.agent_id = a.id) AS rating,
+           (SELECT COUNT(*) FROM reviews r WHERE r.agent_id = a.id) AS review_count,
+           (SELECT COUNT(*) FROM houses h WHERE h.owner_id = a.owner_id) AS house_count
+    FROM agents a LEFT JOIN users u ON u.id = a.owner_id
+"""
+
+
+def search_agents(user_id, state="", lga="", town=""):
+    """Agents whose profile is filled in. State is optional (empty = all states)."""
+    sql = _AGENT_SELECT + " WHERE (a.is_sample = 1 OR u.role = 'agent') AND a.state != '' AND a.lga != ''"
+    params = []
+    if state:
+        sql += " AND lower(a.state) = lower(?)"
+        params.append(state)
     if lga:
-        sql += " AND lower(lga) LIKE ?"
+        sql += " AND lower(a.lga) LIKE ?"
         params.append("%" + lga.lower() + "%")
     if town:
         # An agent covers a town if it is in their list of areas (or is their LGA).
-        sql += " AND (lower(towns) LIKE ? OR lower(lga) LIKE ?)"
+        sql += " AND (lower(a.towns) LIKE ? OR lower(a.lga) LIKE ?)"
         params += ["%" + town.lower() + "%"] * 2
-    sql += " ORDER BY id DESC"
+    sql += " ORDER BY a.is_sample, a.id DESC"
 
     conn = _connect()
     rows = _rows_to_dicts(conn.execute(sql, params).fetchall())
@@ -113,11 +199,19 @@ def search_agents(user_id, state, lga="", town=""):
     for r in rows:
         r["mine"] = r["owner_id"] == user_id
         del r["owner_id"]
+        del r["owner_role"]
     return rows
 
 
+def get_agent(agent_id):
+    conn = _connect()
+    row = conn.execute(_AGENT_SELECT + " WHERE a.id = ?", (agent_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 def save_my_agent(user_id, name, agency, phone, state, lga, towns, about):
-    """Each user can have one agent profile: create it, or update it."""
+    """Each agent has one profile: create it, or update it."""
     conn = _connect()
     conn.execute(
         """INSERT INTO agents (owner_id, name, agency, phone, state, lga, towns, about, created_at)
@@ -138,56 +232,136 @@ def get_my_agent(user_id):
     return dict(row) if row else None
 
 
-def delete_my_agent(user_id):
-    conn = _connect()
-    conn.execute("DELETE FROM agents WHERE owner_id = ?", (user_id,))
-    conn.commit()
-    conn.close()
-
-
 def count_near(table, state, lga):
     """How many houses/agents are in this LGA (used by the home page)."""
+    state, lga = state.strip(), lga.strip()
     conn = _connect()
-    n = conn.execute(f"SELECT COUNT(*) FROM {table} WHERE lower(state) = lower(?) AND lower(lga) = lower(?)",
-                     (state, lga)).fetchone()[0]
+    if table == "houses":
+        n = conn.execute(
+            """SELECT COUNT(*) FROM houses h LEFT JOIN users u ON u.id = h.owner_id
+               WHERE lower(h.state) = lower(?) AND lower(h.lga) = lower(?) AND """ + _VISIBLE,
+            (state, lga)).fetchone()[0]
+    else:
+        n = conn.execute(
+            """SELECT COUNT(*) FROM agents a LEFT JOIN users u ON u.id = a.owner_id
+               WHERE lower(a.state) = lower(?) AND lower(a.lga) = lower(?)
+                 AND (a.is_sample = 1 OR u.role = 'agent')""",
+            (state, lga)).fetchone()[0]
     conn.close()
     return n
 
 
-# ---------- sample data ----------
+# ---------- reviews ----------
 
-# (title, type, rooms, rent per year, state, lga, town, address, description)
+def _ppa_key(ppa_name, state, lga):
+    return "ppa:" + "|".join(s.strip().lower() for s in (ppa_name, state, lga))
+
+
+def add_review(author_id, target_type, rating, body, service_year,
+               agent_id=None, ppa_name="", state="", lga="", town=""):
+    """Save a review. Raises sqlite3.IntegrityError if this person already reviewed the same thing."""
+    if target_type == "agent":
+        key = f"agent:{agent_id}"
+    else:
+        key = _ppa_key(ppa_name, state, lga)
+    conn = _connect()
+    try:
+        conn.execute(
+            """INSERT INTO reviews (author_id, target_type, target_key, agent_id, ppa_name, state, lga, town,
+                                    rating, body, service_year, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (author_id, target_type, key, agent_id, ppa_name, state, lga, town,
+             rating, body, service_year, datetime.now().isoformat()))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def list_reviews(user_id, target_type="", state="", lga="", q="", agent_id=None):
+    sql = """SELECT r.id, r.author_id, r.target_type, r.agent_id, r.ppa_name, r.state, r.lga, r.town,
+                    r.rating, r.body, r.service_year, r.created_at,
+                    u.first_name, u.last_name, a.name AS agent_name, a.agency AS agent_agency
+             FROM reviews r
+             JOIN users u ON u.id = r.author_id
+             LEFT JOIN agents a ON a.id = r.agent_id
+             WHERE 1 = 1"""
+    params = []
+    if target_type in ("ppa", "agent"):
+        sql += " AND r.target_type = ?"
+        params.append(target_type)
+    if agent_id is not None:
+        sql += " AND r.agent_id = ?"
+        params.append(agent_id)
+    if state:
+        sql += " AND lower(r.state) = lower(?)"
+        params.append(state)
+    if lga:
+        sql += " AND lower(r.lga) LIKE ?"
+        params.append("%" + lga.lower() + "%")
+    if q:
+        sql += " AND (lower(r.ppa_name) LIKE ? OR lower(r.body) LIKE ? OR lower(a.name) LIKE ?)"
+        params += ["%" + q.lower() + "%"] * 3
+    sql += " ORDER BY r.id DESC LIMIT 200"
+
+    conn = _connect()
+    rows = _rows_to_dicts(conn.execute(sql, params).fetchall())
+    conn.close()
+
+    reviews = []
+    for r in rows:
+        last = (r["last_name"] or "").strip()
+        reviews.append({
+            "id": r["id"],
+            "mine": r["author_id"] == user_id,
+            "author": r["first_name"] + (" " + last[0] + "." if last else ""),   # "Thomas T."
+            "target_type": r["target_type"],
+            "agent_id": r["agent_id"],
+            "agent_name": r["agent_name"],
+            "agent_agency": r["agent_agency"],
+            "ppa_name": r["ppa_name"], "state": r["state"], "lga": r["lga"], "town": r["town"],
+            "rating": r["rating"], "body": r["body"],
+            "service_year": r["service_year"], "created_at": r["created_at"],
+        })
+    return reviews
+
+
+def delete_review(user_id, review_id):
+    conn = _connect()
+    cursor = conn.execute("DELETE FROM reviews WHERE id = ? AND author_id = ?", (review_id, user_id))
+    conn.commit()
+    deleted = cursor.rowcount > 0
+    conn.close()
+    return deleted
+
+
+# ---------- sample data ----------
+# Clearly-labelled sample listings so the pages are not blank on a fresh install.
+# Phone numbers are dummy (0800...). Real agents' listings appear beside them.
+
 SAMPLE_HOUSES = [
-    ("Self-contain near Gboko market", "Self-contain", 1, 180000, "Benue", "Gboko", "Gboko", "Off Jos Road", "Tiled, own toilet and kitchen, prepaid meter."),
-    ("2-bedroom flat, Yandev", "2-bedroom flat", 2, 350000, "Benue", "Gboko", "Yandev", "Behind the secondary school", "Fenced compound, borehole water."),
-    ("Room and parlour, Makurdi North Bank", "Room and parlour", 1, 220000, "Benue", "Makurdi", "North Bank", "Close to the bridge", "Quiet street, gate and security light."),
-    ("3-bedroom bungalow, Wadata", "3-bedroom flat", 3, 600000, "Benue", "Makurdi", "Wadata", "Wadata Plaza area", "Large compound, ideal to share between corps members."),
-    ("Mini flat, Gwagwalada", "Mini flat", 1, 450000, "FCT", "Gwagwalada", "Gwagwalada", "Near the university", "Prepaid meter, water available."),
-    ("Self-contain, Kubwa", "Self-contain", 1, 500000, "FCT", "Bwari", "Kubwa", "Phase 4", "Tiled floor, fenced estate, steady light."),
-    ("2-bedroom flat, Lugbe", "2-bedroom flat", 2, 800000, "FCT", "Abuja Municipal", "Lugbe", "Airport road", "Gated estate, parking space."),
-    ("Room and parlour, Ikorodu", "Room and parlour", 1, 400000, "Lagos", "Ikorodu", "Ikorodu", "Near the bus terminal", "Tiled, prepaid meter."),
-    ("Self-contain, Ojo", "Self-contain", 1, 350000, "Lagos", "Ojo", "Ojo", "Near the barracks", "Gate, borehole, own kitchen."),
-    ("Mini flat, Kaduna North", "Mini flat", 1, 300000, "Kaduna", "Kaduna North", "Kawo", "Kawo roundabout", "Own meter, secure compound."),
-    ("2-bedroom flat, Port Harcourt", "2-bedroom flat", 2, 900000, "Rivers", "Port Harcourt", "Rumuokoro", "Off East-West road", "Prepaid meter, water tank."),
-    ("Self-contain, Ibadan", "Self-contain", 1, 250000, "Oyo", "Ibadan North", "Bodija", "Near the market", "Tiled floor, fenced compound."),
+    # (title, house type, rooms, rent per year, state, lga, town, address, description)
+    ("Self-contain near Gboko market", "Self-contain", 1, 250000, "Benue", "Gboko", "Gboko", "Near the main market", "Tiled floor, prepaid meter, borehole water."),
+    ("2-bedroom flat, Yandev", "2-bedroom flat", 2, 450000, "Benue", "Gboko", "Yandev", "", "Fenced compound, steady water, quiet area."),
+    ("Room and parlour, Makurdi North Bank", "Room and parlour", 2, 300000, "Benue", "Makurdi", "North Bank", "", "Close to the road, shared compound."),
+    ("3-bedroom bungalow, Wadata", "3-bedroom flat", 3, 700000, "Benue", "Makurdi", "Wadata", "", "Big compound, security gate."),
+    ("Mini flat, Gwagwalada", "Mini flat", 2, 400000, "FCT", "Gwagwalada", "Gwagwalada", "", "Prepaid meter and running water."),
+    ("Self-contain, Kubwa", "Self-contain", 1, 500000, "FCT", "Bwari", "Kubwa", "", "Gated estate, good road."),
+    ("Room, Surulere", "Room", 1, 350000, "Lagos", "Surulere", "Surulere", "", "Shared bathroom, close to transport."),
+    ("2-bedroom flat, Otukpo", "2-bedroom flat", 2, 380000, "Benue", "Otukpo", "Otukpo", "", "Tiled, fenced, borehole."),
 ]
 
-# (name, agency, state, lga, towns, about)
 SAMPLE_AGENTS = [
-    ("Sample Agent (Gboko)", "Sample Homes Gboko", "Benue", "Gboko", "Gboko, Yandev, Aliade", "Rooms and flats for corps members around Gboko."),
-    ("Sample Agent (Makurdi)", "Sample Properties Makurdi", "Benue", "Makurdi", "North Bank, Wadata, High Level", "Houses near Makurdi PPAs and the orientation camp."),
-    ("Sample Agent (Gwagwalada)", "Sample Estates Gwagwalada", "FCT", "Gwagwalada", "Gwagwalada, Kuje", "Self-contains and mini flats near the university."),
-    ("Sample Agent (Kubwa)", "Sample Realty Kubwa", "FCT", "Bwari", "Kubwa, Bwari", "Affordable flats around Kubwa."),
-    ("Sample Agent (Lagos)", "Sample Lagos Rentals", "Lagos", "Ikorodu", "Ikorodu, Ojo, Badagry", "Corps member friendly rentals across Lagos."),
-    ("Sample Agent (Kaduna)", "Sample Kaduna Homes", "Kaduna", "Kaduna North", "Kawo, Barnawa", "Short-term and yearly rentals."),
-    ("Sample Agent (Port Harcourt)", "Sample PH Properties", "Rivers", "Port Harcourt", "Rumuokoro, Rumuola", "Flats around Port Harcourt."),
-    ("Sample Agent (Ibadan)", "Sample Ibadan Estates", "Oyo", "Ibadan North", "Bodija, Agodi", "Rooms near Ibadan PPAs."),
+    # (name, agency, state, lga, towns covered, about)
+    ("Sample Agent (Gboko)", "Sample Homes", "Benue", "Gboko", "Gboko, Yandev", "Sample profile for demonstration."),
+    ("Sample Agent (Makurdi)", "Sample Homes", "Benue", "Makurdi", "North Bank, Wadata", "Sample profile for demonstration."),
+    ("Sample Agent (Gwagwalada)", "Sample Homes", "FCT", "Gwagwalada", "Gwagwalada", "Sample profile for demonstration."),
+    ("Sample Agent (Kubwa)", "Sample Homes", "FCT", "Bwari", "Kubwa", "Sample profile for demonstration."),
+    ("Sample Agent (Lagos)", "Sample Homes", "Lagos", "Surulere", "Surulere", "Sample profile for demonstration."),
 ]
 
 
 def seed_samples():
-    """Fill empty tables with clearly-labelled sample listings so the pages are not blank.
-    Phone numbers are dummy (0800 000 000x). Real users' listings sit beside them."""
+    """Fill EMPTY tables with sample listings. Does nothing once the tables have rows."""
     conn = _connect()
     now = datetime.now().isoformat()
     if conn.execute("SELECT COUNT(*) FROM houses").fetchone()[0] == 0:

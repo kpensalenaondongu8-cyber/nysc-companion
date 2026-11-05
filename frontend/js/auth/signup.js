@@ -1,4 +1,10 @@
-if (Session.token()) window.location.href = '/home';
+// Where each kind of account starts.
+function landing(role) { return role === 'agent' ? '/agent-hub' : '/home'; }
+if (Session.token()) {
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem('nysc_user') || sessionStorage.getItem('nysc_user')) || {}; } catch (e) { /* ignore */ }
+  window.location.href = landing(saved.role);
+}
 
 // Password strength bar: 1 point each for length, mixed case, a digit, a symbol.
 function strength(p) {
@@ -20,6 +26,7 @@ $('signup-form').addEventListener('submit', async (e) => {
   const phone = $('phone').value;
   const email = $('email').value.trim();
   const pw = $('pw').value;
+  const role = document.querySelector('input[name="role"]:checked').value;
 
   // Every check runs (no early exit) so all bad fields turn red at once.
   const problems = [
@@ -38,10 +45,10 @@ $('signup-form').addEventListener('submit', async (e) => {
   try {
     const data = await api('POST', '/api/register', {
       first_name: first, middle_name: mid, last_name: last,
-      number: phone, email, password: pw,
+      number: phone, email, password: pw, role,
     });
     Session.save(data.token, data.user, true);   // the server logs the new user in
-    window.location.href = '/home';
+    window.location.href = landing(data.user.role);
   } catch (err) {
     say('notice', err.message, 'bad');
     $('submit').disabled = false;

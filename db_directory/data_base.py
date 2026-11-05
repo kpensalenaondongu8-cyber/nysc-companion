@@ -114,6 +114,46 @@ def init__db():
       );
     """)
 
+    # Photos of a house (the pictures themselves are files in the uploads/houses folder).
+    cursor.execute("""
+       CREATE TABLE IF NOT EXISTS house_photos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        house_id INTEGER NOT NULL,
+        filename TEXT NOT NULL,
+        position INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (house_id) REFERENCES houses (id) ON DELETE CASCADE
+      );
+    """)
+
+    # Reviews written by former corps members, about a PPA or about a house agent.
+    # target_key makes sure one person can review the same PPA / agent only once.
+    cursor.execute("""
+       CREATE TABLE IF NOT EXISTS reviews(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        author_id INTEGER NOT NULL,
+        target_type TEXT NOT NULL CHECK (target_type IN ('ppa', 'agent')),
+        target_key TEXT NOT NULL,
+        agent_id INTEGER,
+        ppa_name TEXT NOT NULL DEFAULT '',
+        state TEXT NOT NULL DEFAULT '',
+        lga TEXT NOT NULL DEFAULT '',
+        town TEXT NOT NULL DEFAULT '',
+        rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+        body TEXT NOT NULL,
+        service_year INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE (author_id, target_key),
+        FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE CASCADE,
+        FOREIGN KEY (agent_id) REFERENCES agents (id) ON DELETE CASCADE
+      );
+    """)
+
+    # Upgrade an older database: accounts now have a role, 'corper' or 'agent'.
+    # Everyone who registered before this change stays a corper.
+    columns = [row[1] for row in cursor.execute("PRAGMA table_info(users)")]
+    if "role" not in columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'corper'")
+
     conn.commit()
     conn.close()
 if __name__ == "__main__":

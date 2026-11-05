@@ -1,4 +1,9 @@
+/* The Home page: /home
+   Greeting, saved PPA, a small map, and the quick-link cards.
+   All the map work is in map.js. */
+
 let home = null;
+let editing = false;
 
 fillSelect('p-state', NG_STATES, 'Choose state');
 
@@ -6,10 +11,12 @@ function renderHome() {
   const { user, ppa } = home;
   $('hello').textContent = 'Hello, ' + user.first_name;
 
-  // PPA: show the form when none is saved, otherwise the summary card.
+  // PPA: show the form when none is saved (or while editing), otherwise the summary card.
   $('ppa-form-panel').hidden = !!ppa && !editing;
   $('ppa-card-panel').hidden = !ppa || editing;
   $('ppa-cancel').hidden = !ppa;
+  $('ppa-map-panel').hidden = !ppa || editing;
+
   if (ppa) {
     $('ppa-title').textContent = ppa.ppa_name;
     $('ppa-where').textContent = [ppa.address, ppa.town, ppa.lga, ppa.state].filter(Boolean).join(', ');
@@ -18,14 +25,25 @@ function renderHome() {
     $('n-agents').textContent = home.agents_nearby;
     $('p-houses').textContent = `Listings in ${ppa.lga} LGA. Tap to search the rest of ${ppa.state}.`;
     $('p-agents').textContent = `Agents in ${ppa.lga} LGA, with phone and WhatsApp.`;
+
+    // Draw the map (the map box is already un-hidden by the lines above).
+    if (!editing) {
+      NYSC_MAP.showPpa({
+        canvasId: 'map-viewport-canvas',
+        badgeId: 'live-distance-text',
+        ppa,
+      });
+    }
   } else {
     $('hello-sub').textContent = 'Start by saving your PPA so we can show you what is around it.';
   }
+
   $('n-money').textContent = home.remaining === null ? 'Set up' : naira(home.remaining);
-  $('p-money').textContent = home.remaining === null ? 'Set your monthly allowance and track what you spend.' : 'Balance left from your monthly allowance.';
+  $('p-money').textContent = home.remaining === null
+    ? 'Set your monthly allowance and track what you spend.'
+    : 'Balance left from your monthly allowance.';
 }
 
-let editing = false;
 function fillForm() {
   const p = home.ppa || {};
   $('p-name').value = p.ppa_name || '';
@@ -41,16 +59,20 @@ $('ppa-cancel').addEventListener('click', () => { editing = false; renderHome();
 $('ppa-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const body = {
-    ppa_name: $('p-name').value.trim(), address: $('p-addr').value.trim(),
-    state: $('p-state').value, lga: $('p-lga').value.trim(), town: $('p-town').value.trim(),
+    ppa_name: $('p-name').value.trim(),
+    address: $('p-addr').value.trim(),
+    state: $('p-state').value,
+    lga: $('p-lga').value.trim(),
+    town: $('p-town').value.trim(),
   };
   const bad = [setBad('f-name', !body.ppa_name), setBad('f-state', !body.state), setBad('f-lga', !body.lga)];
   if (bad.some(Boolean)) return;
 
   e.submitter.disabled = true;
   try {
-    home = await api('PUT', '/api/ppa', body);
+    home = await api('PUT', '/api/ppa', body);   // the server answers with the fresh home data
     editing = false;
+    say('ppa-notice', '', '');
     renderHome();
   } catch (err) {
     say('ppa-notice', err.message, 'bad');

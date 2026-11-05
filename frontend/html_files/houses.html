@@ -9,63 +9,34 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
 <link rel="stylesheet" href="/frontend/css/base.css">
 <link rel="stylesheet" href="/frontend/css/app.css">
+<link rel="stylesheet" href="/frontend/css/extra.css">
 <title>NYSC Companion · Houses for rent</title>
 </head>
 <body>
 <div class="view">
   <div id="topbar"></div>
   <div class="page-head">
-    <div><h1>Houses for rent</h1><p id="sub">Search by state, LGA and town. Rents are per year.</p></div>
+    <div><h1>Houses for rent</h1><p id="sub">Houses posted by agents around your PPA. Rents are per year.</p></div>
     <span class="pill" id="count"></span>
   </div>
-  <div class="notice warn page-note" id="no-ppa" hidden>Save your PPA on the <a class="link" href="/home">Home page</a> and this search will start around it.</div>
+  <div class="notice warn page-note show" id="no-ppa" hidden>Save your PPA on the <a class="link" href="/home">Home page</a> first. Houses are shown around your PPA only.</div>
 
-  <section class="panel" aria-label="Search">
+  <section class="panel" aria-label="Filter">
     <div class="body">
       <form class="filters" id="search-form" novalidate>
-        <div class="field"><label for="s-state">State</label><select class="input" id="s-state"></select></div>
-        <div class="field"><label for="s-lga">LGA</label><input class="input" id="s-lga" placeholder="Any"></div>
-        <div class="field"><label for="s-town">Town or area</label><input class="input" id="s-town" placeholder="Any"></div>
+        <div class="field"><label for="s-town">Town or area</label><input class="input" id="s-town" placeholder="Any in my LGA"></div>
         <div class="field"><label for="s-rent">Max rent / year</label><input class="input num" id="s-rent" type="number" min="0" step="any" placeholder="Any"></div>
         <div class="field"><label for="s-rooms">Rooms</label><select class="input" id="s-rooms"><option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
-        <button class="btn" type="submit">Search</button>
+        <button class="btn" type="submit">Filter</button>
       </form>
     </div>
   </section>
 
-  <div class="grid">
-    <div class="cards" id="results" aria-live="polite"></div>
-
-    <section class="panel" aria-labelledby="h-post">
-      <header><h2 id="h-post">Post a house</h2><span class="hint">Landlords and agents</span></header>
-      <div class="body">
-        <form class="stack" id="post-form" style="margin-top:0" novalidate>
-          <div class="field" id="f-title"><label for="h-title">Title</label><input class="input" id="h-title" maxlength="80" placeholder="e.g. Self-contain near the market"><span class="err">Add a title.</span></div>
-          <div class="row2">
-            <div class="field"><label for="h-type">Type</label><select class="input" id="h-type"></select></div>
-            <div class="field" id="f-rooms"><label for="h-rooms">Rooms</label><input class="input num" id="h-rooms" type="number" min="1" max="20" value="1"><span class="err">1 to 20.</span></div>
-          </div>
-          <div class="field" id="f-rentp"><label for="h-rent">Rent per year</label><div class="input-wrap"><span class="prefix">₦</span><input class="input has-prefix num" id="h-rent" type="number" min="0" step="any" placeholder="350,000"></div><span class="err">Enter the yearly rent.</span></div>
-          <div class="row2">
-            <div class="field" id="f-hstate"><label for="h-state">State</label><select class="input" id="h-state"></select><span class="err">Choose a state.</span></div>
-            <div class="field" id="f-hlga"><label for="h-lga">LGA</label><input class="input" id="h-lga" maxlength="60"><span class="err">Required.</span></div>
-          </div>
-          <div class="field" id="f-htown"><label for="h-town">Town or area</label><input class="input" id="h-town" maxlength="60"><span class="err">Required.</span></div>
-          <div class="field"><label for="h-addr">Address <span class="opt">(optional)</span></label><input class="input" id="h-addr" maxlength="200"></div>
-          <div class="field"><label for="h-desc">Description <span class="opt">(optional)</span></label><input class="input" id="h-desc" maxlength="400" placeholder="Water, light, fence, security..."></div>
-          <div class="row2">
-            <div class="field" id="f-hname"><label for="h-cname">Contact name</label><input class="input" id="h-cname" maxlength="60"><span class="err">Required.</span></div>
-            <div class="field" id="f-hphone"><label for="h-phone">Contact phone</label><input class="input" id="h-phone" type="tel" inputmode="numeric" placeholder="08030000000"><span class="err">11-digit number.</span></div>
-          </div>
-          <button class="btn" type="submit">Post house</button>
-        </form>
-        <div class="notice" id="post-notice" role="status"></div>
-      </div>
-    </section>
-  </div>
+  <div class="cards" id="results" aria-live="polite" style="margin-top:16px"></div>
 </div>
 <script src="/frontend/js/api.js"></script>
 <script src="/frontend/js/nav.js"></script>
+<script src="/frontend/js/ui.js"></script>
 <script src="/frontend/js/houses.js"></script>
 </body>
 </html>

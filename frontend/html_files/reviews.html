@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/frontend/nysc-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="/frontend/css/base.css">
+<link rel="stylesheet" href="/frontend/css/app.css">
+<link rel="stylesheet" href="/frontend/css/extra.css">
+<title>NYSC Companion · Reviews</title>
+</head>
+<body>
+<div class="view">
+  <div id="topbar"></div>
+  <div class="page-head">
+    <div><h1>Reviews from former corps members</h1><p>Real experiences from people who have served: PPAs and house agents.</p></div>
+  </div>
+
+  <section class="panel" aria-label="Filter reviews">
+    <div class="body" style="display:grid;gap:14px">
+      <div class="tabs" id="tabs" role="group" aria-label="What to show">
+        <button type="button" data-type="" aria-pressed="true">All</button>
+        <button type="button" data-type="ppa" aria-pressed="false">PPAs</button>
+        <button type="button" data-type="agent" aria-pressed="false">House agents</button>
+      </div>
+      <form class="filters" id="filter-form" novalidate>
+        <div class="field"><label for="f-state-sel">State</label>
+          <select class="input" id="f-state-sel">
+            <option value="">Any state</option>
+            <option>Abia</option>
+            <option>Adamawa</option>
+            <option>Akwa Ibom</option>
+            <option>Anambra</option>
+            <option>Bauchi</option>
+            <option>Bayelsa</option>
+            <option>Benue</option>
+            <option>Borno</option>
+            <option>Cross River</option>
+            <option>Delta</option>
+            <option>Ebonyi</option>
+            <option>Edo</option>
+            <option>Ekiti</option>
+            <option>Enugu</option>
+            <option>FCT</option>
+            <option>Gombe</option>
+            <option>Imo</option>
+            <option>Jigawa</option>
+            <option>Kaduna</option>
+            <option>Kano</option>
+            <option>Katsina</option>
+            <option>Kebbi</option>
+            <option>Kogi</option>
+            <option>Kwara</option>
+            <option>Lagos</option>
+            <option>Nasarawa</option>
+            <option>Niger</option>
+            <option>Ogun</option>
+            <option>Ondo</option>
+            <option>Osun</option>
+            <option>Oyo</option>
+            <option>Plateau</option>
+            <option>Rivers</option>
+            <option>Sokoto</option>
+            <option>Taraba</option>
+            <option>Yobe</option>
+            <option>Zamfara</option>
+          </select></div>
+        <div class="field"><label for="f-lga-in">LGA</label><input class="input" id="f-lga-in" placeholder="Any"></div>
+        <div class="field"><label for="f-q">Search</label><input class="input" id="f-q" placeholder="School, agent or a word"></div>
+        <button class="btn" type="submit">Search</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="grid">
+    <div class="col">
+      <div class="notice show ok" id="agent-filter" hidden></div>
+      <div class="summary-strip" id="summary"></div>
+      <div class="cards" id="results" aria-live="polite"></div>
+    </div>
+
+    <!-- WRITE A REVIEW (corps members only) -->
+    <section class="panel" id="write-panel" aria-labelledby="h-write" hidden>
+      <header><h2 id="h-write">Write a review</h2><span class="hint">For those who have served</span></header>
+      <div class="body">
+        <form id="review-form" novalidate style="display:grid;gap:14px">
+          <div class="field">
+            <label>What are you reviewing?</label>
+            <div class="choice" role="radiogroup">
+              <label><input type="radio" name="rtype" value="ppa" checked> A PPA</label>
+              <label><input type="radio" name="rtype" value="agent"> A house agent</label>
+            </div>
+          </div>
+
+          <div id="ppa-fields" style="display:grid;gap:14px">
+            <div class="field" id="f-rppa"><label for="r-ppa">PPA name</label><input class="input" id="r-ppa" maxlength="100" placeholder="e.g. Government Secondary School, Gboko"><span class="err">Enter the PPA name.</span></div>
+            <div class="row2">
+              <div class="field" id="f-rstate"><label for="r-state">State</label>
+                <select class="input" id="r-state">
+                  <option value="">Choose state</option>
+            <option>Abia</option>
+            <option>Adamawa</option>
+            <option>Akwa Ibom</option>
+            <option>Anambra</option>
+            <option>Bauchi</option>
+            <option>Bayelsa</option>
+            <option>Benue</option>
+            <option>Borno</option>
+            <option>Cross River</option>
+            <option>Delta</option>
+            <option>Ebonyi</option>
+            <option>Edo</option>
+            <option>Ekiti</option>
+            <option>Enugu</option>
+            <option>FCT</option>
+            <option>Gombe</option>
+            <option>Imo</option>
+            <option>Jigawa</option>
+            <option>Kaduna</option>
+            <option>Kano</option>
+            <option>Katsina</option>
+            <option>Kebbi</option>
+            <option>Kogi</option>
+            <option>Kwara</option>
+            <option>Lagos</option>
+            <option>Nasarawa</option>
+            <option>Niger</option>
+            <option>Ogun</option>
+            <option>Ondo</option>
+            <option>Osun</option>
+            <option>Oyo</option>
+            <option>Plateau</option>
+            <option>Rivers</option>
+            <option>Sokoto</option>
+            <option>Taraba</option>
+            <option>Yobe</option>
+            <option>Zamfara</option>
+                </select><span class="err">Choose a state.</span></div>
+              <div class="field" id="f-rlga"><label for="r-lga">LGA</label><input class="input" id="r-lga" maxlength="60"><span class="err">Required.</span></div>
+            </div>
+            <div class="field"><label for="r-town">Town <span class="opt">(optional)</span></label><input class="input" id="r-town" maxlength="60"></div>
+          </div>
+
+          <div id="agent-fields" style="display:none">
+            <div class="field" id="f-ragent"><label for="r-agent">House agent</label><select class="input" id="r-agent"></select><span class="err">Choose an agent.</span></div>
+          </div>
+
+          <div class="row2">
+            <div class="field"><label for="r-rating">Rating</label>
+              <select class="input" id="r-rating">
+                <option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option>
+                <option value="2">2 · Poor</option><option value="1">1 · Terrible</option>
+              </select></div>
+            <div class="field"><label for="r-year">Year you served</label><select class="input" id="r-year"></select></div>
+          </div>
+
+          <div class="field" id="f-rbody"><label for="r-body">Your review</label>
+            <textarea class="input" id="r-body" maxlength="1000" rows="5" style="height:auto;padding-top:10px" placeholder="What should the next corper know? Be honest and fair."></textarea>
+            <span class="err">Write at least 20 characters.</span></div>
+
+          <div class="field" id="f-served">
+            <label class="check"><input type="checkbox" id="r-served"> I have completed my NYSC service.</label>
+            <span class="err">Tick the box to confirm.</span>
+          </div>
+          <button class="btn gold" type="submit" id="r-submit">Post review</button>
+        </form>
+        <div class="notice" id="r-notice" role="status"></div>
+        <p class="hint-small" style="margin-top:10px">Reviews show your first name, last initial and service year. The service year is what the writer says, so read reviews with that in mind.</p>
+      </div>
+    </section>
+  </div>
+</div>
+<script src="/frontend/js/api.js"></script>
+<script src="/frontend/js/nav.js"></script>
+<script src="/frontend/js/ui.js"></script>
+<script src="/frontend/js/reviews.js"></script>
+</body>
+</html>

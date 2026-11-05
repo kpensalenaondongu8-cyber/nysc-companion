@@ -1,8 +1,8 @@
-let ppa = null;
-let mine = null;
+/* House agents directory (for corps members to browse).
+   Agents manage their own profile and houses on the agent page (/agent-hub). */
 
-fillSelect('s-state', NG_STATES);
-fillSelect('a-state', NG_STATES, 'Choose state');
+let ppa = null;
+let me = null;
 
 const same = (a, b) => a && b && a.trim().toLowerCase() === b.trim().toLowerCase();
 
@@ -11,25 +11,27 @@ function card(a) {
   const tags = [
     a.is_sample ? '<span class="pill sample">Sample listing</span>' : '',
     near ? '<span class="pill here">Covers your LGA</span>' : '',
-    a.mine ? '<span class="pill ok">You</span>' : '',
   ].join('');
+  const message = `Hello ${a.name}, my name is ${me ? me.first_name : 'a corps member'}, a corps member${ppa ? ' serving in ' + ppa.lga + ', ' + ppa.state : ''}. I found you on NYSC Companion and I am looking for a house. Do you have any available?`;
   const contact = a.is_sample
     ? '<span class="who-line">Sample listing for demonstration, not a real contact.</span>'
     : `<span class="who-line">${esc(a.phone)}</span>
        <a class="btn sm" href="tel:${esc(a.phone)}">Call</a>
-       <a class="btn sm gold" href="${whatsapp(a.phone)}" target="_blank" rel="noopener">WhatsApp</a>`;
+       <a class="btn sm gold" href="${waLink(a.phone, message)}" target="_blank" rel="noopener">WhatsApp</a>`;
+  const reviews = a.is_sample ? '' : `<a class="btn ghost sm" href="/reviews?agent=${a.id}">Reviews</a>`;
   return `<article class="card ${near ? 'here' : ''}">
-    <div class="head"><h3>${esc(a.name)}</h3></div>
-    <div class="meta">${a.agency ? esc(a.agency) + ' · ' : ''}${esc(a.lga)}, ${esc(a.state)}</div>
+    <div class="head"><h3>${esc(a.name)}</h3>${a.is_sample ? '' : ratingLine(a.rating, a.review_count)}</div>
+    <div class="meta">${a.agency ? esc(a.agency) + ' · ' : ''}${esc(a.lga)}, ${esc(a.state)}${a.is_sample ? '' : ' · ' + a.house_count + (a.house_count === 1 ? ' house posted' : ' houses posted')}</div>
     ${a.towns ? `<p class="desc"><b>Covers:</b> ${esc(a.towns)}</p>` : ''}
     ${a.about ? `<p class="desc">${esc(a.about)}</p>` : ''}
     ${tags ? `<div class="tags">${tags}</div>` : ''}
-    <div class="actions">${contact}</div>
+    <div class="actions">${contact}${reviews}</div>
   </article>`;
 }
 
 async function search() {
-  const q = new URLSearchParams({ state: $('s-state').value });
+  const q = new URLSearchParams();
+  if ($('s-state').value) q.set('state', $('s-state').value);
   if ($('s-lga').value.trim()) q.set('lga', $('s-lga').value.trim());
   if ($('s-town').value.trim()) q.set('town', $('s-town').value.trim());
   try {
@@ -44,64 +46,17 @@ async function search() {
 
 $('search-form').addEventListener('submit', (e) => { e.preventDefault(); search(); });
 
-function fillAgentForm() {
-  if (mine) {
-    $('a-name').value = mine.name; $('a-agency').value = mine.agency; $('a-phone').value = mine.phone;
-    $('a-state').value = mine.state; $('a-lga').value = mine.lga; $('a-towns').value = mine.towns; $('a-about').value = mine.about;
-    $('a-save').textContent = 'Update my listing';
-    $('a-remove').hidden = false;
-  }
-}
-
-$('agent-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const body = {
-    name: $('a-name').value.trim(), agency: $('a-agency').value.trim(), phone: $('a-phone').value,
-    state: $('a-state').value, lga: $('a-lga').value.trim(), towns: $('a-towns').value.trim(), about: $('a-about').value.trim(),
-  };
-  const bad = [setBad('f-aname', !body.name), setBad('f-aphone', !phoneOk(body.phone)),
-               setBad('f-astate', !body.state), setBad('f-alga', !body.lga)];
-  if (bad.some(Boolean)) return;
-
-  e.submitter.disabled = true;
-  try {
-    await api('PUT', '/api/agents/me', body);
-    say('a-notice', 'Your agent listing is saved.', 'ok');
-    $('s-state').value = body.state; $('s-lga').value = body.lga; $('s-town').value = '';
-    mine = body;
-    fillAgentForm();
-    search();
-  } catch (err) {
-    say('a-notice', err.message, 'bad');
-  }
-  e.submitter.disabled = false;
-});
-
-$('a-remove').addEventListener('click', async () => {
-  if (!confirm('Remove your agent listing?')) return;
-  try {
-    await api('DELETE', '/api/agents/me');
-    mine = null;
-    $('agent-form').reset(); $('a-save').textContent = 'List me'; $('a-remove').hidden = true;
-    say('a-notice', 'Your listing was removed.', 'ok');
-    search();
-  } catch (err) { say('a-notice', err.message, 'bad'); }
-});
-
 (async function start() {
   try {
     const home = await api('GET', '/api/home');
+    me = home.user;
     ppa = home.ppa;
     if (ppa) {
-      $('s-state').value = ppa.state; $('s-lga').value = ppa.lga;
-      $('a-state').value = ppa.state; $('a-lga').value = ppa.lga; $('a-towns').value = ppa.town;
+      $('s-state').value = ppa.state;
+      $('s-lga').value = ppa.lga;
     } else {
       $('no-ppa').hidden = false;
-      $('s-state').value = 'FCT';
     }
-    $('a-name').value = home.user.first_name + ' ' + home.user.last_name;
-    mine = (await api('GET', '/api/agents/me')).agent;
-    fillAgentForm();
   } catch (err) { /* the search below shows any problem */ }
   search();
 })();

@@ -29,6 +29,8 @@ app = FastAPI()
 app.include_router(locator_router)
 app.include_router(api_router)                      # the /api routes the pages use
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
+os.makedirs("uploads/houses", exist_ok=True)            # house pictures agents upload
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
@@ -70,11 +72,26 @@ class LimitRequest(BaseModel):
     amount_d: float
 class BalanceRequest(BaseModel):
     budget_d : int
- 
+
+class PpaRequest(BaseModel):
+    user_d: int
+    pp_name: str
+    addres: str
+    stte: str
+    lga: str
+    town: str 
 # ---------- the website pages ----------
 @app.get("/")
 def home():
     return RedirectResponse("/login")
+
+@app.get("/ppa-route")
+def ppa_route_page():
+    return FileResponse("frontend/html_files/ppa-route.html")
+
+@app.get("/ppa-locator")
+def ppa_locator_page():
+    return FileResponse("frontend/html_files/ppa.html")
 
 @app.get("/home")
 def home_page():
@@ -87,6 +104,18 @@ def houses_page():
 @app.get("/agents")
 def agents_page():
     return FileResponse("frontend/html_files/agents.html")
+
+@app.get("/agent-hub")
+def agent_hub_page():
+    return FileResponse("frontend/html_files/agent-hub.html")
+
+@app.get("/house")
+def house_page():
+    return FileResponse("frontend/html_files/house.html")
+
+@app.get("/reviews")
+def reviews_page():
+    return FileResponse("frontend/html_files/reviews.html")
 
 @app.get("/login")
 def login_page():

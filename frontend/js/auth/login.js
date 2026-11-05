@@ -1,5 +1,12 @@
-// Already logged in? Skip straight to the tracker.
-if (Session.token()) window.location.href = '/home';
+// Where each kind of account starts.
+function landing(role) { return role === 'agent' ? '/agent-hub' : '/home'; }
+
+// Already logged in? Skip straight to the right page.
+if (Session.token()) {
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem('nysc_user') || sessionStorage.getItem('nysc_user')) || {}; } catch (e) { /* ignore */ }
+  window.location.href = landing(saved.role);
+}
 
 if (new URLSearchParams(location.search).has('expired')) {
   say('notice', 'Your session has ended. Please log in again.', 'warn');
@@ -21,7 +28,7 @@ $('login-form').addEventListener('submit', async (e) => {
   try {
     const data = await api('POST', '/api/login', { number: phone, password });
     Session.save(data.token, data.user, $('remember').checked);
-    window.location.href = '/home';
+    window.location.href = landing(data.user.role);
   } catch (err) {
     say('notice', err.message, 'bad');
     $('submit').disabled = false;
