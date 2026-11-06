@@ -48,3 +48,6 @@ async function shrinkPhoto(file, maxSide = 1280) {
   }
   return dataUrl;
 }
+
+// Small green badge shown next to agents who an admin has approved.
+const verifiedPill = '<span class="pill verified" title="An admin has checked this agent">✔ Verified agent</span>';

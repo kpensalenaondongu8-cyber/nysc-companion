@@ -5,20 +5,37 @@ const MAX_PHOTOS = 6;
 let mine = null;          // the agent profile
 let picked = [];          // pictures chosen for the house being posted: [{ dataUrl }]
 
-const profileDone = () => !!(mine && mine.state && mine.lga);
+const profileDone = () => !!(mine && mine.state && mine.lga && mine.office_address && mine.verification_note);
+const approved = () => profileDone() && mine.verification_status === 'approved';
 
 function renderProfileState() {
   $('profile-warn').hidden = profileDone();
-  $('post-panel').hidden = !profileDone();
+  $('post-panel').hidden = !approved();          // posting unlocks only after an admin approves
   $('mine-panel').hidden = !profileDone();
-  if (profileDone()) {
-    $('a-save').textContent = 'Update profile';
+
+  const banner = $('status-banner');
+  banner.className = 'status-banner';
+  banner.hidden = false;
+  if (!profileDone()) {
+    banner.hidden = true;
+  } else if (mine.verification_status === 'approved') {
+    banner.classList.add('ok');
+    banner.innerHTML = '<b>✔ You are a verified agent</b>Corps members near you can see your profile and houses. If you change your phone number, agency name or office address, you will need to be approved again.';
+  } else if (mine.verification_status === 'rejected') {
+    banner.classList.add('bad');
+    banner.innerHTML = `<b>Not approved yet</b>Reason: ${esc(mine.reject_reason || 'No reason given.')}<br>Fix your details on the right and press the save button to send them again.`;
+  } else {
+    banner.innerHTML = `<b>⏳ Waiting for approval</b>An admin will check your details and may call you on ${esc(mine.phone)}. Your profile and houses stay hidden from corps members until you are approved.`;
+  }
+
+  if (approved()) {
     if (!$('h-state').value) {
       $('h-state').value = mine.state;
       $('h-lga').value = mine.lga;
       $('h-town').value = (mine.towns || '').split(',')[0].trim();
     }
   }
+  $('a-save').textContent = profileDone() ? 'Update profile' : 'Save and submit for approval';
 }
 
 function fillProfile() {
@@ -30,6 +47,8 @@ function fillProfile() {
   $('a-lga').value = mine.lga || '';
   $('a-towns').value = mine.towns || '';
   $('a-about').value = mine.about || '';
+  $('a-office').value = mine.office_address || '';
+  $('a-note').value = mine.verification_note || '';
 }
 
 $('agent-form').addEventListener('submit', async (e) => {
@@ -37,16 +56,18 @@ $('agent-form').addEventListener('submit', async (e) => {
   const body = {
     name: $('a-name').value.trim(), agency: $('a-agency').value.trim(), phone: $('a-phone').value,
     state: $('a-state').value, lga: $('a-lga').value.trim(), towns: $('a-towns').value.trim(), about: $('a-about').value.trim(),
+    office_address: $('a-office').value.trim(), verification_note: $('a-note').value.trim(),
   };
-  const bad = [setBad('f-aname', !body.name), setBad('f-aphone', !phoneOk(body.phone)),
-               setBad('f-astate', !body.state), setBad('f-alga', !body.lga)];
+  const bad = [setBad('f-aname', !body.name), setBad('f-aagency', !body.agency), setBad('f-aphone', !phoneOk(body.phone)),
+               setBad('f-astate', !body.state), setBad('f-alga', !body.lga),
+               setBad('f-aoffice', body.office_address.length < 5), setBad('f-anote', body.verification_note.length < 10)];
   if (bad.some(Boolean)) return;
 
   e.submitter.disabled = true;
   try {
-    await api('PUT', '/api/agents/me', body);
-    mine = { ...mine, ...body, phone: body.phone.replace(/[\s-]/g, '') };
-    say('a-notice', 'Profile saved.', 'ok');
+    const saved = await api('PUT', '/api/agents/me', body);
+    mine = saved.agent;                           // the server tells us the new approval status
+    say('a-notice', mine.verification_status === 'approved' ? 'Profile saved.' : 'Saved. An admin will check your details.', 'ok');
     renderProfileState();
     loadMine();
   } catch (err) {

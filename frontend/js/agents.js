@@ -9,7 +9,7 @@ const same = (a, b) => a && b && a.trim().toLowerCase() === b.trim().toLowerCase
 function card(a) {
   const near = ppa && same(a.state, ppa.state) && same(a.lga, ppa.lga);
   const tags = [
-    a.is_sample ? '<span class="pill sample">Sample listing</span>' : '',
+    a.is_sample ? '<span class="pill sample">Sample listing</span>' : verifiedPill,
     near ? '<span class="pill here">Covers your LGA</span>' : '',
   ].join('');
   const message = `Hello ${a.name}, my name is ${me ? me.first_name : 'a corps member'}, a corps member${ppa ? ' serving in ' + ppa.lga + ', ' + ppa.state : ''}. I found you on NYSC Companion and I am looking for a house. Do you have any available?`;

@@ -9,7 +9,7 @@ const same = (a, b) => a && b && a.trim().toLowerCase() === b.trim().toLowerCase
 function card(h) {
   const inTown = area && same(h.town, area.town);
   const tags = [
-    h.is_sample ? '<span class="pill sample">Sample listing</span>' : '',
+    h.is_sample ? '<span class="pill sample">Sample listing</span>' : verifiedPill,
     inTown ? '<span class="pill here">In your town</span>' : '',
   ].join('');
   const photo = h.cover

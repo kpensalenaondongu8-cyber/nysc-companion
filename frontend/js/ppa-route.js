@@ -25,6 +25,10 @@
     return;
   }
 
+  if (ppa.photo) {
+    $('ppa-photo-img').src = '/uploads/ppa/' + encodeURIComponent(ppa.photo);
+    $('photo-panel').hidden = false;
+  }
   $('route-map-title').textContent = '📍 Route to ' + ppa.ppa_name;
 
   // 2. Find the PPA, get your position, draw everything.
@@ -32,5 +36,6 @@
     canvasId: 'map-viewport-canvas',
     badgeId: 'live-distance-badge',
     ppa,
+    refreshButtonId: 'refresh-loc',
   });
 })();

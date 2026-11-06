@@ -1,14 +1,37 @@
-/* Shared map code for the Home page and the PPA route page.
+/* Shared map code for the Home page, the PPA route page and the PPA pin picker.
    Load order in the HTML: leaflet.js, leaflet-routing-machine.js (optional), api.js, map.js
 
    How it works:
-   1. geocode  - turn "PPA name, town, LGA, State" into latitude/longitude (OpenStreetMap Nominatim)
-   2. position - ask the browser for the user's GPS position
-   3. draw     - Leaflet map + OpenStreetMap tiles + two pins + the road route (OSRM)
+   1. find     - the exact pin the corper saved, or else search by name/address (OpenStreetMap Nominatim)
+   2. position - ask the browser for where you are standing now (GPS)
+   3. draw     - Leaflet map, Street/Satellite switch, two pins, the road route (OSRM) and the distance
 */
 
 const NYSC_MAP = (function () {
   const states = {};   // one entry per map container: { map, group, routing }
+
+  // Map picture sources. To change the satellite provider, change SATELLITE_URL and its attribution.
+  // NOTE: check the provider's terms (Esri World Imagery) before you launch to the public.
+  const STREET_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+
+  function baseLayers() {
+    return {
+      street: L.tileLayer(STREET_URL, {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }),
+      satellite: L.tileLayer(SATELLITE_URL, {
+        maxZoom: 19, maxNativeZoom: 18,        // past zoom 18 the picture is stretched instead of going blank
+        attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics and the GIS User Community',
+      }),
+    };
+  }
+
+  // Street / Satellite switch in the top-right corner of a map.
+  function addLayerSwitch(map, layers) {
+    L.control.layers({ 'Street map': layers.street, 'Satellite': layers.satellite }, null, { position: 'topright' }).addTo(map);
+  }
 
   // ---------- distance in a straight line (km) ----------
   function haversineKm(lat1, lon1, lat2, lon2) {
@@ -23,7 +46,7 @@ const NYSC_MAP = (function () {
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  // ---------- 1. geocoding ----------
+  // ---------- 1. finding the PPA ----------
   // Asks Nominatim about ONE piece of text. Results are remembered in the browser
   // so the same PPA is only looked up once (Nominatim is free but limited).
   async function geocodeOne(query) {
@@ -45,9 +68,13 @@ const NYSC_MAP = (function () {
     return hit;
   }
 
-  // Tries the most exact search first, then gets less exact until something is found.
+  // 1. If the corper pinned the exact spot, use it (no searching needed).
+  // 2. Otherwise search: most exact text first, then less exact until something is found.
   // "precision" tells the page how much to trust the pin.
   async function findPpa(ppa) {
+    if (ppa.lat != null && ppa.lon != null) {
+      return { lat: ppa.lat, lon: ppa.lon, precision: 'pinned' };
+    }
     const join = (...parts) => parts.map((p) => (p || '').trim()).filter(Boolean).join(', ') + ', Nigeria';
     const attempts = [
       { precision: 'exact', text: join(ppa.ppa_name, ppa.address, ppa.town, ppa.lga, ppa.state) },
@@ -70,7 +97,7 @@ const NYSC_MAP = (function () {
     return null;
   }
 
-  // ---------- 2. the user's GPS position ----------
+  // ---------- 2. where you are standing now ----------
   function getUserPosition() {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) return reject(new Error('This browser cannot share your location.'));
@@ -78,11 +105,11 @@ const NYSC_MAP = (function () {
         return reject(new Error('Location only works on https:// or http://127.0.0.1 pages.'));
       }
       navigator.geolocation.getCurrentPosition(
-        (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+        (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy }),
         (err) => reject(new Error(err.code === 1
           ? 'Location is blocked. Click the padlock next to the web address and allow Location.'
-          : 'Could not get your location. Check that GPS or Wi-Fi is on, then refresh.')),
-        { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
+          : 'Could not get your location. Check that GPS or Wi-Fi is on, then try again.')),
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
       );
     });
   }
@@ -92,11 +119,9 @@ const NYSC_MAP = (function () {
   function draw(canvasId, ppa, label, user, onRoadDistance) {
     let st = states[canvasId];
     if (!st) {
-      const map = L.map(canvasId).setView([ppa.lat, ppa.lon], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(map);
+      const layers = baseLayers();
+      const map = L.map(canvasId, { layers: [layers.street] }).setView([ppa.lat, ppa.lon], 13);
+      addLayerSwitch(map, layers);
       st = states[canvasId] = { map, group: L.layerGroup().addTo(map), routing: null };
     }
     const { map, group } = st;
@@ -108,12 +133,16 @@ const NYSC_MAP = (function () {
       .bindPopup('<b>🏫 ' + esc(label) + '</b>');
 
     if (!user) {
-      map.setView([ppa.lat, ppa.lon], ppa.precision === 'exact' ? 16 : 13);
+      map.setView([ppa.lat, ppa.lon], (ppa.precision === 'exact' || ppa.precision === 'pinned') ? 17 : 13);
       ppaPin.openPopup();
       return;
     }
 
+    // You: a pin, plus a circle showing how accurate the GPS reading is.
     L.marker([user.lat, user.lon]).addTo(group).bindPopup('<b>👤 You are here</b>');
+    if (user.accuracy && user.accuracy < 3000) {
+      L.circle([user.lat, user.lon], { radius: user.accuracy, color: '#1d6fd8', weight: 1, fillOpacity: 0.12 }).addTo(group);
+    }
     map.fitBounds(L.latLngBounds([[user.lat, user.lon], [ppa.lat, ppa.lon]]).pad(0.25));
 
     const straightLine = () => L.polyline([[user.lat, user.lon], [ppa.lat, ppa.lon]],
@@ -127,7 +156,7 @@ const NYSC_MAP = (function () {
       createMarker: () => null,                 // we already drew our own pins
       addWaypoints: false, draggableWaypoints: false, routeWhileDragging: false,
       show: false, fitSelectedRoutes: false,
-      lineOptions: { styles: [{ color: '#01652d', opacity: 0.85, weight: 5 }] },
+      lineOptions: { styles: [{ color: '#ffffff', opacity: 0.9, weight: 9 }, { color: '#01652d', opacity: 0.95, weight: 5 }] },
     })
       .on('routesfound', (e) => {
         if (onRoadDistance) onRoadDistance(e.routes[0].summary.totalDistance / 1000);
@@ -137,9 +166,9 @@ const NYSC_MAP = (function () {
   }
 
   // ---------- the whole job, used by the pages ----------
-  // opts: { canvasId, badgeId, ppa (the saved record), beforeDraw (optional function) }
+  // opts: { canvasId, badgeId, ppa (the saved record), beforeDraw (optional), refreshButtonId (optional) }
   async function showPpa(opts) {
-    const { canvasId, badgeId, ppa, beforeDraw } = opts;
+    const { canvasId, badgeId, ppa, beforeDraw, refreshButtonId } = opts;
     const label = ppa.ppa_name;
 
     say(badgeId, '🔍 Finding ' + label + ' on the map…', 'warn');
@@ -151,30 +180,44 @@ const NYSC_MAP = (function () {
       return;
     }
     if (!spot) {
-      say(badgeId, '⚠️ We could not find "' + label + '" or its LGA on the map. Check the spelling of the LGA and state.', 'bad');
+      say(badgeId, '⚠️ We could not find "' + label + '" or its LGA on the map. Open PPA settings and drop a pin on the exact spot.', 'bad');
       return;
     }
 
     if (beforeDraw) beforeDraw();               // e.g. un-hide the map box BEFORE Leaflet measures it
     draw(canvasId, spot, label, null);          // show the PPA straight away
 
-    const where = { exact: '', street: ' (street position)', town: ' (showing the town centre)', lga: ' (showing the LGA centre, exact spot not found)' }[spot.precision];
+    const where = {
+      pinned: '', exact: '', street: ' (street position)',
+      town: ' (showing the town centre: pin the exact spot in PPA settings)',
+      lga: ' (showing the LGA centre: pin the exact spot in PPA settings)',
+    }[spot.precision];
 
-    let user;
-    try {
-      user = await getUserPosition();
-    } catch (err) {
-      say(badgeId, '📍 Showing ' + label + where + '. ' + err.message, 'warn');
-      return;
+    // Find where you are standing, then draw the route and the distance. Can be repeated.
+    async function locateAndDraw() {
+      say(badgeId, '📍 Finding where you are standing…', 'warn');
+      let user;
+      try {
+        user = await getUserPosition();
+      } catch (err) {
+        say(badgeId, '📍 Showing ' + label + where + '. ' + err.message, 'warn');
+        return;
+      }
+      const km = haversineKm(user.lat, user.lon, spot.lat, spot.lon);
+      const near = km < 0.15 ? ' You are at your PPA.' : '';
+      const base = '🚶 You are about ' + km.toFixed(1) + ' km (straight line) from ' + label + where + '.' + near;
+      say(badgeId, base, 'ok');
+      draw(canvasId, spot, label, user, (roadKm) => {
+        say(badgeId, base + ' By road: about ' + roadKm.toFixed(1) + ' km.', 'ok');
+      });
     }
 
-    const km = haversineKm(user.lat, user.lon, spot.lat, spot.lon);
-    const base = '🚶 You are about ' + km.toFixed(1) + ' km (straight line) from ' + label + where + '.';
-    say(badgeId, base, 'ok');
-    draw(canvasId, spot, label, user, (roadKm) => {
-      say(badgeId, base + ' By road: about ' + roadKm.toFixed(1) + ' km.', 'ok');
-    });
+    if (refreshButtonId && $(refreshButtonId)) {
+      $(refreshButtonId).hidden = false;
+      $(refreshButtonId).onclick = locateAndDraw;   // "Update my location"
+    }
+    await locateAndDraw();
   }
 
-  return { haversineKm, findPpa, getUserPosition, draw, showPpa };
+  return { haversineKm, findPpa, getUserPosition, draw, showPpa, baseLayers, addLayerSwitch };
 })();

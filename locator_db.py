@@ -51,29 +51,32 @@ def get_ppa(user_id):
     return dict(row) if row else None
 
 
-def save_ppa(user_id, ppa_name, address, state, lga, town):
-    """Insert the PPA, or replace it if this user already saved one."""
+def save_ppa(user_id, ppa_name, address, state, lga, town, lat=None, lon=None, photo=""):
+    """Insert the PPA, or replace it if this user already saved one.
+    lat/lon are the exact pin (None = not pinned). photo is a file name in uploads/ppa ('' = none)."""
     conn = _connect()
     conn.execute(
-        """INSERT INTO ppas (user_id, ppa_name, address, state, lga, town)
-           VALUES (?, ?, ?, ?, ?, ?)
+        """INSERT INTO ppas (user_id, ppa_name, address, state, lga, town, lat, lon, photo)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(user_id) DO UPDATE SET
              ppa_name = excluded.ppa_name, address = excluded.address,
-             state = excluded.state, lga = excluded.lga, town = excluded.town""",
-        (user_id, ppa_name, address, state, lga, town)
+             state = excluded.state, lga = excluded.lga, town = excluded.town,
+             lat = excluded.lat, lon = excluded.lon, photo = excluded.photo""",
+        (user_id, ppa_name, address, state, lga, town, lat, lon, photo)
     )
     conn.commit()
     conn.close()
 
 
 # ---------- houses ----------
-# A house is visible to corpers if an AGENT posted it (or it is one of the built-in samples).
+# A house is visible to corpers if an APPROVED agent posted it (or it is one of the built-in samples).
 
-_VISIBLE = "(h.is_sample = 1 OR u.role = 'agent')"
+_VISIBLE = "(h.is_sample = 1 OR (u.role = 'agent' AND a.verification_status = 'approved'))"
 
 _HOUSE_SELECT = """
     SELECT h.*,
            a.id AS agent_id, a.name AS agent_name, a.agency AS agent_agency, a.phone AS agent_phone,
+           a.verification_status AS agent_status,
            (SELECT filename FROM house_photos p WHERE p.house_id = h.id ORDER BY position, id LIMIT 1) AS cover,
            (SELECT COUNT(*) FROM house_photos p WHERE p.house_id = h.id) AS photo_count,
            (SELECT ROUND(AVG(rating), 1) FROM reviews r WHERE r.agent_id = a.id) AS agent_rating,
@@ -179,7 +182,8 @@ _AGENT_SELECT = """
 
 def search_agents(user_id, state="", lga="", town=""):
     """Agents whose profile is filled in. State is optional (empty = all states)."""
-    sql = _AGENT_SELECT + " WHERE (a.is_sample = 1 OR u.role = 'agent') AND a.state != '' AND a.lga != ''"
+    sql = _AGENT_SELECT + (" WHERE (a.is_sample = 1 OR (u.role = 'agent' AND a.verification_status = 'approved'))"
+                           " AND a.state != '' AND a.lga != ''")
     params = []
     if state:
         sql += " AND lower(a.state) = lower(?)"
@@ -198,8 +202,9 @@ def search_agents(user_id, state="", lga="", town=""):
     conn.close()
     for r in rows:
         r["mine"] = r["owner_id"] == user_id
-        del r["owner_id"]
-        del r["owner_role"]
+        for private in ("owner_id", "owner_role", "office_address", "verification_note",
+                        "verification_status", "reject_reason", "reviewed_at"):
+            r.pop(private, None)
     return rows
 
 
@@ -210,17 +215,38 @@ def get_agent(agent_id):
     return dict(row) if row else None
 
 
-def save_my_agent(user_id, name, agency, phone, state, lga, towns, about):
-    """Each agent has one profile: create it, or update it."""
+def save_my_agent(user_id, name, agency, phone, state, lga, towns, about,
+                  office_address="", verification_note=""):
+    """Each agent has one profile: create it, or update it.
+
+    Verification rules:
+      * a new profile starts as 'pending';
+      * a rejected agent who edits their details goes back to 'pending' (they are resubmitting);
+      * an approved agent who changes phone, agency or office address goes back to 'pending',
+        because the admin verified the OLD details."""
     conn = _connect()
-    conn.execute(
-        """INSERT INTO agents (owner_id, name, agency, phone, state, lga, towns, about, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-           ON CONFLICT(owner_id) DO UPDATE SET
-             name = excluded.name, agency = excluded.agency, phone = excluded.phone,
-             state = excluded.state, lga = excluded.lga, towns = excluded.towns, about = excluded.about""",
-        (user_id, name, agency, phone, state, lga, towns, about, datetime.now().isoformat())
-    )
+    old = conn.execute("SELECT * FROM agents WHERE owner_id = ?", (user_id,)).fetchone()
+    if old is None:
+        conn.execute(
+            """INSERT INTO agents (owner_id, name, agency, phone, state, lga, towns, about,
+                                   office_address, verification_note, verification_status, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)""",
+            (user_id, name, agency, phone, state, lga, towns, about,
+             office_address, verification_note, datetime.now().isoformat()))
+    else:
+        status = old["verification_status"]
+        if status == "rejected":
+            status = "pending"
+        elif status == "approved" and (old["phone"] != phone or old["agency"] != agency
+                                       or old["office_address"] != office_address):
+            status = "pending"
+        conn.execute(
+            """UPDATE agents SET name = ?, agency = ?, phone = ?, state = ?, lga = ?, towns = ?, about = ?,
+                                 office_address = ?, verification_note = ?, verification_status = ?,
+                                 reject_reason = CASE WHEN ? = 'pending' THEN '' ELSE reject_reason END
+               WHERE owner_id = ?""",
+            (name, agency, phone, state, lga, towns, about, office_address, verification_note,
+             status, status, user_id))
     conn.commit()
     conn.close()
 
@@ -239,16 +265,54 @@ def count_near(table, state, lga):
     if table == "houses":
         n = conn.execute(
             """SELECT COUNT(*) FROM houses h LEFT JOIN users u ON u.id = h.owner_id
+               LEFT JOIN agents a ON a.owner_id = h.owner_id
                WHERE lower(h.state) = lower(?) AND lower(h.lga) = lower(?) AND """ + _VISIBLE,
             (state, lga)).fetchone()[0]
     else:
         n = conn.execute(
             """SELECT COUNT(*) FROM agents a LEFT JOIN users u ON u.id = a.owner_id
                WHERE lower(a.state) = lower(?) AND lower(a.lga) = lower(?)
-                 AND (a.is_sample = 1 OR u.role = 'agent')""",
+                 AND (a.is_sample = 1 OR (u.role = 'agent' AND a.verification_status = 'approved'))""",
             (state, lga)).fetchone()[0]
     conn.close()
     return n
+
+
+# ---------- admin: approving agents ----------
+
+def list_agents_for_admin(status):
+    """Agents who have filled in their details, filtered by verification status."""
+    conn = _connect()
+    rows = _rows_to_dicts(conn.execute(
+        """SELECT a.id, a.name, a.agency, a.phone, a.state, a.lga, a.towns, a.about, a.office_address,
+                  a.verification_note, a.verification_status, a.reject_reason, a.reviewed_at, a.created_at,
+                  u.email, u.number AS account_number,
+                  (SELECT COUNT(*) FROM houses h WHERE h.owner_id = a.owner_id) AS house_count
+           FROM agents a JOIN users u ON u.id = a.owner_id
+           WHERE a.is_sample = 0 AND u.role = 'agent' AND a.verification_status = ?
+             AND a.office_address != '' AND a.verification_note != ''
+           ORDER BY a.id DESC""", (status,)).fetchall())
+    counts = {}
+    for s in ("pending", "approved", "rejected"):
+        counts[s] = conn.execute(
+            """SELECT COUNT(*) FROM agents a JOIN users u ON u.id = a.owner_id
+               WHERE a.is_sample = 0 AND u.role = 'agent' AND a.verification_status = ?
+                 AND a.office_address != '' AND a.verification_note != ''""", (s,)).fetchone()[0]
+    conn.close()
+    return rows, counts
+
+
+def set_agent_status(agent_id, status, reason=""):
+    """Approve or reject an agent. Returns True if the agent exists."""
+    conn = _connect()
+    cursor = conn.execute(
+        """UPDATE agents SET verification_status = ?, reject_reason = ?, reviewed_at = ?
+           WHERE id = ? AND is_sample = 0""",
+        (status, reason if status == "rejected" else "", datetime.now().isoformat(), agent_id))
+    conn.commit()
+    changed = cursor.rowcount > 0
+    conn.close()
+    return changed
 
 
 # ---------- reviews ----------

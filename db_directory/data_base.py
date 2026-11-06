@@ -154,6 +154,21 @@ def init__db():
     if "role" not in columns:
         cursor.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'corper'")
 
+    # Agent verification: an admin approves each agent before their houses go live.
+    agent_columns = [row[1] for row in cursor.execute("PRAGMA table_info(agents)")]
+    if "verification_status" not in agent_columns:
+        cursor.execute("ALTER TABLE agents ADD COLUMN verification_status TEXT NOT NULL DEFAULT 'pending'")
+        cursor.execute("UPDATE agents SET verification_status = 'approved' WHERE is_sample = 1")
+    for column in ("office_address", "verification_note", "reject_reason", "reviewed_at"):
+        if column not in agent_columns:
+            cursor.execute(f"ALTER TABLE agents ADD COLUMN {column} TEXT NOT NULL DEFAULT ''")
+
+    # The exact spot of a PPA (the corper drops a pin) and a photo of its gate or signboard.
+    ppa_cols = [row[1] for row in cursor.execute("PRAGMA table_info(ppas)")]
+    for column, definition in [("lat", "REAL"), ("lon", "REAL"), ("photo", "TEXT NOT NULL DEFAULT ''")]:
+        if column not in ppa_cols:
+            cursor.execute(f"ALTER TABLE ppas ADD COLUMN {column} {definition}")
+
     conn.commit()
     conn.close()
 if __name__ == "__main__":

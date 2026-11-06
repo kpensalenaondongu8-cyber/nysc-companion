@@ -20,6 +20,7 @@
     <span id="rating"></span>
   </div>
   <p class="notice show bad" id="load-error" role="alert" hidden></p>
+  <div class="status-banner" id="status-banner" role="status" hidden></div>
 
   <div class="grid">
     <div class="col">
@@ -116,10 +117,10 @@
     <section class="panel" aria-labelledby="h-profile">
       <header><h2 id="h-profile">My agent profile</h2><span class="hint">Corps members contact you with this</span></header>
       <div class="body">
-        <div class="notice warn show" id="profile-warn" hidden>Fill in your area and save. Then you can post houses.</div>
+        <div class="notice warn show" id="profile-warn" hidden>Fill in all the details and save. An admin will check them before you can post houses.</div>
         <form id="agent-form" novalidate style="display:grid;gap:14px">
           <div class="field" id="f-aname"><label for="a-name">Your name</label><input class="input" id="a-name" maxlength="60"><span class="err">Required.</span></div>
-          <div class="field"><label for="a-agency">Agency <span class="opt">(optional)</span></label><input class="input" id="a-agency" maxlength="80"></div>
+          <div class="field" id="f-aagency"><label for="a-agency">Agency / business name</label><input class="input" id="a-agency" maxlength="80"><span class="err">Required. Use your own name if you work alone.</span></div>
           <div class="field" id="f-aphone"><label for="a-phone">Phone / WhatsApp number</label><input class="input" id="a-phone" type="tel" inputmode="numeric" placeholder="08030000000"><span class="err">11-digit number.</span></div>
           <div class="row2">
             <div class="field" id="f-astate"><label for="a-state">State</label>
@@ -167,7 +168,9 @@
           </div>
           <div class="field"><label for="a-towns">Towns you cover <span class="opt">(optional)</span></label><input class="input" id="a-towns" maxlength="200" placeholder="e.g. Yandev, Gboko town, Ugba"></div>
           <div class="field"><label for="a-about">About you <span class="opt">(optional)</span></label><textarea class="input" id="a-about" maxlength="300" rows="3" style="height:auto;padding-top:10px"></textarea></div>
-          <button class="btn" type="submit" id="a-save">Save profile</button>
+          <div class="field" id="f-aoffice"><label for="a-office">Office address</label><input class="input" id="a-office" maxlength="200" placeholder="Where can we find you?"><span class="err">Enter your office address.</span><span class="hint-small">Only the admin sees this. It is used to verify you.</span></div>
+          <div class="field" id="f-anote"><label for="a-note">About your work</label><textarea class="input" id="a-note" maxlength="500" rows="3" style="height:auto;padding-top:10px" placeholder="How long you have been an agent, who you work with, a page or website where we can see your work..."></textarea><span class="err">Write at least 10 characters.</span><span class="hint-small">Only the admin sees this. The admin may call you on your phone number.</span></div>
+          <button class="btn" type="submit" id="a-save">Save and submit for approval</button>
         </form>
         <div class="notice" id="a-notice" role="status"></div>
       </div>

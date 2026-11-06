@@ -7,8 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+
+<!-- Map libraries: Leaflet (the map) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <link rel="stylesheet" href="/frontend/css/base.css">
 <link rel="stylesheet" href="/frontend/css/app.css">
+<link rel="stylesheet" href="/frontend/css/extra.css">
 <title>NYSC Companion · Configure PPA</title>
 <style>
   .subnav { display: flex; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 8px; margin: 20px 0 8px; overflow-x: auto; }
@@ -30,22 +36,23 @@
     <a class="active" href="/ppa-locator">PPA Locator</a>
     <a href="/houses">Houses for Rent</a>
     <a href="/agents">House Agents</a>
+    <a href="/reviews">Reviews</a>
   </nav>
 
   <div class="page-head">
     <div>
-      <h1>Set up your PPA posting</h1>
-      <p>Save the details from your deployment letter to see your PPA on the map.</p>
+      <h1>Set up your PPA</h1>
+      <p>Save the details from your posting letter, then pin the exact spot on the map.</p>
     </div>
   </div>
 
-  <section class="panel" id="ppa-form-panel" style="max-width: 560px; margin: 0 auto;">
+  <section class="panel" id="ppa-form-panel" style="max-width: 720px; margin: 0 auto;">
     <header>
       <h2>Where is your PPA?</h2>
       <span class="hint">Copy the details from your posting letter</span>
     </header>
     <div class="body">
-      <form class="stack" id="ppa-form" novalidate style="display: grid; gap: 14px;">
+      <form id="ppa-form" novalidate style="display: grid; gap: 14px;">
         <div class="field" id="f-name">
           <label for="p-name">PPA name</label>
           <input class="input" id="p-name" maxlength="100" placeholder="e.g. Government Secondary School, Gboko">
@@ -110,7 +117,33 @@
           <label for="p-town">Town or area <span class="opt">(optional)</span></label>
           <input class="input" id="p-town" maxlength="60" placeholder="e.g. Yandev">
         </div>
-        <button class="btn gold block" type="submit">Save &amp; view map route ➔</button>
+
+        <!-- PIN THE EXACT SPOT -->
+        <div class="field">
+          <label>Pin the exact spot <span class="opt">(recommended)</span></label>
+          <p class="hint-small" style="margin: 0 0 8px;">Tap <b>Find my PPA</b>, then zoom in on the satellite view and tap or drag the pin onto your PPA building. Houses and routes will use this exact spot.</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+            <button class="btn sm" type="button" id="pin-find">🔍 Find my PPA</button>
+            <button class="btn sm ghost" type="button" id="pin-here">📍 I am at my PPA now</button>
+            <button class="btn sm ghost" type="button" id="pin-clear" hidden>Clear pin</button>
+          </div>
+          <div id="pick-map" aria-label="Map for placing your PPA pin"></div>
+          <div class="notice" id="pin-notice" role="status" style="margin-top:10px;"></div>
+          <div class="hint-small" id="pin-readout" style="margin-top:6px;">No pin yet.</div>
+        </div>
+
+        <!-- PHOTO OF THE GATE -->
+        <div class="field">
+          <label for="p-photo">Photo of your PPA gate or signboard <span class="opt">(optional)</span></label>
+          <input class="input" id="p-photo" type="file" accept="image/*" style="padding-top:10px;">
+          <div id="photo-box" class="ppa-photo" hidden>
+            <img id="photo-preview" alt="Your PPA gate or signboard">
+            <button class="btn sm ghost" type="button" id="photo-remove">Remove photo</button>
+          </div>
+          <span class="hint-small">Helps you and other corps members recognise the place.</span>
+        </div>
+
+        <button class="btn gold block" type="submit" id="ppa-save">Save &amp; view map route ➔</button>
         <a class="btn ghost block" id="view-map" href="/ppa-route" hidden>View my saved PPA on the map</a>
       </form>
       <div class="notice" id="ppa-notice" role="status"></div>
@@ -120,6 +153,8 @@
 
 <script src="/frontend/js/api.js"></script>
 <script src="/frontend/js/nav.js"></script>
+<script src="/frontend/js/ui.js"></script>
+<script src="/frontend/js/map.js"></script>
 <script src="/frontend/js/ppa.js"></script>
 </body>
 </html>

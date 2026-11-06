@@ -83,3 +83,21 @@ a.house-card:focus-visible { outline-offset: 3px; }
 @media (max-width: 460px) { .role-choice { grid-template-columns: 1fr; } }
 
 textarea.input { font: inherit; line-height: 1.45; resize: vertical; }
+
+/* ---------- verification ---------- */
+.pill.verified { background: var(--green); color: #fff; font-weight: 600; }
+.status-banner { border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; border: 1px solid var(--line); border-left: 6px solid var(--gold); background: var(--gold-soft); color: var(--gold-ink); }
+.status-banner.ok { border-left-color: var(--green); background: var(--green-tint); color: var(--green-deep); }
+.status-banner.bad { border-left-color: var(--danger); background: var(--danger-tint); color: var(--danger); }
+.status-banner b { display: block; font-size: 16px; margin-bottom: 2px; }
+.admin-card h3 { font-size: 19px; }
+.admin-card dl { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 6px 12px; margin: 12px 0 0; font-size: 14px; }
+.admin-card dt { color: var(--muted); font-weight: 600; }
+.admin-card dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+@media (max-width: 520px) { .admin-card dl { grid-template-columns: 1fr; } .admin-card dt { margin-top: 6px; } }
+
+/* ---------- PPA pin picker and gate photo ---------- */
+#pick-map { height: 400px; border-radius: 12px; border: 1px solid var(--line); background: #e2e8f0; }
+.ppa-photo { display: grid; gap: 8px; justify-items: start; margin-top: 8px; }
+.ppa-photo img { max-width: 100%; width: 320px; border-radius: 10px; border: 1px solid var(--line); display: block; }
+.ppa-photo-card img { width: 100%; max-height: 380px; object-fit: cover; display: block; }

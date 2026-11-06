@@ -71,7 +71,7 @@ function agentPanel(h, me) {
   return `<header><h2>Contact the agent</h2></header><div class="body">
     <h3>${esc(a.name)}</h3>
     ${a.agency ? `<div class="muted">${esc(a.agency)}</div>` : ''}
-    <div style="margin-top:6px">${ratingLine(a.rating, a.review_count)}</div>
+    <div style="margin-top:6px">${verifiedPill} ${ratingLine(a.rating, a.review_count)}</div>
     <div class="phone num">${esc(a.phone)}</div>
     <div class="stack-actions">
       <a class="btn gold" href="${waLink(a.phone, message)}" target="_blank" rel="noopener">💬 Message on WhatsApp</a>

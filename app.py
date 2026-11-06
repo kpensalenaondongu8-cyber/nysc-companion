@@ -30,6 +30,7 @@ app.include_router(locator_router)
 app.include_router(api_router)                      # the /api routes the pages use
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 os.makedirs("uploads/houses", exist_ok=True)            # house pictures agents upload
+os.makedirs("uploads/ppa", exist_ok=True)               # photos of PPA gates / signboards
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.add_middleware(
@@ -108,6 +109,10 @@ def agents_page():
 @app.get("/agent-hub")
 def agent_hub_page():
     return FileResponse("frontend/html_files/agent-hub.html")
+
+@app.get("/admin")
+def admin_page():
+    return FileResponse("frontend/html_files/admin.html")
 
 @app.get("/house")
 def house_page():

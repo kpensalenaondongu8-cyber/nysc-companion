@@ -12,14 +12,18 @@ from pathlib import Path
 UPLOAD_DIR = Path("uploads") / "houses"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
+PPA_DIR = Path("uploads") / "ppa"          # photo of a PPA's gate or signboard
+PPA_DIR.mkdir(parents=True, exist_ok=True)
+
 MAX_PHOTOS = 6
 MAX_PHOTO_BYTES = 1_500_000          # 1.5 MB each, after the browser has shrunk it
 
 _DATA_URL = re.compile(r"data:image/jpeg;base64,([A-Za-z0-9+/=]+)")
 
 
-def save_photo(data_url):
+def save_photo(data_url, folder=None):
     """Save one picture and return its file name. Raises ValueError if it is not a normal JPEG."""
+    folder = folder or UPLOAD_DIR
     match = _DATA_URL.fullmatch(data_url.strip())
     if not match:
         raise ValueError("One of the pictures is not a valid photo.")
@@ -33,16 +37,17 @@ def save_photo(data_url):
         raise ValueError("One of the pictures is too large. Please choose a smaller one.")
 
     filename = secrets.token_hex(12) + ".jpg"            # random name: nobody can guess it
-    (UPLOAD_DIR / filename).write_bytes(raw)
+    (folder / filename).write_bytes(raw)
     return filename
 
 
-def delete_photos(filenames):
-    """Remove picture files from disk (used when a house is deleted)."""
+def delete_photos(filenames, folder=None):
+    """Remove picture files from disk (used when a house or a PPA photo is deleted)."""
+    folder = folder or UPLOAD_DIR
     for name in filenames:
         # Only plain file names we created ourselves: never a path.
-        if re.fullmatch(r"[0-9a-f]{24}\.jpg", name):
+        if name and re.fullmatch(r"[0-9a-f]{24}\.jpg", name):
             try:
-                (UPLOAD_DIR / name).unlink()
+                (folder / name).unlink()
             except FileNotFoundError:
                 pass

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/frontend/nysc-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="/frontend/css/base.css">
+<link rel="stylesheet" href="/frontend/css/app.css">
+<link rel="stylesheet" href="/frontend/css/extra.css">
+<title>NYSC Companion · Approvals</title>
+</head>
+<body>
+<div class="view">
+  <div id="topbar"></div>
+  <div class="page-head">
+    <div><h1>Agent approvals</h1><p>Call each agent, check their details, then approve or reject. Corps members only see approved agents.</p></div>
+  </div>
+  <p class="notice show bad" id="load-error" role="alert" hidden></p>
+
+  <div class="tabs" id="tabs" role="group" aria-label="Status" style="margin-bottom:16px">
+    <button type="button" data-status="pending" aria-pressed="true">Waiting <span id="n-pending">0</span></button>
+    <button type="button" data-status="approved" aria-pressed="false">Approved <span id="n-approved">0</span></button>
+    <button type="button" data-status="rejected" aria-pressed="false">Rejected <span id="n-rejected">0</span></button>
+  </div>
+
+  <div class="cards" id="results" aria-live="polite"></div>
+</div>
+<script src="/frontend/js/api.js"></script>
+<script src="/frontend/js/nav.js"></script>
+<script src="/frontend/js/ui.js"></script>
+<script src="/frontend/js/admin.js"></script>
+</body>
+</html>
