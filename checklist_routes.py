@@ -95,6 +95,19 @@ class CustomBody(BaseModel):
     due: str | None = None
 
 
+def _clean_custom(body):
+    title = body.title.strip()
+    if not title:
+        raise HTTPException(status_code=400, detail="Write what you want to be reminded of.")
+    due = None
+    if body.due:
+        d = parse_date(body.due)
+        if not d:
+            raise HTTPException(status_code=400, detail="Enter the date as day, month and year.")
+        due = d.isoformat()
+    return title, due
+
+
 @router.get("")
 def get_checklist(user_id: int = Depends(current_corper_id)):
     conn = _connect()
@@ -117,7 +130,11 @@ def get_checklist(user_id: int = Depends(current_corper_id)):
             months.append({"key": "clearance:" + key, "month": key, "done": ("clearance:" + key) in done})
     total = len(ITEM_IDS) + len(months)
     finished = sum(1 for s in stages for i in s["items"] if i["done"]) + sum(1 for m in months if m["done"])
-    return {"start_date": start.isoformat() if start else None,
+    today = date.today()
+    soon = (today.toordinal() + 7)
+    attention = [{"id": c["id"], "title": c["title"], "due": c["due"]} for c in custom
+                 if not c["done"] and c["due"] and (parse_date(c["due"]) or today).toordinal() <= soon]
+    return {"attention": attention, "start_date": start.isoformat() if start else None,
             "end_date": end.isoformat() if end else None,
             "stages": stages, "months": months,
             "custom": [{**c, "done": bool(c["done"])} for c in custom],
@@ -186,6 +203,19 @@ def add_custom(body: CustomBody, user_id: int = Depends(current_corper_id)):
     new_id = cur.lastrowid
     conn.close()
     return {"id": new_id}
+
+
+@router.put("/custom/{cid}")
+def edit_custom(cid: int, body: CustomBody, user_id: int = Depends(current_corper_id)):
+    title, due = _clean_custom(body)
+    conn = _connect()
+    cur = conn.execute("UPDATE checklist_custom SET title = ?, due = ? WHERE id = ? AND user_id = ?",
+                       (title, due, cid, user_id))
+    conn.commit()
+    conn.close()
+    if cur.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Reminder not found.")
+    return {"ok": True}
 
 
 @router.post("/custom/{cid}/tick")

@@ -17,6 +17,8 @@ function say(id, text, kind) {
 }
 function clear(id) { $(id).className = 'notice'; }
 
+let editingId = null;
+
 async function load() {
   let c;
   try {
@@ -66,12 +68,21 @@ async function load() {
   // my reminders
   const today = todayIso();
   $('custom-list').innerHTML = c.custom.length ? c.custom.map((r) => {
+    if (r.id === editingId) {
+      return `<li class="editing" data-eid="${r.id}">
+        <div class="edit-box">
+          <input class="input" data-f="title" maxlength="80" value="${esc(r.title)}" aria-label="Reminder">
+          <input class="input" data-f="due" type="date" value="${esc(r.due || '')}" aria-label="Date">
+          <div class="edit-acts"><button type="button" class="btn sm" data-save="${r.id}">Save</button><button type="button" class="btn sm ghost" data-cancel="1">Cancel</button></div>
+          <div class="notice" id="e-notice" role="status"></div>
+        </div></li>`;
+    }
     const late = r.due && !r.done && r.due < today;
     const dueText = r.due ? (late ? 'Was due ' : 'Due ') + niceDate(r.due) : '';
     return `<li class="${r.done ? 'done' : ''}">
       <input type="checkbox" data-cid="${r.id}" aria-label="Done: ${esc(r.title)}"${r.done ? ' checked' : ''}>
       <span class="t">${esc(r.title)}${dueText ? `<span class="d${late ? ' late' : ''}">${esc(dueText)}</span>` : ''}</span>
-      <button type="button" class="del" data-del="${r.id}">Delete</button></li>`;
+      <span class="r-acts"><button type="button" class="btn sm ghost" data-edit="${r.id}">Edit</button><button type="button" class="btn sm danger" data-del="${r.id}" data-t="${esc(r.title)}">Delete</button></span></li>`;
   }).join('') : '<li class="empty" style="border:0;display:block;padding:0">Nothing yet. Add anything you must not forget.</li>';
 }
 
@@ -118,9 +129,25 @@ $('custom-list').addEventListener('change', (e) => {
   const cid = e.target.dataset.cid;
   if (cid) run(() => api('POST', '/api/checklist/custom/' + cid + '/tick', { done: e.target.checked }));
 });
-$('custom-list').addEventListener('click', (e) => {
-  const id = e.target.dataset.del;
-  if (id) run(() => api('DELETE', '/api/checklist/custom/' + id));
+$('custom-list').addEventListener('click', async (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.del) {
+    if (!confirm('Delete this reminder?\n\n' + (b.dataset.t || ''))) return;
+    return run(() => api('DELETE', '/api/checklist/custom/' + b.dataset.del));
+  }
+  if (b.dataset.edit) { editingId = +b.dataset.edit; return load(); }
+  if (b.dataset.cancel) { editingId = null; return load(); }
+  if (b.dataset.save) {
+    const box = b.closest('.edit-box');
+    const title = box.querySelector('[data-f=title]').value.trim();
+    if (!title) return say('e-notice', 'Write what you need to remember.');
+    try {
+      await api('PUT', '/api/checklist/custom/' + b.dataset.save, { title, due: box.querySelector('[data-f=due]').value || null });
+      editingId = null;
+      await load();
+    } catch (err) { say('e-notice', err.message); }
+  }
 });
 
 load();

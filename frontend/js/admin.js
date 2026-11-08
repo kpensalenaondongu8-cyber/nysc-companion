@@ -75,4 +75,34 @@ $('results').addEventListener('click', async (e) => {
   }
 });
 
+// ---------- hidden noticeboard posts ----------
+async function loadReported() {
+  try {
+    const data = await api('GET', '/api/board/admin/reported');
+    $('reported').innerHTML = data.items.length ? data.items.map((i) => `<article class="card admin-card">
+      <div class="head"><h3>${esc(i.title)}</h3><span class="pill">${i.reports} ${i.reports === 1 ? 'report' : 'reports'}</span></div>
+      <div class="meta">${esc(i.author)}${i.place ? ' · ' + esc(i.place) : ''} · ${esc(i.when)}</div>
+      <p style="margin:8px 0;overflow-wrap:anywhere">${esc(i.body)}</p>
+      <div class="actions"><button class="btn sm" type="button" data-restore="${i.type}:${i.id}">Bring back</button>
+        <button class="btn danger sm" type="button" data-remove="${i.type}:${i.id}">Delete</button></div></article>`).join('')
+      : '<div class="card empty">Nothing is hidden.</div>';
+  } catch (err) { /* the approvals part still works */ }
+}
+$('reported').addEventListener('click', async (e) => {
+  const r = e.target.closest('[data-restore]');
+  const d = e.target.closest('[data-remove]');
+  try {
+    if (r) {
+      const [type, id] = r.dataset.restore.split(':');
+      await api('POST', `/api/board/admin/${type}/${id}/restore`);
+    } else if (d) {
+      if (!confirm('Delete this for good?')) return;
+      const [type, id] = d.dataset.remove.split(':');
+      await api('DELETE', type === 'post' ? '/api/board/' + id : '/api/board/reply/' + id);
+    } else return;
+    loadReported();
+  } catch (err) { alert(err.message); }
+});
+
 load();
+loadReported();

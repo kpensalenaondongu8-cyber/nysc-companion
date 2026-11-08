@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/frontend/nysc-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="/frontend/css/base.css">
+<link rel="stylesheet" href="/frontend/css/app.css">
+<link rel="stylesheet" href="/frontend/css/board.css">
+<title>NYSC Companion · Corpers' board</title>
+</head>
+<body>
+<div class="view">
+  <div id="topbar"></div>
+  <p class="notice show bad" id="load-error" role="alert" hidden></p>
+
+  <div class="page-head">
+    <div><h1>Corpers' board</h1><p id="place-line">Ask, share and pass things on to corps members near you.</p></div>
+  </div>
+
+  <div class="no-ppa" id="no-ppa" hidden>
+    <b>Save your PPA to join the board.</b>
+    <span>The board shows corps members in your LGA, and we get your LGA from your PPA.</span>
+    <a class="btn sm" href="/ppa-locator">Go to PPA Locator</a>
+  </div>
+
+  <div id="board" hidden>
+    <div class="bar">
+      <div class="tabs" id="scope" role="group" aria-label="Where">
+        <button type="button" data-scope="lga" aria-pressed="true">My LGA</button>
+        <button type="button" data-scope="state" aria-pressed="false">My state</button>
+      </div>
+      <div class="tabs kinds" id="kinds" role="group" aria-label="Kind of post"></div>
+    </div>
+
+    <div class="board-grid">
+      <section class="panel new-post" id="new-panel" aria-labelledby="h-new">
+        <header><h2 id="h-new">New post</h2><button class="btn sm toggle" type="button" id="new-toggle" aria-expanded="false" aria-controls="post-form">Write a post</button></header>
+        <div class="body">
+          <form class="stack" id="post-form" novalidate>
+            <div class="field"><label for="n-kind">What is it?</label><select class="input" id="n-kind"></select></div>
+            <div class="field"><label for="n-title">Title</label><input class="input" id="n-title" maxlength="80" placeholder="e.g. Where do I buy a mattress in Gboko?"></div>
+            <div class="field"><label for="n-body">Details <span class="opt">(optional)</span></label><textarea class="input" id="n-body" rows="3" maxlength="600" placeholder="Say more, for example the price or the place"></textarea></div>
+            <label class="check"><input type="checkbox" id="n-contact"> <span>Show my phone number so people can WhatsApp me</span></label>
+            <button class="btn" type="submit">Post to the board</button>
+            <div class="notice" id="n-notice" role="status"></div>
+          </form>
+          <p class="rules">Be kind and keep it about service life. No loans, no adverts, and never share someone else's number. A post that 3 corps members report is hidden until the admin checks it.</p>
+        </div>
+      </section>
+
+      <div class="posts" id="posts" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+<script src="/frontend/js/api.js"></script>
+<script src="/frontend/js/ui.js"></script>
+<script src="/frontend/js/nav.js"></script>
+<script src="/frontend/js/board.js"></script>
+</body>
+</html>

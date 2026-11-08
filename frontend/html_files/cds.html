@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/frontend/nysc-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="/frontend/css/base.css">
+<link rel="stylesheet" href="/frontend/css/app.css">
+<link rel="stylesheet" href="/frontend/css/cds.css">
+<title>NYSC Companion · CDS and community project</title>
+</head>
+<body>
+<div class="view">
+  <div id="topbar"></div>
+  <p class="notice show bad" id="load-error" role="alert" hidden></p>
+
+  <div class="page-head">
+    <div><h1>CDS and community project</h1><p>Log your CDS days, keep a record of your project, and print a summary for your inspector.</p></div>
+    <button class="btn" type="button" id="print-btn">Print summary</button>
+  </div>
+
+  <div class="cds-grid">
+    <div class="col">
+      <section class="panel" aria-labelledby="h-group">
+        <header><h2 id="h-group">My CDS group</h2></header>
+        <div class="body">
+          <form class="stack" id="group-form" novalidate>
+            <div class="field"><label for="g-name">Group name</label><input class="input" id="g-name" maxlength="80" placeholder="e.g. Health Awareness CDS"></div>
+            <div class="two">
+              <div class="field"><label for="g-day">Meets on</label>
+                <select class="input" id="g-day"><option value="">Not sure yet</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></div>
+              <div class="field"><label for="g-leader">Group leader <span class="opt">(optional)</span></label><input class="input" id="g-leader" maxlength="80" placeholder="Name"></div>
+            </div>
+            <button class="btn" type="submit">Save group</button>
+            <div class="notice" id="g-notice" role="status"></div>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-att">
+        <header><h2 id="h-att">Attendance</h2></header>
+        <div class="body">
+          <div class="stats" id="stats" aria-live="polite"></div>
+          <form class="stack" id="att-form" novalidate>
+            <div class="two">
+              <div class="field"><label for="a-day">Date</label><input class="input" id="a-day" type="date"></div>
+              <div class="field"><label for="a-status">Were you there?</label>
+                <select class="input" id="a-status"><option value="present">Present</option><option value="absent">Absent</option><option value="excused">Excused</option></select></div>
+            </div>
+            <div class="field"><label for="a-note">Note <span class="opt">(optional)</span></label><input class="input" id="a-note" maxlength="200" placeholder="e.g. Cleaned the market road"></div>
+            <button class="btn" type="submit">Log this day</button>
+            <div class="notice" id="a-notice" role="status"></div>
+          </form>
+          <ul class="log-list" id="att-list"></ul>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="panel" aria-labelledby="h-proj">
+        <header><h2 id="h-proj">Community project</h2><span class="pill" id="proj-pill"></span></header>
+        <div class="body">
+          <form class="stack" id="proj-form" novalidate>
+            <div class="field"><label for="p-title">What is the project?</label><input class="input" id="p-title" maxlength="100" placeholder="e.g. Clean water point for the market"></div>
+            <div class="field"><label for="p-about">What will it do for the community?</label><textarea class="input" id="p-about" rows="3" maxlength="600" placeholder="Who it helps and what you will do"></textarea></div>
+            <div class="field"><label for="p-status">Where is it now?</label>
+              <select class="input" id="p-status"><option value="planned">Planned</option><option value="ongoing">Ongoing</option><option value="done">Done</option></select></div>
+            <button class="btn" type="submit">Save project</button>
+            <div class="notice" id="p-notice" role="status"></div>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-upd">
+        <header><h2 id="h-upd">What we did</h2></header>
+        <div class="body">
+          <form class="stack" id="upd-form" novalidate>
+            <div class="two">
+              <div class="field"><label for="u-day">Date</label><input class="input" id="u-day" type="date"></div>
+              <div class="field"><label for="u-photo">Photo <span class="opt">(optional)</span></label><input class="input" id="u-photo" type="file" accept="image/*" style="padding-top:10px;"></div>
+            </div>
+            <div id="u-photo-box" class="u-photo-box" hidden><img id="u-photo-preview" alt="Photo you chose"><button class="btn sm ghost" type="button" id="u-photo-remove">Remove photo</button></div>
+            <div class="field"><label for="u-note">What did you do?</label><textarea class="input" id="u-note" rows="2" maxlength="500" placeholder="e.g. Cleared the drain beside the market with 12 volunteers"></textarea></div>
+            <button class="btn" type="submit">Add to record</button>
+            <div class="notice" id="u-notice" role="status"></div>
+          </form>
+          <ul class="timeline" id="upd-list"></ul>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <section id="report" aria-label="CDS summary"></section>
+  <p class="fine">Keep your CDS card or sheet signed by your leader. This record helps you, but your LGA office decides what counts.</p>
+</div>
+<script src="/frontend/js/api.js"></script>
+<script src="/frontend/js/ui.js"></script>
+<script src="/frontend/js/nav.js"></script>
+<script src="/frontend/js/cds.js"></script>
+</body>
+</html>

@@ -26,7 +26,7 @@ if (!Session.token()) window.location.href = '/login';
     ? [['/admin', 'Approvals'], ['/reviews', 'Reviews']]
     : isAgent
       ? [['/agent-hub', 'My listings'], ['/reviews', 'Reviews']]
-      : [['/home', 'Home'], ['/houses', 'Houses for rent'], ['/agents', 'House agents'], ['/reviews', 'Reviews'], ['/expenses', 'Expenses'], ['/checklist', 'Checklist']];
+      : [['/home', 'Home'], ['/houses', 'Houses'], ['/agents', 'Agents'], ['/board', 'Board'], ['/reviews', 'Reviews'], ['/expenses', 'Expenses'], ['/checklist', 'Checklist'], ['/cds', 'CDS']];
   const nav = links.map(([href, label]) =>
     `<a href="${href}"${path === href ? ' aria-current="page"' : ''}>${label}</a>`).join('');
 
