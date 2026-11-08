@@ -30,9 +30,10 @@
 
 /* ---------- navigation inside the top bar ---------- */
 .topnav { display: flex; gap: 4px; flex-wrap: wrap; }
-.topnav a { color: rgba(255,255,255,.88); text-decoration: none; font-weight: 600; font-size: 14px; padding: 8px 14px; border-radius: 8px; }
+.topnav a { color: rgba(255,255,255,.88); text-decoration: none; font-weight: 600; font-size: 14px; padding: 8px 11px; white-space: nowrap; border-radius: 8px; }
 .topnav a:hover { background: rgba(255,255,255,.14); }
 .topnav a[aria-current="page"] { background: var(--gold); color: #1c1700; }
+@media (max-width: 1360px) and (min-width: 901px) { .who { display: none; } }
 @media (max-width: 900px) { .topnav { order: 3; width: 100%; } .topbar { gap: 10px; } }
 
 /* ---------- filters ---------- */

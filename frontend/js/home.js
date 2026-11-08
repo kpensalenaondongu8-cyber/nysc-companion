@@ -22,4 +22,8 @@
     $('load-error').textContent = err.message;
     $('load-error').hidden = false;
   }
+  try {
+    const c = await api('GET', '/api/checklist');
+    $('t-check').textContent = c.progress.done + ' of ' + c.progress.total + ' steps done';
+  } catch (err) { /* the tile still works without the count */ }
 })();

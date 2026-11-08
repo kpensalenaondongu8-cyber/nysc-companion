@@ -1,0 +1,50 @@
+/* Service checklist page: /checklist */
+.progress-bar { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin: 0 0 18px; }
+.progress-bar i { display: block; height: 100%; background: var(--green); border-radius: 99px; transition: width .3s; }
+.ck-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 20px; align-items: start; }
+.ck-grid .col { display: grid; gap: 20px; min-width: 0; }
+
+.start-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; }
+.start-form .field { margin: 0; }
+.dates-line { margin: 12px 0 0; color: var(--muted); font-size: 14px; }
+.dates-line b { color: var(--ink); }
+.mini-h { font-size: 15px; margin: 18px 0 8px; font-family: var(--font-body); }
+.months { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; }
+.month { border: 1.5px solid var(--line); background: var(--white); border-radius: 10px; padding: 8px 4px; font: inherit; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; text-align: center; line-height: 1.25; }
+.month small { display: block; font-weight: 500; font-size: 11px; }
+.month:hover { border-color: var(--green); }
+.month.done { background: var(--green); border-color: var(--green); color: #fff; }
+.month.now { box-shadow: 0 0 0 3px var(--gold); }
+
+.stage ul { list-style: none; margin: 0; padding: 0; }
+.stage li + li { border-top: 1px solid var(--line); }
+.stage .count { font-size: 13px; color: var(--muted); font-weight: 600; }
+.step-row { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; padding: 12px 0; cursor: pointer; align-items: start; }
+.step-row input { width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--green); cursor: pointer; }
+.step-row b { display: block; font-weight: 600; }
+.step-row .when { font-size: 12.5px; font-weight: 600; color: var(--gold-ink); }
+.step-row .note { display: block; font-size: 13.5px; color: var(--muted); margin-top: 2px; }
+.step-row.done b { text-decoration: line-through; color: var(--muted); }
+
+.custom-list { list-style: none; margin: 14px 0 0; padding: 0; }
+.custom-list li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); align-items: center; }
+.custom-list input { width: 22px; height: 22px; accent-color: var(--green); }
+.custom-list .t { font-weight: 600; overflow-wrap: anywhere; }
+.custom-list .d { display: block; font-size: 12.5px; color: var(--muted); font-weight: 500; }
+.custom-list .d.late { color: var(--danger); font-weight: 700; }
+.custom-list li.done .t { text-decoration: line-through; color: var(--muted); }
+.custom-list .del { background: none; border: 0; color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; padding: 6px; text-decoration: underline; }
+.empty { color: var(--muted); font-size: 14px; margin: 12px 0 0; }
+.fine { color: var(--muted); font-size: 13px; margin: 18px 0 8px; }
+
+@media (max-width: 860px) {
+  .ck-grid { grid-template-columns: 1fr; gap: 14px; }
+  .ck-grid .col { gap: 14px; }
+}
+@media (max-width: 600px) {
+  .progress-bar { margin-bottom: 12px; }
+  .start-form { grid-template-columns: 1fr; }
+  .step-row { padding: 10px 0; gap: 10px; }
+  .step-row .note { font-size: 13px; }
+  .months { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+}

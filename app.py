@@ -7,6 +7,7 @@ from api_routes import router as api_router
 from locator_routes import router as locator_router
 from config_routes import router as config_router
 from ppa_directory import router as directory_router
+from checklist_routes import router as checklist_router
 from locator_db import seed_samples
 from budget_tracking.budget import budget_track
 from budget_tracking.add_expense import add_expense
@@ -31,6 +32,7 @@ app = FastAPI()
 app.include_router(locator_router)
 app.include_router(config_router)
 app.include_router(directory_router)
+app.include_router(checklist_router)
 app.include_router(api_router)                      # the /api routes the pages use
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 os.makedirs("uploads/houses", exist_ok=True)            # house pictures agents upload
@@ -133,6 +135,10 @@ def login_page():
 @app.get("/register")
 def register_page():
     return FileResponse("frontend/html_files/register.html")
+
+@app.get("/checklist")
+def checklist_page():
+    return FileResponse("frontend/html_files/checklist.html")
 
 @app.get("/expenses")
 def expenses_page():

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/frontend/nysc-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="/frontend/css/base.css">
+<link rel="stylesheet" href="/frontend/css/app.css">
+<link rel="stylesheet" href="/frontend/css/checklist.css">
+<title>NYSC Companion · Service checklist</title>
+</head>
+<body>
+<div class="view">
+  <div id="topbar"></div>
+  <p class="notice show bad" id="load-error" role="alert" hidden></p>
+
+  <div class="page-head">
+    <div><h1>Service checklist</h1><p>Every step from camp to passing out. Tick them off as you go.</p></div>
+    <span class="pill" id="pill">Loading…</span>
+  </div>
+
+  <div class="progress-bar" aria-hidden="true"><i id="bar" style="width:0"></i></div>
+
+  <div class="ck-grid">
+    <div class="col">
+      <section class="panel" aria-labelledby="h-dates">
+        <header><h2 id="h-dates">Your service dates</h2></header>
+        <div class="body">
+          <form class="start-form" id="start-form" novalidate>
+            <div class="field">
+              <label for="start">The day you registered at camp</label>
+              <input class="input" id="start" type="date">
+            </div>
+            <button class="btn" type="submit">Save date</button>
+          </form>
+          <p class="dates-line" id="dates-line"></p>
+          <div class="notice" id="start-notice" role="status"></div>
+          <div id="months-wrap" hidden>
+            <h3 class="mini-h">Monthly clearance</h3>
+            <div class="months" id="months"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-mine">
+        <header><h2 id="h-mine">My reminders</h2></header>
+        <div class="body">
+          <form class="stack" id="custom-form" novalidate>
+            <div class="field"><label for="c-title">What do you need to remember?</label><input class="input" id="c-title" maxlength="80" placeholder="e.g. Take CDS card to the LGA office"></div>
+            <div class="field"><label for="c-due">Date (optional)</label><input class="input" id="c-due" type="date"></div>
+            <button class="btn ghost" type="submit">Add reminder</button>
+          </form>
+          <div class="notice" id="c-notice" role="status"></div>
+          <ul class="custom-list" id="custom-list"></ul>
+        </div>
+      </section>
+    </div>
+
+    <div class="col" id="stages"></div>
+  </div>
+
+  <p class="fine">This is a general guide. Dates and rules differ by state and LGA, so confirm with your LGA inspector.</p>
+</div>
+<script src="/frontend/js/api.js"></script>
+<script src="/frontend/js/nav.js"></script>
+<script src="/frontend/js/checklist.js"></script>
+</body>
+</html>
