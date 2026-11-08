@@ -36,17 +36,29 @@ if (!Session.token()) window.location.href = '/login';
         <span class="logo-chip"><img src="/frontend/nysc-logo.png" alt="National Youth Service Corps logo"></span>
         <div><b>NYSC Companion</b><small>${isAdmin ? 'Admin' : isAgent ? 'House agent portal' : 'Your PPA, your home, your allowance'}</small></div>
       </a>
-      <nav class="topnav" aria-label="Main">${nav}</nav>
+      <nav class="topnav" id="topnav" aria-label="Main">${nav}<button class="menu-logout" type="button" id="logout2">Log out</button></nav>
       <div class="topbar-actions">
         <div class="who"><span>${esc(first + ' ' + last)}</span><small>${isAdmin ? 'Administrator' : isAgent ? 'House agent' : 'Corps member'}</small></div>
         <div class="avatar" aria-hidden="true">${esc((first[0] + last[0]).toUpperCase())}</div>
         <button class="btn sm light" type="button" id="logout">Log out</button>
+        <button class="menu-btn" type="button" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="topnav">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
       </div>
     </header>`;
 
-  $('logout').addEventListener('click', async () => {
+  // Phones: the links live in a menu so the top bar stays on one line.
+  const bar = document.querySelector('.topbar');
+  $('menu-btn').addEventListener('click', () => {
+    const open = bar.classList.toggle('open');
+    $('menu-btn').setAttribute('aria-expanded', String(open));
+  });
+
+  const logOut = async () => {
     try { await api('POST', '/api/logout'); } catch (err) { /* leave anyway */ }
     Session.clear();
     window.location.href = '/login';
-  });
+  };
+  $('logout').addEventListener('click', logOut);
+  $('logout2').addEventListener('click', logOut);
 })();

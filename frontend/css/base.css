@@ -77,6 +77,13 @@ form.stack { display: grid; gap: 16px; margin-top: 26px; }
   background: var(--white); border: 1.5px solid var(--line); transition: border-color .15s, box-shadow .15s;
 }
 .input::placeholder { color: #8a9a90; }
+/* Dropdowns: our own arrow, set in from the edge, instead of the browser's arrow jammed against the side. */
+select.input {
+  -webkit-appearance: none; appearance: none; cursor: pointer; text-overflow: ellipsis;
+  padding-right: 42px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%2301652d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 16px center; background-size: 12px 8px;
+}
 .input:hover { border-color: #9fbaa8; }
 .input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 4px rgba(1, 101, 45, .18); }
 .input.has-prefix { padding-left: 44px; }
@@ -102,3 +109,23 @@ form.stack { display: grid; gap: 16px; margin-top: 26px; }
 
 /* Keep typed text and placeholders clear of the Show/Hide button. */
 .input-wrap:has(.toggle-pw) .input { padding-right: 64px; }
+
+
+/* ---------- phones: normal-sized, not blown up ---------- */
+@media (max-width: 600px) {
+  body { padding: 10px; font-size: 14px; }
+  .logo-chip { padding: 3px 6px; border-radius: 10px; }
+  .logo-chip img { height: 34px; }
+  .brand { gap: 10px; }
+  .brand b { font-size: 16px; }
+  .brand small { display: none; }
+  .btn { height: 44px; padding: 0 18px; font-size: 14.5px; }
+  .btn.sm { height: 34px; padding: 0 12px; font-size: 13px; }
+  /* 16px stops iPhones from zooming the page when you tap a box */
+  .input, select.input, textarea.input { height: 44px; font-size: 16px; padding-left: 12px; }
+  select.input { padding-right: 38px; background-position: right 14px center; }
+  textarea.input { height: auto; }
+  .field label { font-size: 12.5px; }
+  .row2, .row3 { grid-template-columns: 1fr; gap: 12px; }
+  .notice { font-size: 13px; }
+}

@@ -101,3 +101,28 @@ textarea.input { font: inherit; line-height: 1.45; resize: vertical; }
 .ppa-photo { display: grid; gap: 8px; justify-items: start; margin-top: 8px; }
 .ppa-photo img { max-width: 100%; width: 320px; border-radius: 10px; border: 1px solid var(--line); display: block; }
 .ppa-photo-card img { width: 100%; max-height: 380px; object-fit: cover; display: block; }
+
+/* ---------- PPA search results ---------- */
+.place-results { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; max-height: 340px; overflow-y: auto; }
+.place-results button { width: 100%; text-align: left; background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; cursor: pointer; font: inherit; color: var(--ink); display: block; }
+.place-results button:hover, .place-results button:focus-visible { border-color: var(--green); background: var(--green-tint); }
+.place-results button.chosen { border-color: var(--green); background: var(--green-tint); box-shadow: 0 0 0 3px rgba(1,101,45,.12); }
+.place-results b { display: block; }
+.place-results span { color: var(--muted); font-size: 13px; }
+
+/* ---------- shared PPA list ---------- */
+.share-row { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.4; cursor: pointer; }
+.share-row input { margin-top: 3px; width: 18px; height: 18px; flex: none; }
+.place-results .row-wrap { display: flex; gap: 8px; align-items: stretch; }
+.place-results .row-wrap > button:first-child { flex: 1; min-width: 0; }
+.place-results button.small { width: auto; flex: none; padding: 6px 10px; font-size: 12.5px; align-self: center; }
+.tag-shared { display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 600; color: var(--green-deep); background: var(--green-tint); border-radius: 99px; padding: 1px 8px; }
+
+@media (max-width: 600px) {
+  .big-price { font-size: 24px; }
+  .summary-strip .big { font-size: 26px; }
+  .review { padding: 14px; }
+  .review h3 { font-size: 16px; }
+  .house-layout { gap: 12px; margin-top: 12px; }
+  .ppa-photo img { width: 100%; }
+}

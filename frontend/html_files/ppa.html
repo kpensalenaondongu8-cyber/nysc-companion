@@ -42,7 +42,7 @@
   <div class="page-head">
     <div>
       <h1>Set up your PPA</h1>
-      <p>Save the details from your posting letter, then pin the exact spot on the map.</p>
+      <p>Search for your PPA or type the details from your posting letter, then check the pin on the map.</p>
     </div>
   </div>
 
@@ -53,6 +53,18 @@
     </header>
     <div class="body">
       <form id="ppa-form" novalidate style="display: grid; gap: 14px;">
+        <!-- SEARCH FOR YOUR PPA -->
+        <div class="field">
+          <label for="s-name">Search for your PPA</label>
+          <p class="hint-small" style="margin: 0 0 8px;">Type the PPA name, the town and the state, all in one line, for example <b>Government Secondary School, Gboko, Benue</b>. We search PPAs that other corps members have already pinned, plus the map data. Tap yours in the list and the map takes you there. Not listed? Pin it yourself and save: it will then show up for the next corps member.</p>
+          <div style="display:flex; gap:8px;">
+            <input class="input" id="s-name" maxlength="150" style="flex:1;" placeholder="PPA name, town, state">
+            <button class="btn sm" type="button" id="s-go">🔍 Search</button>
+          </div>
+          <div class="notice" id="s-notice" role="status" style="margin-top:10px;"></div>
+          <ul class="place-results" id="s-results"></ul>
+        </div>
+
         <div class="field" id="f-name">
           <label for="p-name">PPA name</label>
           <input class="input" id="p-name" maxlength="100" placeholder="e.g. Government Secondary School, Gboko">
@@ -121,7 +133,7 @@
         <!-- PIN THE EXACT SPOT -->
         <div class="field">
           <label>Pin the exact spot <span class="opt">(recommended)</span></label>
-          <p class="hint-small" style="margin: 0 0 8px;">Tap <b>Find my PPA</b>, then zoom in on the satellite view and tap or drag the pin onto your PPA building. Houses and routes will use this exact spot.</p>
+          <p class="hint-small" style="margin: 0 0 8px;">Tap <b>Find my PPA</b> (or pick it from the search above), then tap or drag the pin onto your PPA building. Houses and routes will use this exact spot.</p>
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
             <button class="btn sm" type="button" id="pin-find">🔍 Find my PPA</button>
             <button class="btn sm ghost" type="button" id="pin-here">📍 I am at my PPA now</button>
@@ -142,6 +154,11 @@
           </div>
           <span class="hint-small">Helps you and other corps members recognise the place.</span>
         </div>
+
+        <label class="share-row">
+          <input type="checkbox" id="p-share" checked>
+          <span><b>Share this PPA with other corps members.</b> If you pinned the spot, others who search for this PPA will find it. Your name is never shown.</span>
+        </label>
 
         <button class="btn gold block" type="submit" id="ppa-save">Save &amp; view map route ➔</button>
         <a class="btn ghost block" id="view-map" href="/ppa-route" hidden>View my saved PPA on the map</a>

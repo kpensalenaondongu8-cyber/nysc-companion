@@ -1,0 +1,150 @@
+/* The home page: what the site does, and four doors into it. */
+
+.home { display: grid; gap: 28px; padding-bottom: 40px; }
+
+/* ---------- hero ---------- */
+.hero {
+  position: relative; overflow: hidden; color: #fff;
+  background: var(--green-deep); border-radius: 20px;
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center;
+  gap: 8px; padding: 40px 0 40px 44px; margin-top: 16px;
+}
+.hero-copy { padding-right: 12px; }
+.hero .hello { font-size: 15px; color: #cfe3d6; margin: 0 0 14px; }
+.hero h1 {
+  font-family: var(--font-display); font-weight: 700; font-size: clamp(30px, 4.4vw, 46px);
+  line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 16px; max-width: 15em;
+}
+.hero p.lead { font-size: 17px; line-height: 1.55; color: #e2eee6; margin: 0 0 24px; max-width: 34em; }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.btn-gold-solid {
+  display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
+  background: var(--gold); color: #1c1700; font-weight: 700; border-radius: 12px; padding: 13px 22px; border: 0; cursor: pointer;
+}
+.btn-gold-solid:hover { background: #f6e03e; }
+.btn-line-light {
+  display: inline-flex; align-items: center; text-decoration: none; color: #fff; font-weight: 600;
+  border: 1px solid rgba(255,255,255,.45); border-radius: 12px; padding: 12px 20px;
+}
+.btn-line-light:hover { background: rgba(255,255,255,.1); }
+.hero a:focus-visible, .tile:focus-visible, .step-link:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+.hero-map { align-self: stretch; min-height: 260px; }
+.hero-map svg { width: 100%; height: 100%; display: block; }
+.map-road { stroke: #2c7a49; stroke-width: 2; fill: none; }
+.map-road.main { stroke: #3b9059; stroke-width: 3.5; }
+.map-block { fill: #0f5a2d; }
+.route-casing { stroke: #013618; stroke-width: 9; fill: none; stroke-linecap: round; }
+.route-line { stroke: var(--gold); stroke-width: 5; fill: none; stroke-linecap: round; stroke-dasharray: 560; stroke-dashoffset: 560; animation: draw 2.2s .35s ease-out forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.pin-ppa, .pin-you, .pin-house, .map-label { opacity: 0; animation: show .5s forwards; }
+.pin-you { animation-delay: .2s; }
+.pin-ppa { animation-delay: 2.3s; }
+.pin-house { animation-delay: 2.6s; }
+.map-label { animation-delay: 2.4s; }
+@keyframes show { to { opacity: 1; } }
+.map-text { font: 600 13px var(--font-body); fill: #fff; }
+.map-text.dim { fill: #bcd6c5; font-weight: 500; }
+
+/* your PPA, when saved */
+.ppa-strip {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: space-between;
+  background: var(--white); border: 1px solid var(--line); border-left: 6px solid var(--gold);
+  border-radius: 14px; padding: 14px 18px; box-shadow: var(--shadow);
+}
+.ppa-strip .label { font-size: 13px; color: var(--muted); }
+.ppa-strip b { display: block; font-size: 18px; overflow-wrap: anywhere; }
+.ppa-strip .where { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+.ppa-strip .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- the four doors ---------- */
+.section-title { font-family: var(--font-display); font-size: 26px; margin: 4px 0 -8px; }
+.section-sub { color: var(--muted); margin: 0; }
+
+.tiles { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); grid-template-rows: repeat(3, auto); gap: 16px; }
+.tile {
+  display: grid; gap: 6px; align-content: start; text-decoration: none; color: inherit;
+  background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px;
+  box-shadow: var(--shadow); transition: transform .15s ease, border-color .15s ease;
+}
+.tile:hover { transform: translateY(-2px); border-color: var(--green); }
+.tile .ico { width: 44px; height: 44px; border-radius: 12px; background: var(--green-tint); color: var(--green); display: grid; place-items: center; }
+.tile .ico svg { width: 24px; height: 24px; }
+.tile h3 { font-family: var(--font-display); font-size: 22px; margin: 8px 0 0; }
+.tile p { margin: 0; color: var(--muted); max-width: 36em; }
+.tile .live { margin-top: 6px; font-weight: 700; color: var(--green); }
+
+.tile.ppa { grid-row: 1 / span 3; background: var(--green); border-color: var(--green); color: #fff; align-content: end; padding: 28px; min-height: 360px; position: relative; overflow: hidden; }
+.tile.ppa:hover { border-color: var(--gold); }
+.tile.ppa .ico { background: var(--gold); color: #1c1700; width: 52px; height: 52px; }
+.tile.ppa h3 { font-size: 30px; }
+.tile.ppa p { color: #dcebe1; font-size: 16px; }
+.tile.ppa .live { color: var(--gold); }
+.tile.ppa .contours { position: absolute; inset: 0; opacity: .18; pointer-events: none; }
+
+.tile.row { grid-template-columns: 44px minmax(0, 1fr); column-gap: 16px; align-items: start; }
+.tile.row .ico { grid-row: 1 / span 3; }
+.tile.row h3 { margin-top: 0; }
+
+.reviews-line {
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  background: var(--gold-soft); border-radius: 14px; padding: 16px 20px; color: var(--gold-ink);
+}
+.reviews-line b { color: var(--ink); }
+.reviews-line a { color: var(--green-deep); font-weight: 700; }
+
+/* ---------- how it works: a true sequence ---------- */
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--green); }
+.step { padding: 18px 22px 8px 0; }
+.step .n { font-family: var(--font-display); font-size: 34px; font-weight: 700; color: var(--green); line-height: 1; }
+.step h3 { font-size: 18px; margin: 8px 0 4px; }
+.step p { margin: 0; color: var(--muted); max-width: 26em; }
+.step-link { color: var(--green-deep); font-weight: 700; }
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; padding: 32px 24px 0; }
+  .hero-map { min-height: 230px; margin: 0 -24px; }
+  .tiles { grid-template-columns: 1fr; grid-template-rows: none; }
+  .tile.ppa { grid-row: auto; min-height: 0; }
+  .steps { grid-template-columns: 1fr; }
+  .step { padding-right: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-line { animation: none; stroke-dashoffset: 0; }
+  .pin-ppa, .pin-you, .pin-house, .map-label { animation: none; opacity: 1; }
+  .tile { transition: none; }
+}
+
+/* ---------- phones: compact ---------- */
+@media (max-width: 600px) {
+  .home { gap: 16px; padding-bottom: 24px; }
+  .hero { border-radius: 14px; padding: 18px 16px 0; margin-top: 10px; }
+  .hero .hello { font-size: 13px; margin-bottom: 8px; }
+  .hero h1 { font-size: 22px; line-height: 1.15; margin-bottom: 10px; }
+  .hero p.lead { font-size: 14px; line-height: 1.45; margin-bottom: 14px; }
+  .hero-actions { gap: 8px; }
+  .btn-gold-solid, .btn-line-light { padding: 10px 14px; font-size: 14px; border-radius: 10px; }
+  .hero-map { height: 130px; min-height: 0; margin: 10px -16px 0; }
+  .hero-map svg { height: 130px; }
+  .ppa-strip { padding: 10px 12px; border-left-width: 4px; border-radius: 12px; gap: 8px; }
+  .ppa-strip b { font-size: 15px; }
+  .ppa-strip .where { font-size: 12.5px; }
+  .section-title { font-size: 19px; margin: 0; }
+  .section-sub { font-size: 13px; }
+  .tiles { gap: 10px; }
+  .tile, .tile.ppa { padding: 14px; border-radius: 12px; min-height: 0; box-shadow: none; gap: 3px; align-content: start; }
+  .tile .ico, .tile.ppa .ico { width: 34px; height: 34px; border-radius: 9px; }
+  .tile .ico svg { width: 19px; height: 19px; }
+  .tile h3, .tile.ppa h3 { font-size: 16.5px; margin-top: 6px; }
+  .tile.row { grid-template-columns: 34px minmax(0, 1fr); column-gap: 12px; }
+  .tile.row h3 { margin-top: 0; }
+  .tile p, .tile.ppa p { font-size: 13px; line-height: 1.4; }
+  .tile .live { font-size: 13px; margin-top: 2px; }
+  .tile.ppa .contours { display: none; }
+  .reviews-line { padding: 12px 14px; font-size: 13px; border-radius: 12px; }
+  .steps { gap: 4px; }
+  .step { padding: 12px 0 4px; }
+  .step .n { font-size: 24px; }
+  .step h3 { font-size: 15px; margin: 4px 0 2px; }
+  .step p { font-size: 13px; }
+}

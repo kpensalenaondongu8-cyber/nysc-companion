@@ -17,6 +17,7 @@ from api_routes import current_user_id, clean_number
 from budget_tracking.dashboard import get_budget, build_dashboard
 import locator_db as db
 import photo_store
+import ppa_directory
 
 router = APIRouter(prefix="/api")
 
@@ -41,6 +42,7 @@ class PpaBody(BaseModel):
     photo: str | None = None                 # new photo of the gate/signboard, as a data URL (optional)
     remove_photo: bool = False
     clear_pin: bool = False                  # forget the saved pin
+    share: bool = True                       # add this pinned PPA to the shared list for other corps members
 
 class HouseBody(BaseModel):
     title: str = Field(min_length=1, max_length=80)
@@ -166,6 +168,11 @@ def save_ppa(body: PpaBody, user_id: int = Depends(current_corper_id)):
         photo = ""
 
     db.save_ppa(user_id, name, body.address.strip(), state, lga, town, lat, lon, photo)
+    if lat is not None and body.share:
+        try:
+            ppa_directory.share(user_id, name, state, lga, town, body.address.strip(), lat, lon)
+        except Exception:
+            pass                                 # sharing is a bonus: never stop the save because of it
     if old_photo and old_photo != photo:
         photo_store.delete_photos([old_photo], photo_store.PPA_DIR)
     return home(user_id)
