@@ -144,6 +144,20 @@ def register_page():
 def checklist_page():
     return FileResponse("frontend/html_files/checklist.html")
 
+@app.get("/sw.js")
+def service_worker():
+    # Must be served from the site root so it can cover every page. Never cache it: updates must arrive.
+    return FileResponse("frontend/sw.js", media_type="application/javascript",
+                        headers={"Cache-Control": "no-cache"})
+
+@app.get("/manifest.webmanifest")
+def manifest():
+    return FileResponse("frontend/manifest.webmanifest", media_type="application/manifest+json")
+
+@app.get("/offline")
+def offline_page():
+    return FileResponse("frontend/html_files/offline.html")
+
 @app.get("/board")
 def board_page():
     return FileResponse("frontend/html_files/board.html")

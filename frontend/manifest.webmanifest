@@ -1,0 +1,24 @@
+{
+  "name": "NYSC Companion",
+  "short_name": "NYSC",
+  "description": "Find your PPA, rent a house near it, track your CDS and your allowance.",
+  "id": "/home",
+  "start_url": "/home",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6f3",
+  "theme_color": "#014a21",
+  "lang": "en-NG",
+  "icons": [
+    { "src": "/frontend/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/frontend/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/frontend/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "My PPA route", "url": "/ppa-route" },
+    { "name": "Checklist", "url": "/checklist" },
+    { "name": "CDS log", "url": "/cds" },
+    { "name": "Expenses", "url": "/expenses" }
+  ]
+}

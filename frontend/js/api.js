@@ -17,6 +17,8 @@ const Session = {
       store.removeItem('nysc_token');
       store.removeItem('nysc_user');
     }
+    // The phone keeps saved answers for offline use. They belong to the person who logged in, so wipe them.
+    try { if (window.caches) caches.delete('nysc-api-v1'); } catch (e) { /* ignore */ }
   },
 };
 
@@ -34,7 +36,9 @@ async function api(method, path, body) {
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch (err) {
-    throw new Error('Cannot reach the server. Is it still running?');
+    throw new Error(navigator.onLine === false
+      ? 'You are offline. Connect to the internet and try again. Nothing was saved.'
+      : 'Cannot reach the server. Check your connection and try again.');
   }
 
   const data = await response.json().catch(() => ({}));
