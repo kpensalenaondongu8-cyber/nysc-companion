@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/frontend/nysc-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="/frontend/css/base.css">
+<link rel="stylesheet" href="/frontend/css/app.css">
+<link rel="stylesheet" href="/frontend/css/agent-dash.css">
+<link rel="stylesheet" href="/frontend/css/admin-overview.css">
+<title>NYSC Companion · Overview</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#014a21">
+<link rel="apple-touch-icon" href="/frontend/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NYSC">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+<div class="view">
+  <div id="topbar"></div>
+  <p class="notice show bad" id="load-error" role="alert" hidden></p>
+
+  <div class="page-head">
+    <div><h1>Overview</h1><p>How the app is doing. Numbers only: no names, phone numbers or messages.</p></div>
+  </div>
+
+  <div id="content" hidden>
+    <div id="attention"></div>
+    <div class="kpis" id="kpis"></div>
+
+    <section class="panel" aria-labelledby="h-chart">
+      <header><h2 id="h-chart">New accounts in the last 14 days</h2><span class="hint" id="chart-total"></span></header>
+      <div class="body">
+        <div class="chart" id="chart" role="img" aria-label="Bar chart of new accounts per day for the last 14 days"></div>
+        <div class="chart-tip" id="chart-tip" aria-live="polite">Tap or hover a bar to see the day.</div>
+        <details class="table-view"><summary>Show as a table</summary><table id="chart-table"></table></details>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="h-places" style="margin-top:16px">
+      <header><h2 id="h-places">Corps members and houses, by LGA</h2><span class="hint">Biggest LGAs first</span></header>
+      <div class="body">
+        <div class="tablewrap"><table class="lga" id="places"></table></div>
+        <div class="short" id="short" hidden></div>
+      </div>
+    </section>
+    <p class="fine">Corps members are counted from the PPA they saved. Houses are the ones on offer from approved agents.</p>
+  </div>
+</div>
+<script src="/frontend/js/api.js"></script>
+<script src="/frontend/js/nav.js"></script>
+<script src="/frontend/js/ui.js"></script>
+<script src="/frontend/js/admin-overview.js"></script>
+<script src="/frontend/js/pwa.js"></script>
+</body>
+</html>

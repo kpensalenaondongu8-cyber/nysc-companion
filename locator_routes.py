@@ -18,6 +18,7 @@ from budget_tracking.dashboard import get_budget, build_dashboard
 import locator_db as db
 import photo_store
 import ppa_directory
+import house_events
 
 router = APIRouter(prefix="/api")
 
@@ -187,7 +188,7 @@ def _public_house(h, with_phone):
         "id": h["id"], "title": h["title"], "description": h["description"],
         "house_type": h["house_type"], "rooms": h["rooms"], "rent_per_year": h["rent_per_year"],
         "state": h["state"], "lga": h["lga"], "town": h["town"], "address": h["address"],
-        "is_sample": is_sample, "created_at": h["created_at"],
+        "is_sample": is_sample, "created_at": h["created_at"], "status": h.get("status", "available"),
         "cover": h.get("cover"), "photo_count": h.get("photo_count", 0),
         "agent": None,
     }
@@ -232,7 +233,15 @@ def one_house(house_id: int, user_id: int = Depends(current_user_id)):
                        and house["lga"].strip().lower() == ppa["lga"].strip().lower())
     if not allowed:
         raise HTTPException(status_code=404, detail="That house was not found in your area.")
-    out = _public_house(house, with_phone=True)
+    # Count one view per corps member per day (the agent sees only the number, never who).
+    if role != "agent" and not house["is_sample"] and house.get("status") == "available":
+        try:
+            house_events.record_event(house_id, user_id, "view")
+        except Exception:
+            pass                                    # counting must never stop someone seeing a house
+    out = _public_house(house, with_phone=house.get("status") == "available")
+    if house.get("status") != "available" and out["agent"]:
+        out["agent"].pop("phone", None)
     out["photos"] = house["photos"]
     return out
 

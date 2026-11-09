@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/frontend/nysc-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="/frontend/css/base.css">
+<link rel="stylesheet" href="/frontend/css/login.css">
+<title>NYSC Companion · Forgot password</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#014a21">
+<link rel="apple-touch-icon" href="/frontend/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NYSC">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+<main class="view">
+  <div class="auth">
+    <aside class="auth-side">
+      <div class="brand">
+        <span class="logo-chip"><img src="/frontend/nysc-logo.png" alt="National Youth Service Corps logo"></span>
+        <div><b>NYSC Companion</b><small>National Youth Service Corps</small></div>
+      </div>
+      <div>
+        <h2>Settle into your PPA, <em>faster.</em></h2>
+        <p class="lede">Find houses for rent and trusted agents around your place of primary assignment, and keep your allowance in check while you serve.</p>
+      </div>
+      <ul class="perks">
+        <li>Save your PPA and search around it</li>
+        <li>Houses for rent by state, LGA and town</li>
+        <li>House agents who cover your area</li>
+        <li>Allowance and expense tracker</li>
+      </ul>
+      <p class="auth-foot">A companion for corps members, from camp to passing out.</p>
+    </aside>
+
+    <section class="auth-main">
+      <div class="auth-box">
+        <p class="eyebrow">Reset your password</p>
+        <h1>Forgot your password?</h1>
+        <p class="sub">Contact the admin and prove it is you. They will give you a code that works once, for 30 minutes. Enter it here with a new password.</p>
+
+        <div class="notice" id="notice" role="alert"></div>
+
+        <form class="stack" id="reset-form" novalidate>
+          <div class="field" id="f-phone">
+            <label for="phone">Phone number</label>
+            <div class="input-wrap"><span class="prefix">🇳🇬</span><input class="input has-prefix" id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="0803 000 0000" required></div>
+            <span class="err">Enter an 11-digit Nigerian number, like 08030000000.</span>
+          </div>
+          <div class="field" id="f-code">
+            <label for="code">Code from the admin</label>
+            <input class="input" id="code" type="text" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="ABCD-2345" required>
+            <span class="err">Enter the 8-letter code the admin gave you.</span>
+          </div>
+          <div class="field" id="f-pw">
+            <label for="pw">New password</label>
+            <div class="input-wrap"><input class="input" id="pw" type="password" autocomplete="new-password" placeholder="At least 8 characters" required><button type="button" class="toggle-pw" data-toggle="pw" aria-label="Show password">Show</button></div>
+            <span class="err">Use at least 8 characters.</span>
+          </div>
+          <div class="field" id="f-pw2">
+            <label for="pw2">Type it again</label>
+            <input class="input" id="pw2" type="password" autocomplete="new-password" required>
+            <span class="err">The two passwords are not the same.</span>
+          </div>
+          <button class="btn block" type="submit" id="submit">Save new password</button>
+        </form>
+
+        <p class="switch-line">Remembered it? <a class="link" href="/login">Log in</a></p>
+      </div>
+    </section>
+  </div>
+</main>
+<script src="/frontend/js/api.js"></script>
+<script src="/frontend/js/auth/forgot.js"></script>
+<script src="/frontend/js/pwa.js"></script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 from argon2 import PasswordHasher
 
 ph = PasswordHasher()
@@ -9,8 +10,8 @@ def create_account(first_name, middle_name, last_name, number, email, password, 
     hashed_password = ph.hash(password)    
     try:
         cursor.execute(
-            "INSERT INTO users (first_name, middle_name, last_name, number, email, password, role) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (first_name, middle_name, last_name, number, email, hashed_password, role)
+            "INSERT INTO users (first_name, middle_name, last_name, number, email, password, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (first_name, middle_name, last_name, number, email, hashed_password, role, datetime.now().isoformat(timespec="seconds"))
         )
         conn.commit()
         print("Account Created and values assigned successfully!")

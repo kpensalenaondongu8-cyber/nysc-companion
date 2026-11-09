@@ -148,7 +148,7 @@ function mineCard(h) {
     <div class="mini-house">
       <div class="thumb">${photo}</div>
       <div style="min-width:0">
-        <div class="head"><h3>${esc(h.title)}</h3><div class="price num">${naira(h.rent_per_year)} <small>/ year</small></div></div>
+        <div class="head"><h3>${esc(h.title)}${h.status === 'taken' ? ' <span class="pill">Taken</span>' : ''}</h3><div class="price num">${naira(h.rent_per_year)} <small>/ year</small></div></div>
         <div class="meta">${esc(h.house_type)} · ${h.rooms} ${h.rooms === 1 ? 'room' : 'rooms'} · ${esc([h.town, h.lga, h.state].join(', '))} · ${h.photo_count} ${h.photo_count === 1 ? 'picture' : 'pictures'}</div>
       </div>
     </div>

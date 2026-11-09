@@ -104,5 +104,22 @@ $('reported').addEventListener('click', async (e) => {
   } catch (err) { alert(err.message); }
 });
 
+$('reset-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('reset-result').hidden = true;
+  if (!phoneOk($('reset-phone').value)) { say('reset-notice', 'Enter an 11-digit Nigerian number, like 08030000000.', 'bad'); return; }
+  say('reset-notice', '', '');
+  try {
+    const r = await api('POST', '/api/admin/reset-code', { number: $('reset-phone').value });
+    const msg = 'Hello ' + r.name + ', your NYSC Companion reset code is ' + r.code + '. Go to the Forgot password page, enter it with your phone number and a new password. It works once, for ' + r.minutes + ' minutes.';
+    $('reset-result').hidden = false;
+    $('reset-result').innerHTML = `<p style="margin:0">Code for <b>${esc(r.name)}</b> (${esc(r.role === 'agent' ? 'house agent' : 'corps member')}), valid ${r.minutes} minutes. It will not be shown again.</p>
+      <p style="font-size:30px;font-weight:700;letter-spacing:.08em;margin:6px 0" class="num" id="reset-code">${esc(r.code)}</p>
+      <a class="link" href="${waLink(r.number, msg)}" target="_blank" rel="noopener">Send on WhatsApp</a>`;
+  } catch (err) {
+    say('reset-notice', err.message, 'bad');
+  }
+});
+
 load();
 loadReported();

@@ -10,6 +10,9 @@ from ppa_directory import router as directory_router
 from checklist_routes import router as checklist_router
 from cds_routes import router as cds_router
 from board_routes import router as board_router
+from agent_dash import router as agent_dash_router
+from admin_overview import router as admin_overview_router
+from password_reset import router as password_reset_router
 from locator_db import seed_samples
 from budget_tracking.budget import budget_track
 from budget_tracking.add_expense import add_expense
@@ -37,6 +40,9 @@ app.include_router(directory_router)
 app.include_router(checklist_router)
 app.include_router(cds_router)
 app.include_router(board_router)
+app.include_router(agent_dash_router)
+app.include_router(admin_overview_router)
+app.include_router(password_reset_router)
 app.include_router(api_router)                      # the /api routes the pages use
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 os.makedirs("uploads/houses", exist_ok=True)            # house pictures agents upload
@@ -116,6 +122,15 @@ def houses_page():
 def agents_page():
     return FileResponse("frontend/html_files/agents.html")
 
+@app.get("/admin-overview")
+def admin_overview_page():
+    return FileResponse("frontend/html_files/admin-overview.html")
+
+
+@app.get("/agent-dash")
+def agent_dash_page():
+    return FileResponse("frontend/html_files/agent-dash.html")
+
 @app.get("/agent-hub")
 def agent_hub_page():
     return FileResponse("frontend/html_files/agent-hub.html")
@@ -135,6 +150,11 @@ def reviews_page():
 @app.get("/login")
 def login_page():
     return FileResponse("frontend/html_files/login.html")
+
+@app.get("/forgot")
+def forgot_page():
+    return FileResponse("frontend/html_files/forgot.html")
+
 
 @app.get("/register")
 def register_page():

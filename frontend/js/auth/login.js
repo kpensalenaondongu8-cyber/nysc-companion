@@ -1,5 +1,5 @@
 // Where each kind of account starts.
-function landing(role) { return role === 'admin' ? '/admin' : role === 'agent' ? '/agent-hub' : '/home'; }
+function landing(role) { return role === 'admin' ? '/admin-overview' : role === 'agent' ? '/agent-hub' : '/home'; }
 
 // Already logged in? Skip straight to the right page.
 if (Session.token()) {

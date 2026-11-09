@@ -1,5 +1,5 @@
 // Where each kind of account starts.
-function landing(role) { return role === 'admin' ? '/admin' : role === 'agent' ? '/agent-hub' : '/home'; }
+function landing(role) { return role === 'admin' ? '/admin-overview' : role === 'agent' ? '/agent-hub' : '/home'; }
 if (Session.token()) {
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem('nysc_user') || sessionStorage.getItem('nysc_user')) || {}; } catch (e) { /* ignore */ }

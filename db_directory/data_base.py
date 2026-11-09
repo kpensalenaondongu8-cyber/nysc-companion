@@ -154,6 +154,12 @@ def init__db():
     if "role" not in columns:
         cursor.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'corper'")
 
+    # When the account was made (for the admin overview). Older accounts get the date of their first login, if known.
+    if "created_at" not in columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN created_at TEXT NOT NULL DEFAULT ''")
+        cursor.execute("""UPDATE users SET created_at = COALESCE(
+            (SELECT MIN(s.created_at) FROM sessions s WHERE s.user_id = users.id), '')""")
+
     # Agent verification: an admin approves each agent before their houses go live.
     agent_columns = [row[1] for row in cursor.execute("PRAGMA table_info(agents)")]
     if "verification_status" not in agent_columns:
@@ -168,6 +174,22 @@ def init__db():
     for column, definition in [("lat", "REAL"), ("lon", "REAL"), ("photo", "TEXT NOT NULL DEFAULT ''")]:
         if column not in ppa_cols:
             cursor.execute(f"ALTER TABLE ppas ADD COLUMN {column} {definition}")
+
+    # Houses: the agent can mark one as taken, and we count how many corps members look at it or contact the agent.
+    house_cols = [row[1] for row in cursor.execute("PRAGMA table_info(houses)")]
+    if "status" not in house_cols:
+        cursor.execute("ALTER TABLE houses ADD COLUMN status TEXT NOT NULL DEFAULT 'available'")
+    cursor.execute("""
+       CREATE TABLE IF NOT EXISTS house_events(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        house_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        kind TEXT NOT NULL,
+        day TEXT NOT NULL,
+        UNIQUE (house_id, user_id, kind, day),
+        FOREIGN KEY (house_id) REFERENCES houses (id) ON DELETE CASCADE
+      );
+    """)
 
     conn.commit()
     conn.close()

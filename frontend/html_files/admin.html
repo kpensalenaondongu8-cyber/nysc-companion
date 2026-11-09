@@ -39,6 +39,17 @@
     <div><h2 style="margin:0">Hidden board posts</h2><p>Posts and replies that 3 corps members reported are hidden. Bring one back or delete it.</p></div>
   </div>
   <div class="cards" id="reported" aria-live="polite"></div>
+
+  <div class="page-head" style="margin-top:28px">
+    <div><h2 style="margin:0">Forgot password help</h2><p>First make sure it really is the account owner (call them, or message them on the number they registered with). Then make a one-time code and give it to them. It works once, for 30 minutes.</p></div>
+  </div>
+  <form class="card" id="reset-form" style="display:grid;gap:10px;max-width:460px" novalidate>
+    <label for="reset-phone"><b>Their phone number</b></label>
+    <input class="input" id="reset-phone" type="tel" inputmode="numeric" placeholder="0803 000 0000" required>
+    <button class="btn sm" type="submit" style="justify-self:start">Make a code</button>
+    <div class="notice" id="reset-notice" role="status"></div>
+    <div id="reset-result" hidden></div>
+  </form>
 </div>
 <script src="/frontend/js/api.js"></script>
 <script src="/frontend/js/nav.js"></script>

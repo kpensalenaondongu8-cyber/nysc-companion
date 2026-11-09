@@ -1,8 +1,8 @@
 /* The top bar shared by every logged-in page. Put <div id="topbar"></div> in the page.
    It also keeps each kind of account on its own pages:
      corper  -> Home, Houses for rent, House agents, Reviews, Expenses
-     agent   -> My listings, Reviews
-     admin   -> Approvals, Reviews                                                    */
+     agent   -> My listings, Dashboard, Reviews
+     admin   -> Overview, Approvals, Reviews                                                   */
 if (!Session.token()) window.location.href = '/login';
 
 (function () {
@@ -15,17 +15,17 @@ if (!Session.token()) window.location.href = '/login';
 
   // Send people to the right place if they open a page that is not for them.
   const path = location.pathname;
-  const allowed = isAdmin ? ['/admin', '/reviews']
-                : isAgent ? ['/agent-hub', '/reviews', '/house']
+  const allowed = isAdmin ? ['/admin-overview', '/admin', '/reviews']
+                : isAgent ? ['/agent-hub', '/agent-dash', '/reviews', '/house']
                 : null;                                   // corpers: everything except the two pages below
-  const home = isAdmin ? '/admin' : isAgent ? '/agent-hub' : '/home';
+  const home = isAdmin ? '/admin-overview' : isAgent ? '/agent-hub' : '/home';
   if (allowed && !allowed.includes(path)) window.location.replace(home);
-  if (!allowed && ['/agent-hub', '/admin'].includes(path)) window.location.replace(home);
+  if (!allowed && ['/agent-hub', '/agent-dash', '/admin', '/admin-overview'].includes(path)) window.location.replace(home);
 
   const links = isAdmin
-    ? [['/admin', 'Approvals'], ['/reviews', 'Reviews']]
+    ? [['/admin-overview', 'Overview'], ['/admin', 'Approvals'], ['/reviews', 'Reviews']]
     : isAgent
-      ? [['/agent-hub', 'My listings'], ['/reviews', 'Reviews']]
+      ? [['/agent-hub', 'My listings'], ['/agent-dash', 'Dashboard'], ['/reviews', 'Reviews']]
       : [['/home', 'Home'], ['/houses', 'Houses'], ['/agents', 'Agents'], ['/board', 'Board'], ['/reviews', 'Reviews'], ['/expenses', 'Expenses'], ['/checklist', 'Checklist'], ['/cds', 'CDS']];
   const nav = links.map(([href, label]) =>
     `<a href="${href}"${path === href ? ' aria-current="page"' : ''}>${label}</a>`).join('');

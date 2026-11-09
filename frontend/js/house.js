@@ -58,6 +58,11 @@ function agentPanel(h, me) {
   if (h.is_sample || !a) {
     return `<header><h2>Contact</h2></header><div class="body"><p class="muted">This is a sample listing for demonstration, so it has no real contact. Real houses come from registered agents.</p></div>`;
   }
+  if (h.status === 'taken') {
+    return `<header><h2>No longer available</h2></header><div class="body">
+      <p class="muted">The agent marked this house as taken, so there is no contact for it. Look at other houses near your PPA.</p>
+      <p style="margin-top:12px"><a class="btn sm" href="/houses">See other houses</a></p></div>`;
+  }
   const reviewsLink = `<a class="link" href="/reviews?agent=${a.id}">Read reviews from former corpers</a>`;
   if (me.user.role === 'agent') {
     return `<header><h2>Your listing</h2></header><div class="body">
@@ -100,6 +105,13 @@ function agentPanel(h, me) {
       <p style="margin-top:12px"><b>Location:</b> ${esc([h.address, h.town, h.lga, h.state].filter(Boolean).join(', '))}</p>
       <p class="muted" style="margin-top:4px">Posted ${when(h.created_at)}</p>`;
     $('agent-panel').innerHTML = agentPanel(h, me);
+    // Tell the agent (as a number only) that someone tapped Call or WhatsApp. Never blocks the tap.
+    $('agent-panel').addEventListener('click', (e) => {
+      const a = e.target.closest('a[href]');
+      if (!a || me.user.role === 'agent') return;
+      const kind = a.href.startsWith('tel:') ? 'call' : /wa\.me|whatsapp/.test(a.href) ? 'whatsapp' : '';
+      if (kind) api('POST', '/api/houses/' + encodeURIComponent(houseId) + '/event', { kind }).catch(() => {});
+    });
     $('content').hidden = false;
   } catch (err) {
     $('error').textContent = err.message;

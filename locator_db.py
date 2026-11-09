@@ -71,7 +71,8 @@ def save_ppa(user_id, ppa_name, address, state, lga, town, lat=None, lon=None, p
 # ---------- houses ----------
 # A house is visible to corpers if an APPROVED agent posted it (or it is one of the built-in samples).
 
-_VISIBLE = "(h.is_sample = 1 OR (u.role = 'agent' AND a.verification_status = 'approved'))"
+# A taken house is not shown to corps members any more.
+_VISIBLE = "(h.status = 'available' AND (h.is_sample = 1 OR (u.role = 'agent' AND a.verification_status = 'approved')))"
 
 _HOUSE_SELECT = """
     SELECT h.*,
@@ -175,7 +176,7 @@ _AGENT_SELECT = """
     SELECT a.*, u.role AS owner_role,
            (SELECT ROUND(AVG(rating), 1) FROM reviews r WHERE r.agent_id = a.id) AS rating,
            (SELECT COUNT(*) FROM reviews r WHERE r.agent_id = a.id) AS review_count,
-           (SELECT COUNT(*) FROM houses h WHERE h.owner_id = a.owner_id) AS house_count
+           (SELECT COUNT(*) FROM houses h WHERE h.owner_id = a.owner_id AND h.status = 'available') AS house_count
     FROM agents a LEFT JOIN users u ON u.id = a.owner_id
 """
 

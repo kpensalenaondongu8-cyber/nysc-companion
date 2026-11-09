@@ -1,0 +1,14 @@
+/* Admin overview: /admin-overview (also uses agent-dash.css for the tiles and the chart) */
+.attn { display: grid; gap: 8px; margin-bottom: 16px; }
+.attn a { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 14px; padding: 12px 16px; color: inherit; text-decoration: none; font-size: 15px; }
+.attn a b { font-variant-numeric: tabular-nums; }
+.attn a span.go { color: var(--green); font-weight: 600; white-space: nowrap; }
+.attn .ok { background: var(--green-tint); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; font-size: 15px; }
+.tablewrap { overflow-x: auto; }
+table.lga { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.lga th, table.lga td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+table.lga th { color: var(--muted); font-weight: 600; font-size: 13px; }
+table.lga td.n, table.lga th.n { text-align: right; }
+table.lga tr.none td:last-child { color: #8a5a00; font-weight: 600; }
+.short { margin-top: 12px; background: var(--gold-soft); border-left: 4px solid var(--gold); border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+@media (max-width: 600px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
