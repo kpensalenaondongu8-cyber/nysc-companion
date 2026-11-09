@@ -154,6 +154,10 @@ def init__db():
     if "role" not in columns:
         cursor.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'corper'")
 
+    # Profile picture: just the file name inside uploads/avatars.
+    if "photo" not in columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN photo TEXT NOT NULL DEFAULT ''")
+
     # When the account was made (for the admin overview). Older accounts get the date of their first login, if known.
     if "created_at" not in columns:
         cursor.execute("ALTER TABLE users ADD COLUMN created_at TEXT NOT NULL DEFAULT ''")

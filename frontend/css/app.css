@@ -21,7 +21,7 @@
 /* two-column layout */
 .grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px; margin-top: 16px; align-items: start; }
 .col { display: grid; gap: 16px; min-width: 0; }
-.panel { background: var(--white); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); min-width: 0; }
 .panel > header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 20px; border-bottom: 1px solid var(--line); }
 .panel > header h2 { font-size: 20px; }
 .panel .body { padding: 18px 20px; }
@@ -42,10 +42,10 @@
 
 /* ---------- listing cards (houses and agents) ---------- */
 .cards { display: grid; gap: 14px; }
-.card { background: var(--white); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 18px 20px; min-width: 0; border-left: 5px solid var(--green); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 18px 20px; min-width: 0; border-left: 5px solid var(--green); }
 .card.here { border-left-color: var(--gold); }
 .card h3 { font-size: 19px; overflow-wrap: anywhere; }
-.card .price { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--green); white-space: nowrap; }
+.card .price { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--green-text); white-space: nowrap; }
 .card .price small { font-family: var(--font-body); font-size: 12.5px; font-weight: 400; color: var(--muted); }
 .card .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
 .card .meta { color: var(--muted); font-size: 13.5px; margin-top: 4px; }
@@ -53,16 +53,16 @@
 .card .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
 .card .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 .card .who-line { font-size: 13.5px; color: var(--muted); margin-right: auto; }
-.pill.sample { background: var(--green-tint); color: var(--green-deep); }
+.pill.sample { background: var(--green-tint); color: var(--green-text); }
 .pill.here { background: var(--gold); color: #1c1700; }
 .btn.danger { background: transparent; color: var(--danger); border-color: var(--danger-tint); }
 .btn.danger:hover { background: var(--danger-tint); }
 
 /* ---------- home page ---------- */
 .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 16px; }
-a.feature { display: block; text-decoration: none; color: inherit; background: var(--white); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 20px; border-top: 5px solid var(--green); transition: transform .1s, border-color .15s; }
+a.feature { display: block; text-decoration: none; color: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 20px; border-top: 5px solid var(--green); transition: transform .1s, border-color .15s; }
 a.feature:hover { transform: translateY(-2px); border-top-color: var(--gold); }
-a.feature .big { font-family: var(--font-display); font-size: 30px; font-weight: 700; color: var(--green); }
+a.feature .big { font-family: var(--font-display); font-size: 30px; font-weight: 700; color: var(--green-text); }
 a.feature h3 { font-size: 19px; margin-top: 4px; }
 a.feature p { color: var(--muted); font-size: 13.5px; margin-top: 6px; }
 .ppa-card { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
@@ -107,3 +107,10 @@ a.feature p { color: var(--muted); font-size: 13.5px; margin-top: 6px; }
   .topnav a { font-size: 15px; padding: 11px 12px; }
   .menu-logout { display: block; margin-top: 4px; text-align: left; background: transparent; border: 0; border-top: 1px solid rgba(255,255,255,.2); color: #ffd6da; font: inherit; font-weight: 600; font-size: 15px; padding: 12px; cursor: pointer; }
 }
+
+/* ---------- profile picture in the top bar ---------- */
+a.avatar { text-decoration: none; overflow: hidden; }
+a.avatar:hover { box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.menu-only { display: none; }
+@media (max-width: 600px) { .menu-only { display: block; } }

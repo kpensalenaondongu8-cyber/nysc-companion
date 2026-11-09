@@ -5,10 +5,10 @@
 textarea.input { height: auto; padding-top: 10px; padding-bottom: 10px; resize: vertical; line-height: 1.4; font-family: inherit; }
 
 .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
-.stat { border: 1px solid var(--line); border-radius: 10px; padding: 8px 6px; text-align: center; background: var(--white); }
+.stat { border: 1px solid var(--line); border-radius: 10px; padding: 8px 6px; text-align: center; background: var(--surface); }
 .stat b { display: block; font-size: 20px; line-height: 1.2; }
 .stat small { color: var(--muted); font-size: 12px; }
-.stat.good b { color: var(--green); }
+.stat.good b { color: var(--green-text); }
 .stat.warn b { color: var(--danger); }
 
 .log-list, .timeline { list-style: none; margin: 14px 0 0; padding: 0; max-height: 460px; overflow-y: auto; }
@@ -16,7 +16,7 @@ textarea.input { height: auto; padding-top: 10px; padding-bottom: 10px; resize: 
 .log-list .d { font-weight: 600; font-size: 14px; }
 .log-list .n { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
 .tag { display: inline-block; font-size: 12px; font-weight: 700; border-radius: 99px; padding: 2px 9px; margin-right: 6px; }
-.tag.present { background: var(--green-tint); color: var(--green); }
+.tag.present { background: var(--green-tint); color: var(--green-text); }
 .tag.absent { background: var(--danger-tint); color: var(--danger); }
 .tag.excused { background: var(--gold-soft); color: var(--gold-ink); }
 .x { background: none; border: 0; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; padding: 6px; }

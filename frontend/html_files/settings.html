@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/frontend/nysc-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="/frontend/css/base.css">
+<link rel="stylesheet" href="/frontend/css/app.css">
+<link rel="stylesheet" href="/frontend/css/settings.css">
+<title>NYSC Companion · Settings</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#014a21">
+<link rel="apple-touch-icon" href="/frontend/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NYSC">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script src="/frontend/js/theme.js"></script>
+</head>
+<body>
+<div class="view">
+  <div id="topbar"></div>
+  <div class="page-head"><div><h1>Settings</h1><p>Your picture, details, password and how the app looks.</p></div></div>
+
+  <div class="settings" id="content" hidden>
+    <section class="panel"><header><h2>Profile picture</h2></header>
+      <div class="body pic-row">
+        <div class="big-avatar" id="big-avatar" aria-hidden="true"></div>
+        <div class="pic-actions">
+          <label class="btn sm" for="photo-file">Choose a photo</label>
+          <input type="file" id="photo-file" accept="image/*" hidden>
+          <button class="btn sm ghost" type="button" id="photo-remove" hidden>Remove photo</button>
+          <p class="hint">Only you can see this picture. It shows in the top bar.</p>
+          <div class="notice" id="photo-notice" role="status"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel"><header><h2>Your details</h2></header>
+      <form class="body stack" id="profile-form" novalidate>
+        <div class="field" id="f-first"><label for="first">First name</label><input class="input" id="first" autocomplete="given-name" maxlength="50"><span class="err">Enter your first name.</span></div>
+        <div class="field"><label for="middle">Middle name <span class="opt">(optional)</span></label><input class="input" id="middle" autocomplete="additional-name" maxlength="50"></div>
+        <div class="field" id="f-last"><label for="last">Last name</label><input class="input" id="last" autocomplete="family-name" maxlength="50"><span class="err">Enter your last name.</span></div>
+        <div class="field" id="f-email"><label for="email">Email</label><input class="input" id="email" type="email" autocomplete="email"><span class="err">Enter a valid email address.</span></div>
+        <div class="notice" id="profile-notice" role="status"></div>
+        <button class="btn" type="submit">Save details</button>
+      </form>
+    </section>
+
+    <section class="panel"><header><h2>Phone number</h2></header>
+      <form class="body stack" id="number-form" novalidate>
+        <p class="hint">This is the number you log in with. Now: <b id="cur-number"></b></p>
+        <div class="field" id="f-number"><label for="number">New phone number</label><input class="input" id="number" type="tel" inputmode="numeric" autocomplete="off" placeholder="0803 000 0000"><span class="err">Enter an 11-digit Nigerian number, like 08030000000.</span></div>
+        <div class="field" id="f-numpw"><label for="numpw">Your password</label><input class="input" id="numpw" type="password" autocomplete="current-password"><span class="err">Enter your password to confirm.</span></div>
+        <div class="notice" id="number-notice" role="status"></div>
+        <button class="btn" type="submit">Change number</button>
+      </form>
+    </section>
+
+    <section class="panel"><header><h2>Password</h2></header>
+      <form class="body stack" id="password-form" novalidate>
+        <div class="field" id="f-cur"><label for="cur">Current password</label><input class="input" id="cur" type="password" autocomplete="current-password"><span class="err">Enter your current password.</span></div>
+        <div class="field" id="f-new"><label for="new">New password</label><input class="input" id="new" type="password" autocomplete="new-password" placeholder="At least 8 characters"><span class="err">Use at least 8 characters.</span></div>
+        <div class="field" id="f-new2"><label for="new2">Type the new password again</label><input class="input" id="new2" type="password" autocomplete="new-password"><span class="err">The two passwords are not the same.</span></div>
+        <div class="notice" id="password-notice" role="status"></div>
+        <button class="btn" type="submit">Change password</button>
+        <p class="hint">Changing your password logs you out on all your other devices.</p>
+      </form>
+    </section>
+
+    <section class="panel"><header><h2>Appearance</h2></header>
+      <div class="body">
+        <fieldset class="themes" id="themes">
+          <legend class="hint">Colours on this device</legend>
+          <label><input type="radio" name="theme" value="light"> <span>Light</span></label>
+          <label><input type="radio" name="theme" value="dark"> <span>Dark</span></label>
+          <label><input type="radio" name="theme" value="auto"> <span>Match my phone</span></label>
+        </fieldset>
+      </div>
+    </section>
+
+    <section class="panel"><header><h2>Devices</h2></header>
+      <div class="body stack">
+        <p class="hint">Lost your phone or used a shared computer? Log out everywhere, including here.</p>
+        <button class="btn danger" type="button" id="logout-all">Log out of all devices</button>
+      </div>
+    </section>
+
+    <section class="panel" id="delete-panel"><header><h2>Delete my account</h2></header>
+      <form class="body stack" id="delete-form" novalidate>
+        <p class="hint">This removes your account and everything in it: your PPA, expenses, checklist, CDS log, board posts and reviews<span id="agent-del"> and, for agents, your listings</span>. It cannot be undone.</p>
+        <div class="field" id="f-delpw"><label for="delpw">Your password</label><input class="input" id="delpw" type="password" autocomplete="current-password"><span class="err">Enter your password to confirm.</span></div>
+        <div class="notice" id="delete-notice" role="status"></div>
+        <button class="btn danger" type="submit">Delete my account for good</button>
+      </form>
+    </section>
+  </div>
+  <p class="notice show bad" id="load-error" role="alert" hidden></p>
+</div>
+<script src="/frontend/js/api.js"></script>
+<script src="/frontend/js/nav.js"></script>
+<script src="/frontend/js/ui.js"></script>
+<script src="/frontend/js/settings.js"></script>
+<script src="/frontend/js/pwa.js"></script>
+</body>
+</html>

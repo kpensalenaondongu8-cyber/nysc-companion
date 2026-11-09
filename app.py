@@ -13,6 +13,7 @@ from board_routes import router as board_router
 from agent_dash import router as agent_dash_router
 from admin_overview import router as admin_overview_router
 from password_reset import router as password_reset_router
+from settings_routes import router as settings_router
 from locator_db import seed_samples
 from budget_tracking.budget import budget_track
 from budget_tracking.add_expense import add_expense
@@ -43,9 +44,11 @@ app.include_router(board_router)
 app.include_router(agent_dash_router)
 app.include_router(admin_overview_router)
 app.include_router(password_reset_router)
+app.include_router(settings_router)
 app.include_router(api_router)                      # the /api routes the pages use
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 os.makedirs("uploads/houses", exist_ok=True)            # house pictures agents upload
+os.makedirs("uploads/avatars", exist_ok=True)           # profile pictures
 os.makedirs("uploads/ppa", exist_ok=True)               # photos of PPA gates / signboards
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
@@ -150,6 +153,11 @@ def reviews_page():
 @app.get("/login")
 def login_page():
     return FileResponse("frontend/html_files/login.html")
+
+@app.get("/settings")
+def settings_page():
+    return FileResponse("frontend/html_files/settings.html")
+
 
 @app.get("/forgot")
 def forgot_page():

@@ -4,7 +4,7 @@
 .no-ppa b { color: var(--ink); }
 .bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-bottom: 16px; }
 .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-.tabs button { border: 1px solid var(--line); background: var(--white); border-radius: 99px; padding: 7px 16px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--ink); }
+.tabs button { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 7px 16px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--ink); }
 .tabs button:hover { border-color: var(--green); }
 .tabs button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: #fff; }
 .board-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 20px; align-items: start; }
@@ -16,10 +16,10 @@ textarea.input { height: auto; padding-top: 10px; padding-bottom: 10px; resize: 
 .rules { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
 
 .posts { display: grid; gap: 14px; min-width: 0; }
-.post { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: var(--shadow); display: grid; gap: 8px; min-width: 0; }
+.post { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: var(--shadow); display: grid; gap: 8px; min-width: 0; }
 .post.closed { opacity: .65; }
 .post .top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.kind { font-size: 12px; font-weight: 700; border-radius: 99px; padding: 2px 10px; background: var(--green-tint); color: var(--green); }
+.kind { font-size: 12px; font-weight: 700; border-radius: 99px; padding: 2px 10px; background: var(--green-tint); color: var(--green-text); }
 .kind.sell { background: var(--gold-soft); color: var(--gold-ink); }
 .kind.wanted { background: #e8eefb; color: #24408a; }
 .kind.info { background: #eee; color: #444; }
@@ -29,7 +29,7 @@ textarea.input { height: auto; padding-top: 10px; padding-bottom: 10px; resize: 
 .post .meta { color: var(--muted); font-size: 13px; }
 .acts { display: flex; flex-wrap: wrap; gap: 6px; }
 .acts .btn.sm { height: 34px; padding: 0 12px; font-size: 13px; }
-.btn.danger { background: var(--white); color: var(--danger); border: 1.5px solid var(--danger); }
+.btn.danger { background: var(--surface); color: var(--danger); border: 1.5px solid var(--danger); }
 .btn.danger:hover { background: var(--danger-tint); }
 .link-btn { background: none; border: 0; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; padding: 6px 4px; }
 .link-btn:hover { color: var(--danger); }
@@ -41,7 +41,7 @@ textarea.input { height: auto; padding-top: 10px; padding-bottom: 10px; resize: 
 .reply .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
 .reply p { margin: 2px 0 0; overflow-wrap: anywhere; }
 .reply-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
-.empty { color: var(--muted); text-align: center; background: var(--white); border: 1px dashed var(--line); border-radius: 14px; padding: 28px 16px; }
+.empty { color: var(--muted); text-align: center; background: var(--surface); border: 1px dashed var(--line); border-radius: 14px; padding: 28px 16px; }
 
 @media (max-width: 860px) {
   .new-post:not(.open) .body { display: none; }

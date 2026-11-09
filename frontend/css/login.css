@@ -1,6 +1,6 @@
 /* Login and create-account layout: green brand panel on the left, white form on the right. */
 
-.auth { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); min-height: calc(100vh - 32px); background: var(--white); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+.auth { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); min-height: calc(100vh - 32px); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
 
 .auth-side {
   position: relative; color: var(--white); padding: 40px; display: flex; flex-direction: column; justify-content: space-between; gap: 32px;

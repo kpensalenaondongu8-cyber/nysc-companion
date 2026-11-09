@@ -79,6 +79,10 @@ def login_response(user_id):
     data = build_dashboard(user_id)
     user = dict(data["user"])
     user["role"] = get_role(user_id)
+    conn = sqlite3.connect("nysc_companion.db", timeout=10)
+    row = conn.execute("SELECT photo FROM users WHERE id = ?", (user_id,)).fetchone()
+    conn.close()
+    user["photo"] = row[0] if row else ""
     return {"token": create_session(user_id), "user": user}
 
 

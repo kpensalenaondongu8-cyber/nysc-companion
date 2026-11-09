@@ -1,0 +1,14 @@
+/* Settings: /settings */
+.settings { display: grid; gap: 16px; max-width: 560px; }
+.settings .stack { display: grid; gap: 14px; }
+.pic-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.big-avatar { width: 96px; height: 96px; border-radius: 50%; background: var(--gold); color: #1c1700; display: grid; place-items: center; font: 700 32px var(--font-display); overflow: hidden; flex: none; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--line); }
+.big-avatar img, .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pic-actions { display: grid; gap: 8px; justify-items: start; min-width: 0; }
+label.btn { display: inline-flex; align-items: center; cursor: pointer; }
+.themes { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+.themes legend { padding: 0; margin-bottom: 6px; }
+.themes label { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; cursor: pointer; font-weight: 600; }
+.themes label:has(input:checked) { border-color: var(--green); background: var(--green-tint); }
+.themes input { width: 18px; height: 18px; accent-color: var(--green); }
+.settings .btn[type=submit], .settings .btn.danger { justify-self: start; }

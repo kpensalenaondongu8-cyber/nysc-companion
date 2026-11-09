@@ -18,6 +18,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="NYSC">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script src="/frontend/js/theme.js"></script>
 </head>
 <body>
 <div class="view">
@@ -69,6 +70,23 @@
               <div class="between"><span class="hint">Date and time are saved automatically.</span><button class="btn" type="submit">Add expense</button></div>
             </form>
             <div class="notice" id="e-notice" role="status"></div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="h-spend">
+          <header><h2 id="h-spend">Where your money went</h2><select class="input sm" id="sp-month" aria-label="Month"></select></header>
+          <div class="body" id="spend-body">
+            <p class="sp-sum" id="sp-sum" aria-live="polite"></p>
+            <div class="chips sp-toggle" id="sp-toggle" role="group" aria-label="Chart type">
+              <button type="button" class="chip" data-view="pie">Pie</button>
+              <button type="button" class="chip" data-view="bars">Bars</button>
+            </div>
+            <div class="sp-pie" id="sp-pie">
+              <div class="sp-donut"><svg id="sp-svg" viewBox="0 0 200 200" role="group" aria-label="Pie chart of spending by category"></svg><div class="sp-center" id="sp-center" aria-live="polite"></div></div>
+              <ul class="sp-legend" id="sp-legend"></ul>
+            </div>
+            <ul class="sp-bars" id="sp-bars"></ul>
+            <details class="table-view"><summary>Show as a table</summary><table class="sp-table" id="sp-table"></table></details>
           </div>
         </section>
 

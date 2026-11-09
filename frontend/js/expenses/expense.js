@@ -81,7 +81,107 @@ function render() {
         <div><div class="d">${esc(x.description)}</div><div class="m">${esc(x.category)} · ${esc(when(x))}</div></div>
         <div class="a num">−${naira(x.amount)}</div></li>`).join('')
     : `<li class="empty">${filter === 'All' ? 'No expenses yet. Log your first one above.' : 'No expenses in this category yet.'}</li>`;
+  drawSpending();
 }
+
+// ---------- where the money went (one month, biggest category first) ----------
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+let spendMonth = '';       // "2026-10": the month being shown ('' = the newest month with spending)
+
+function monthKey(e) {                       // "October-29-2026" -> "2026-10"
+  const p = e.date.split('-');
+  const m = MONTHS.indexOf(p[0]);
+  return m < 0 || p.length !== 3 ? '' : p[2] + '-' + String(m + 1).padStart(2, '0');
+}
+// Each category keeps its own colour (slot 1-6). Any other category is folded into "Other" in the pie.
+const SLOT = { 'Food': 1, 'Transport': 2, 'Data & Airtime': 3, 'Toiletries': 4, 'CDS & Contributions': 5, 'Other': 6 };
+let spendView = 'pie';
+try { spendView = localStorage.getItem('nysc_spview') === 'bars' ? 'bars' : 'pie'; } catch (e) { /* ignore */ }
+
+function arc(cx, cy, r0, r1, a0, a1) {             // one donut slice, angles in turns (0 = top)
+  const p = (r, a) => [cx + r * Math.sin(a * 2 * Math.PI), cy - r * Math.cos(a * 2 * Math.PI)];
+  const big = a1 - a0 > 0.5 ? 1 : 0;
+  const [x0, y0] = p(r1, a0), [x1, y1] = p(r1, a1), [x2, y2] = p(r0, a1), [x3, y3] = p(r0, a0);
+  return `M${x0.toFixed(2)} ${y0.toFixed(2)}A${r1} ${r1} 0 ${big} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}L${x2.toFixed(2)} ${y2.toFixed(2)}A${r0} ${r0} 0 ${big} 0 ${x3.toFixed(2)} ${y3.toFixed(2)}Z`;
+}
+
+const monthName = (key) => MONTHS[Number(key.slice(5)) - 1] + ' ' + key.slice(0, 4);
+
+function drawSpending() {
+  const totals = {};                          // month -> { category -> amount }
+  for (const e of data.expenses) {
+    const k = monthKey(e);
+    if (!k) continue;
+    totals[k] = totals[k] || {};
+    totals[k][e.category] = (totals[k][e.category] || 0) + e.amount;
+  }
+  const months = Object.keys(totals).sort().reverse();
+  const sel = $('sp-month');
+  if (!months.length) {
+    sel.hidden = true;
+    $('sp-sum').textContent = 'Nothing to show yet. Log an expense and it will appear here.';
+    $('sp-bars').innerHTML = '';
+    $('sp-table').parentElement.hidden = true;
+    return;
+  }
+  sel.hidden = false;
+  $('sp-table').parentElement.hidden = false;
+  if (!months.includes(spendMonth)) spendMonth = months[0];
+  sel.innerHTML = months.map((k) => `<option value="${k}">${esc(monthName(k))}</option>`).join('');
+  sel.value = spendMonth;
+
+  const rows = Object.entries(totals[spendMonth]).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const total = rows.reduce((s, r) => s + r[1], 0);
+  const pct = (v) => (v * 100 / total < 0.5 ? '<1' : Math.round(v * 100 / total));
+  const income = data.budget.monthly_income;
+  $('sp-sum').innerHTML = `You spent <b class="num">${naira(total)}</b> in ${esc(monthName(spendMonth))}` +
+    (income ? ` (${Math.round(total * 100 / income)}% of your allowance)` : '') +
+    `. Most of it went on <b>${esc(rows[0][0])}</b>: ${pct(rows[0][1])}%.`;
+  $('sp-bars').innerHTML = rows.map(([c, v], i) => `<li class="sp-row${i === 0 ? ' top' : ''}">
+      <div class="sp-top"><span class="sp-name">${esc(c)}</span><span class="sp-val num">${naira(v)} <small>${pct(v)}%</small></span></div>
+      <div class="sp-track"><i style="width:${Math.max(2, v * 100 / rows[0][1])}%"></i></div></li>`).join('');
+  drawPie(rows, total, pct);
+  $('sp-pie').hidden = spendView !== 'pie';
+  $('sp-bars').hidden = spendView !== 'bars';
+  $('sp-toggle').querySelectorAll('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === spendView)));
+  $('sp-table').innerHTML = '<tr><th>Category</th><th>Spent</th><th>Share</th></tr>' +
+    rows.map(([c, v]) => `<tr><td>${esc(c)}</td><td class="num">${naira(v)}</td><td class="num">${pct(v)}%</td></tr>`).join('');
+}
+function drawPie(rows, total, pct) {
+  // Merge categories without their own colour into "Other".
+  const merged = {};
+  for (const [c, v] of rows) { const k = SLOT[c] ? c : 'Other'; merged[k] = (merged[k] || 0) + v; }
+  const slices = Object.entries(merged).sort((a, b) => b[1] - a[1]);
+  let at = 0;
+  const paths = slices.map(([c, v], i) => {
+    const a0 = at, a1 = at + v / total; at = a1;
+    const d = slices.length === 1 ? arc(100, 100, 56, 96, 0, 0.5) + arc(100, 100, 56, 96, 0.5, 1) : arc(100, 100, 56, 96, a0, a1);
+    return `<path class="sp-slice sp${SLOT[c]}" d="${d}" tabindex="0" data-i="${i}" aria-label="${esc(c)}: ${naira(v)}, ${pct(v)}%"/>`;
+  }).join('');
+  $('sp-svg').innerHTML = paths;
+  pieCenter = (i) => {
+    const s = slices[i];
+    $('sp-center').innerHTML = s ? `<b>${esc(s[0])}</b><span class="num">${naira(s[1])}</span><small>${pct(s[1])}%</small>`
+                                 : `<small>Spent</small><b class="num">${naira(total)}</b>`;
+    document.querySelectorAll('#sp-legend li').forEach((li, n) => li.classList.toggle('on', n === i));
+    document.querySelectorAll('.sp-slice').forEach((el, n) => el.classList.toggle('dim', i !== null && n !== i));
+  };
+  $('sp-legend').innerHTML = slices.map(([c, v], i) => `<li data-i="${i}"><i class="sw sp${SLOT[c]}"></i><span class="sp-name">${esc(c)}</span><span class="sp-val num">${naira(v)} <small>${pct(v)}%</small></span></li>`).join('');
+  pieCenter(null);
+}
+// Listeners are added once; pieCenter always points at the latest drawing.
+let pieCenter = () => {};
+for (const ev of ['mouseover', 'focusin', 'click']) $('sp-pie').addEventListener(ev, (e) => {
+  const t = e.target.closest('[data-i]'); if (t) pieCenter(+t.dataset.i);
+});
+for (const ev of ['mouseleave', 'focusout']) $('sp-pie').addEventListener(ev, () => pieCenter(null));
+$('sp-toggle').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-view]'); if (!b) return;
+  spendView = b.dataset.view;
+  try { localStorage.setItem('nysc_spview', spendView); } catch (err) { /* ignore */ }
+  drawSpending();
+});
+$('sp-month').addEventListener('change', (e) => { spendMonth = e.target.value; drawSpending(); });
 
 // ---------- loading ----------
 async function load() {

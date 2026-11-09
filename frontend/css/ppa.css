@@ -1,34 +1,34 @@
 /* --- COMPONENT PRESENTATION FRAMEWORK PRESETS --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; padding: 20px; display: flex; justify-content: center; }
+body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--ink); padding: 20px; display: flex; justify-content: center; }
 .workspace-wrapper { width: 100%; max-width: 700px; display: flex; flex-direction: column; gap: 16px; }
 
 /* --- SITE APP BRAND HEADER --- */
 .feature-header { background: linear-gradient(135deg, #005c37 0%, #008751 100%); color: white; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 .brand-identity { display: flex; align-items: center; gap: 12px; }
-.brand-identity img { width: 44px; height: 44px; background: white; border-radius: 50%; padding: 4px; object-fit: contain; }
+.brand-identity img { width: 44px; height: 44px; background: var(--surface); border-radius: 50%; padding: 4px; object-fit: contain; }
 .brand-identity h1 { font-size: 18px; font-weight: 800; }
 .subtle-banner { font-size: 11px; color: #a3e6cd; font-weight: 500; margin-top: 2px; }
 
 /* --- ALIGNMENT SHORTCUT MENU NAVIGATION TAB LINKS --- */
-.navigation-bar { display: flex; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-.navigation-bar a { flex: 1; text-align: center; padding: 12px; text-decoration: none; color: #64748b; font-size: 14px; font-weight: 700; transition: all 0.2s ease; }
-.navigation-bar a:hover, .navigation-bar a.active { color: #008751; background-color: #f8fafc; }
+.navigation-bar { display: flex; background-color: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+.navigation-bar a { flex: 1; text-align: center; padding: 12px; text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 700; transition: all 0.2s ease; }
+.navigation-bar a:hover, .navigation-bar a.active { color: var(--green-text); background-color: var(--bg); }
 .navigation-bar a.active { border-bottom: 3px solid #008751; }
 
 /* --- ALERT COUNTER BADGE STRIP --- */
-.alert-banner { display: none; text-align: center; font-weight: bold; font-size: 13px; color: #008751; background: #e6f4ed; border-left: 5px solid #008751; padding: 12px; border-radius: 8px; }
+.alert-banner { display: none; text-align: center; font-weight: bold; font-size: 13px; color: var(--green-text); background: var(--green-tint); border-left: 5px solid #008751; padding: 12px; border-radius: 8px; }
 
 .main-split-grid { display: flex; flex-direction: column; gap: 16px; }
-.form-card { background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-.form-card h3 { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
-.form-instructions { font-size: 12px; color: #64748b; margin-bottom: 14px; }
+.form-card { background: var(--surface); border: 1px solid var(--line); padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+.form-card h3 { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 12px; }
+.form-instructions { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
 
 /* --- FORMS AND SELECTION FIELDS COMPONENT --- */
 .field-box { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
-.field-box label { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; }
-.field-box input { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; background-color: #f8fafc; color: #1e293b; outline: none; }
-.field-box input:focus { border-color: #008751; background-color: white; box-shadow: 0 0 0 3px rgba(0, 135, 81, 0.15); }
+.field-box label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+.field-box input { padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; background-color: var(--bg); color: var(--ink); outline: none; }
+.field-box input:focus { border-color: #008751; background-color: var(--surface); box-shadow: 0 0 0 3px rgba(0, 135, 81, 0.15); }
 
 /* --- COMPONENT TRIGGER BUTTON UNITS --- */
 .action-btn-green, .danger-btn { padding: 10px 16px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.2s ease; }
@@ -38,5 +38,5 @@ body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e29
 .danger-btn:hover { background-color: #ef4444; }
 
 /* --- PHYSICAL VISUAL VIEWPORT TIMELINE GRID CANVAS --- */
-#map-viewport-canvas { width: 100%; height: 320px; border-radius: 14px; border: 1px solid #cbd5e1; background-color: #f8fafc; z-index: 10; }
+#map-viewport-canvas { width: 100%; height: 320px; border-radius: 14px; border: 1px solid var(--line); background-color: var(--bg); z-index: 10; }
 .feedback-text { text-align: center; font-weight: bold; font-size: 13px; margin-top: 10px; }
