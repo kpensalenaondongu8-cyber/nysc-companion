@@ -47,6 +47,18 @@ app.include_router(password_reset_router)
 app.include_router(settings_router)
 app.include_router(api_router)                      # the /api routes the pages use
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
+
+
+@app.middleware("http")
+async def always_check_for_new_files(request, call_next):
+    """Pages, scripts and styles are re-checked on every load (a cheap "has it changed?" question),
+    so after an update the browser never keeps running the old script with the new page."""
+    response = await call_next(request)
+    path = request.url.path
+    if (path.startswith("/frontend/") and path.endswith((".js", ".css", ".html"))) or \
+       ("." not in path.rsplit("/", 1)[-1] and not path.startswith(("/api", "/uploads"))):
+        response.headers.setdefault("Cache-Control", "no-cache")
+    return response
 os.makedirs("uploads/houses", exist_ok=True)            # house pictures agents upload
 os.makedirs("uploads/avatars", exist_ok=True)           # profile pictures
 os.makedirs("uploads/ppa", exist_ok=True)               # photos of PPA gates / signboards

@@ -81,7 +81,7 @@ function render() {
         <div><div class="d">${esc(x.description)}</div><div class="m">${esc(x.category)} · ${esc(when(x))}</div></div>
         <div class="a num">−${naira(x.amount)}</div></li>`).join('')
     : `<li class="empty">${filter === 'All' ? 'No expenses yet. Log your first one above.' : 'No expenses in this category yet.'}</li>`;
-  drawSpending();
+  try { drawSpending(); } catch (err) { console.error('Spending chart:', err); }
 }
 
 // ---------- where the money went (one month, biggest category first) ----------
