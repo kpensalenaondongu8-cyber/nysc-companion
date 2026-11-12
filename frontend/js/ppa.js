@@ -168,6 +168,7 @@ function runSearch() {
       : await NYSC_MAP.searchPlaces(q.name, q.town, state, '').catch((e) => Object.assign([], { problem: e.message, centre: null }));
     const where = [q.town, state].filter(Boolean).join(', ');
     const haveOurs = shared.length + known.length > 0;
+    if ($('manual')) $('manual').hidden = haveOurs;      // the "enter it yourself" link appears only when we found nothing
     if (haveOurs && places.noMatch) places = noMap();   // unrelated nearby places are just noise now
     const hint = places.googleProblem ? ' (' + places.googleProblem + ')'
       : NYSC_MAP.provider() === 'google' ? ' (Google found nothing for this either. Check the spelling of the town.)' : '';
@@ -238,7 +239,7 @@ function runSearch() {
       add(b);
     });
     addTownRow();
-  }).finally(() => { $('s-go').disabled = false; });
+  }).catch(() => { if ($('manual')) $('manual').hidden = false; }).finally(() => { $('s-go').disabled = false; });
 }
 
 // Jump the map to the town (no pin yet) so the corper can tap the PPA on the map.
@@ -275,55 +276,6 @@ function choosePlace(pl, button) {
   pickMap.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   say('pin-notice', `Showing ${pl.name}. If the pin is not on your building, drag it, or use the Satellite button on the map.`, 'ok');
 }
-
-// ---------- browse by area: every school / hospital we know in one LGA ----------
-let areaTimer = null;
-async function initBrowse() {
-  try {
-    const a = await api('GET', '/api/places/areas');
-    if (!a.total || !(a.states || []).length) return;               // nothing loaded: keep the page simple
-    if (!$('browse') || !$('b-state')) return;
-    $('browse').hidden = false;
-    fillSelect('b-state', a.states.map((s) => s.state), 'Choose state');
-  } catch (e) { /* the browse link just stays hidden */ }
-}
-on('browse-link', 'click', (e) => {
-  e.preventDefault();
-  $('browse-box').hidden = !$('browse-box').hidden;
-  if (!$('browse-box').hidden && !$('b-state').value && $('p-state').value) { $('b-state').value = $('p-state').value; $('b-state').dispatchEvent(new Event('change')); }
-});
-on('b-state', 'change', async () => {
-  $('b-lga').innerHTML = '<option value="">Choose LGA</option>';
-  $('b-results').innerHTML = '';
-  say('b-notice', '', '');
-  if (!$('b-state').value) return;
-  try {
-    const r = await api('GET', '/api/places/areas?state=' + encodeURIComponent($('b-state').value));
-    $('b-lga').innerHTML = '<option value="">Choose LGA</option>' + r.lgas.map((l) => `<option value="${esc(l.lga)}">${esc(l.lga)} (${l.count})</option>`).join('');
-  } catch (err) { say('b-notice', err.message, 'bad'); }
-});
-async function loadArea() {
-  if (!$('b-state').value || !$('b-lga').value) { $('b-results').innerHTML = ''; return; }
-  try {
-    const r = await api('GET', '/api/places/area?state=' + encodeURIComponent($('b-state').value) + '&lga=' + encodeURIComponent($('b-lga').value) +
-                        '&q=' + encodeURIComponent($('b-q').value.trim()) + '&kind=' + encodeURIComponent($('b-kind').value));
-    $('b-results').innerHTML = '';
-    say('b-notice', r.results.length ? `${r.results.length}${r.results.length === 300 ? '+' : ''} found. Tap yours.` : 'Nothing matches. Clear the name box, or enter your PPA yourself.', r.results.length ? 'ok' : 'warn');
-    r.results.forEach((pl) => {
-      const li = document.createElement('li');
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.innerHTML = '<b>' + esc(pl.name) + '</b><span>' + esc(pl.address || '') + '</span>';
-      b.addEventListener('click', () => choosePlace(pl, b));
-      li.appendChild(b);
-      $('b-results').appendChild(li);
-    });
-  } catch (err) { say('b-notice', err.message, 'bad'); }
-}
-on('b-lga', 'change', loadArea);
-on('b-kind', 'change', loadArea);
-on('b-q', 'input', () => { clearTimeout(areaTimer); areaTimer = setTimeout(loadArea, 300); });
-initBrowse();
 
 $('s-go').addEventListener('click', runSearch);
 $('s-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); runSearch(); } });

@@ -1,0 +1,73 @@
+PUTTING NYSC COMPANION ON PYTHONANYWHERE (free account)
+=========================================================
+Replace YOURNAME everywhere with your PythonAnywhere username.
+Your site will be:  https://YOURNAME.pythonanywhere.com
+
+PART 1 - on your own computer
+-----------------------------
+1. Save your places into one small file (the project folder, venv active):
+       python export_places.py
+   This creates places-export.csv.
+
+2. Make a zip of the app WITHOUT your test data, the venv or the big downloads:
+       zip -r nysc.zip . -x "venv/*" "uploads/*" "__pycache__/*" "*/__pycache__/*" "*.db" "*.csv" "*.xlsx" "*.zip" "foursquare_key.txt"
+
+   (If "zip" is not installed:  sudo apt install zip)
+
+PART 2 - on pythonanywhere.com
+------------------------------
+3. Sign up for the free "Beginner" account at pythonanywhere.com. No card needed.
+
+4. Files tab: upload nysc.zip into your home folder (the page you land on).
+
+5. Dashboard > "Bash" console. Type these one at a time:
+       mkdir nysc-companion
+       cd nysc-companion
+       unzip ../nysc.zip
+   Then back on the Files tab, open the nysc-companion folder and upload places-export.csv into it.
+
+6. Back in the console, still inside nysc-companion:
+       mkvirtualenv --python=python3.10 nysc
+       pip install -r requirements.txt
+       python import_places.py places-export.csv --source "Nigeria places"
+   The load takes a minute or two.
+
+7. Web tab > "Add a new web app" > Next > "Manual configuration" > Python 3.10 > Next.
+   On the Web tab fill in:
+       Source code:   /home/YOURNAME/nysc-companion
+       Virtualenv:    /home/YOURNAME/.virtualenvs/nysc
+       Force HTTPS:   turn ON  (the map's "my location" button needs https)
+
+8. On the Web tab click the link "WSGI configuration file". Delete everything in it and paste:
+       import sys
+       path = '/home/YOURNAME/nysc-companion'
+       if path not in sys.path:
+           sys.path.insert(0, path)
+       from pa_wsgi import application
+   Save it.
+
+9. Web tab > green "Reload" button. Open https://YOURNAME.pythonanywhere.com
+   If you see an error page, open the "Error log" link on the Web tab and send me the last lines.
+
+10. Make yourself admin: register on the live site with your number first, then in the Bash console:
+       cd nysc-companion
+       workon nysc
+       python make_admin.py 08012345678
+
+EVERY MONTH
+-----------
+Free web apps switch off after a while. Log in, open the Web tab, and click the button that says
+"Run until 1 month from today". It takes five seconds. If you forget, the app just goes offline; your data stays.
+
+WHEN YOU CHANGE THE APP
+-----------------------
+Upload the changed files on the Files tab (same folders), then press Reload on the Web tab.
+
+GOOD TO KNOW
+------------
+* Free accounts have 512 MB of disk. Check with:  du -sh ~   (the app with all places is far below that).
+* The database is nysc-companion/nysc_companion.db. It holds every account, so back it up now and then:
+  Files tab > click the file > download.
+* Free accounts can only call a short list of websites from the server. The map search runs in the user's
+  browser, so it still works. Foursquare and Google keys (server-side) are not used here; leave them out.
+* The first page load after a quiet period can be a little slow.

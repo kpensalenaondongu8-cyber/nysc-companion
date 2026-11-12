@@ -3,3 +3,6 @@ uvicorn
 argon2-cffi
 openpyxl
 pyshp
+email-validator
+python-multipart
+a2wsgi

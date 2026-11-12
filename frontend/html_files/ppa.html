@@ -30,8 +30,6 @@
   .ppa-summary span { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
   .ppa-summary .btn { flex: none; }
   .manual { font-size: 14px; margin: 10px 0 0; }
-  .browse-box { display: grid; gap: 10px; margin-top: 6px; }
-  .browse-box[hidden] { display: none; }
   .tag-list { display: inline-block; margin-left: 6px; font-size: 12px; color: var(--muted); }
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
@@ -59,14 +57,14 @@
 
   <div class="page-head">
     <div>
-      <h3>Set up your PPA</h3>
+      <h1>Set up your PPA</h1>
       <p>Search for your PPA, tap it in the list, then check the pin on the map.</p>
     </div>
   </div>
 
-  <section class="panel" id="ppa-form-panel" style="max-width: 500px; margin: 0 auto;">
+  <section class="panel" id="ppa-form-panel" style="max-width: 720px; margin: 0 auto;">
     <header>
-      <h3>Where is your PPA?</h3>
+      <h2>Where is your PPA?</h2>
       <span class="hint">Take the name from your posting letter</span>
     </header>
     <div class="body">
@@ -74,32 +72,17 @@
         <!-- SEARCH FOR YOUR PPA -->
         <div class="field">
           <label for="s-name">Search for your PPA</label>
-          <p class="hint-small" style="margin: 0 0 8px;">Type the PPA name, the town and state</p>
-          <div style="display:flex; gap:2px;">
+          <p class="hint-small" style="margin: 0 0 8px;">Type the PPA name, the town and the state, for example <b>Government Secondary School, Gboko, Benue</b>. Tap yours in the list and the details fill in for you.</p>
+          <div style="display:flex; gap:8px;">
             <input class="input" id="s-name" maxlength="150" style="flex:1;" placeholder="PPA name, town, state">
             <button class="btn sm" type="button" id="s-go">🔍 Search</button>
           </div>
           <div class="notice" id="s-notice" role="status" style="margin-top:10px;"></div>
           <ul class="place-results" id="s-results"></ul>
+          <p class="hint-small" id="credit" style="margin: 8px 0 0;">School and health facility locations: <a class="link" href="https://grid3.org" target="_blank" rel="noopener">GRID3</a>, open data under CC BY.</p>
         </div>
 
-        <div id="browse" hidden>
-          <p class="manual"><a class="link" href="#" id="browse-link">Browse schools and hospitals in an LGA</a></p>
-          <div class="browse-box" id="browse-box" hidden>
-            <div class="row">
-              <div class="field"><label for="b-state">State</label><select class="input" id="b-state"></select></div>
-              <div class="field"><label for="b-lga">LGA</label><select class="input" id="b-lga"><option value="">Choose LGA</option></select></div>
-            </div>
-            <div class="row">
-              <div class="field"><label for="b-q">Narrow by name <span class="opt">(optional)</span></label><input class="input" id="b-q" maxlength="80" placeholder="e.g. Government Secondary"></div>
-              <div class="field"><label for="b-kind">Type</label><select class="input" id="b-kind"><option value="">All</option><option value="school">Schools</option><option value="health">Hospitals and clinics</option><option value="other">Other</option></select></div>
-            </div>
-            <div class="notice" id="b-notice" role="status"></div>
-            <ul class="place-results" id="b-results"></ul>
-          </div>
-        </div>
-
-        <p class="manual">Can't find it? <a class="link" href="#" id="manual-link">Enter the details yourself</a></p>
+        <p class="manual" id="manual" hidden>Can't find it? <a class="link" href="#" id="manual-link">Enter the details yourself</a></p>
 
         <div id="details" hidden>
           <div class="ppa-summary" id="summary">
