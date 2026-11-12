@@ -66,11 +66,11 @@
 
   <section class="panel" id="ppa-form-panel" style="max-width: 500px; margin: 0 auto;">
     <header>
-      <h2>Where is your PPA?</h2>
+      <h3>Where is your PPA?</h3>
       <span class="hint">Take the name from your posting letter</span>
     </header>
     <div class="body">
-      <form id="ppa-form" novalidate style="display: grid; gap: 10px;">
+      <form id="ppa-form" novalidate style="display: grid; gap: 14px;">
         <!-- SEARCH FOR YOUR PPA -->
         <div class="field">
           <label for="s-name">Search for your PPA</label>
@@ -79,7 +79,7 @@
             <input class="input" id="s-name" maxlength="150" style="flex:1;" placeholder="PPA name, town, state">
             <button class="btn sm" type="button" id="s-go">🔍 Search</button>
           </div>
-          <div class="notice" id="s-notice" role="status" style="margin-top:7px;"></div>
+          <div class="notice" id="s-notice" role="status" style="margin-top:10px;"></div>
           <ul class="place-results" id="s-results"></ul>
         </div>
 
@@ -97,10 +97,10 @@
             <div class="notice" id="b-notice" role="status"></div>
             <ul class="place-results" id="b-results"></ul>
           </div>
-        </div> 
+        </div>
 
         <p class="manual">Can't find it? <a class="link" href="#" id="manual-link">Enter the details yourself</a></p>
-        </div>
+
         <div id="details" hidden>
           <div class="ppa-summary" id="summary">
             <div><b id="sum-name"></b><span id="sum-where"></span></div>
@@ -175,19 +175,18 @@
           </div>
         </div>
 
-         <!-- PIN THE EXACT SPOT -->
-
-         <div class="field">
+        <!-- PIN THE EXACT SPOT -->
+        <div class="field">
           <label>Pin the exact spot <span class="opt">(recommended)</span></label>
           <p class="hint-small" style="margin: 0 0 8px;">Pick your PPA from the search above, or tap the map, then drag the pin onto your PPA building. Houses and routes will use this exact spot.</p>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:7px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
             <button class="btn sm" type="button" id="pin-here">📍 I am at my PPA now</button>
             <button class="btn sm ghost" type="button" id="pin-clear" hidden>Clear pin</button>
           </div>
           <div id="pick-map" aria-label="Map for placing your PPA pin"></div>
           <div class="notice" id="pin-notice" role="status" style="margin-top:10px;"></div>
           <div class="hint-small" id="pin-readout" style="margin-top:6px;">No pin yet.</div>
-        </div> 
+        </div>
 
         <!-- PHOTO OF THE GATE -->
         <div class="field">
