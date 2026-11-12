@@ -4,6 +4,11 @@
    3. Optionally add a photo of the gate or signboard.
    Then save, and the map page shows the route from where you are standing to your PPA. */
 
+// Listeners for parts of the page that may be missing (for example when only some files were updated)
+// must never stop the rest of the page, the map and the search, from starting.
+const on = (id, ev, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
+const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+
 fillSelect('p-state', NG_STATES, 'Choose state');
 
 let pin = null;            // { lat, lon } or null
@@ -12,6 +17,36 @@ let pinMarker = null;
 let newPhoto = null;       // a photo chosen now (data URL)
 let savedPhoto = '';       // the photo already saved (file name)
 let removePhoto = false;
+
+// ---------- the details: one summary line, with the fields hidden until they are needed ----------
+let userTyped = false;     // did the corps member type in the fields themselves?
+
+function missingDetails() { return !$('p-name').value.trim() || !$('p-state').value || !$('p-lga').value.trim(); }
+
+function refreshSummary() {
+  const where = [$('p-town').value.trim(), $('p-lga').value.trim() && $('p-lga').value.trim() + ' LGA', $('p-state').value && $('p-state').value + ' State'].filter(Boolean).join(', ');
+  setText('sum-name', $('p-name').value.trim() || 'Your PPA');
+  setText('sum-where', where || 'Add the state and LGA');
+}
+
+function openFields(open) {
+  if (!$('fields')) return;
+  $('fields').hidden = !open;
+  setText('edit-details', open ? 'Done' : 'Edit details');
+  if ($('edit-details')) $('edit-details').setAttribute('aria-expanded', String(open));
+}
+
+// Show the details once there is something to show. Fields open by themselves only when something is missing.
+function showDetails(forceOpen) {
+  if ($('details')) $('details').hidden = false;
+  refreshSummary();
+  openFields(forceOpen || missingDetails());
+}
+
+on('edit-details', 'click', () => { if ($('fields').hidden) openFields(true); else if (!missingDetails()) openFields(false); else refreshSummary(); });
+on('manual-link', 'click', (e) => { e.preventDefault(); userTyped = true; showDetails(true); $('p-name').focus(); });
+['p-name', 'p-addr', 'p-state', 'p-lga', 'p-town'].forEach((id) => $(id).addEventListener('input', () => { userTyped = true; refreshSummary(); }));
+$('p-state').addEventListener('change', () => { userTyped = true; refreshSummary(); });
 
 // ---------- the map (Google Maps if the server has a key, otherwise the free map) ----------
 let pickMap = null;
@@ -120,15 +155,20 @@ function runSearch() {
   $('s-results').innerHTML = '';
   say('s-notice', '🔍 Searching…', 'warn');
 
-  // 1. PPAs other corps members already pinned. 2. Map data (Google if the server has a key, otherwise free map data).
+  // 1. PPAs other corps members already pinned. 2. Our own list of schools, hospitals and offices.
+  // 3. Map data (Google if the server has a key, otherwise free map data), only when the first two find nothing.
   const sharedP = api('GET', '/api/ppa-directory/search?name=' + encodeURIComponent(q.name) + '&town=' + encodeURIComponent(q.town) +
                       '&state=' + encodeURIComponent(state || '')).then((r) => r.results || []).catch(() => []);
-  const mapP = NYSC_MAP.searchPlaces(q.name, q.town, state, '')
-    .catch((e) => Object.assign([], { problem: e.message, centre: null }));
+  const knownP = api('GET', '/api/places/search?name=' + encodeURIComponent(q.name) + '&town=' + encodeURIComponent(q.town) +
+                     '&state=' + encodeURIComponent(state || '')).then((r) => r.results || []).catch(() => []);
+  const noMap = () => Object.assign([], { centre: null, problem: '', googleProblem: '' });
 
-  Promise.all([sharedP, mapP]).then(([shared, places]) => {
+  Promise.all([sharedP, knownP]).then(async ([shared, known]) => {
+    let places = (shared.length + known.length >= 1) ? noMap()
+      : await NYSC_MAP.searchPlaces(q.name, q.town, state, '').catch((e) => Object.assign([], { problem: e.message, centre: null }));
     const where = [q.town, state].filter(Boolean).join(', ');
-    if (shared.length && places.noMatch) places = Object.assign([], { centre: places.centre, problem: '', googleProblem: '' });  // unrelated nearby places are just noise now
+    const haveOurs = shared.length + known.length > 0;
+    if (haveOurs && places.noMatch) places = noMap();   // unrelated nearby places are just noise now
     const hint = places.googleProblem ? ' (' + places.googleProblem + ')'
       : NYSC_MAP.provider() === 'google' ? ' (Google found nothing for this either. Check the spelling of the town.)' : '';
     const addOwn = ' Nobody has added this PPA yet. Open the map at the town, tap your PPA, fill in the details and save: it will then show up for the next corps member.';
@@ -136,8 +176,9 @@ function runSearch() {
     const add = (node) => { const li = document.createElement('li'); li.appendChild(node); $('s-results').appendChild(li); };
 
     const addTownRow = () => {           // always leave a way to open the map at the town
-      if (!places.centre && !shared.length) return;
-      const centre = places.centre || { lat: shared[0].lat, lon: shared[0].lon };
+      const first = shared[0] || known[0];
+      if (!places.centre && !first) return;
+      const centre = places.centre || { lat: first.lat, lon: first.lon };
       const b = document.createElement('button');
       b.type = 'button';
       b.innerHTML = '<b>📍 Open the map at ' + esc(where) + '</b><span>Not listed? Go to the town and tap your PPA on the map yourself.</span>';
@@ -167,18 +208,26 @@ function runSearch() {
       add(wrap);
     });
 
-    if (!shared.length && !places.length) {
+    known.forEach((pl) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = '<b>' + esc(pl.name) + '</b><span>' + esc(pl.address || 'No address listed') + '</span>';
+      b.addEventListener('click', () => choosePlace(pl, b));
+      add(b);
+    });
+
+    if (!haveOurs && !places.length) {
       if (places.problem || places.googleProblem) say('s-notice', '⚠️ ' + [places.googleProblem, places.problem].filter(Boolean).join(' ') + addOwn, 'bad');
       else say('s-notice', `No "${q.name || 'place'}" found in ${where}. Check the spelling of the town.${hint}${addOwn}`, 'bad');
       addTownRow();
       return;
     }
 
-    if (!shared.length && places.noMatch) {
+    if (!haveOurs && places.noMatch) {
       say('s-notice', `No place named like "${q.name}" found in ${where}. These are the nearest places on the map.${hint}${addOwn}`, 'warn');
     } else {
-      const n = shared.length + places.length;
-      say('s-notice', `${n} found${q.name ? ', best name match first' : ', nearest first'}. Tap yours.` + (shared.length ? '' : addOwn), 'ok');
+      const n = shared.length + known.length + places.length;
+      say('s-notice', `${n} found${q.name ? ', best name match first' : ', nearest first'}. Tap yours.` + (haveOurs ? '' : addOwn), 'ok');
     }
 
     places.forEach((pl) => {
@@ -197,6 +246,7 @@ function openTown(centre, town, state) {
   pickMap.setView(centre.lat, centre.lon, 15);
   if (state && NG_STATES.includes(state)) $('p-state').value = state;
   if (!$('p-town').value.trim()) $('p-town').value = town;
+  showDetails(true);
   pickMap.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   say('pin-notice', `Showing ${town}. Tap your PPA on the map to drop the pin (use the Satellite switch if it helps), then fill in the PPA name below.`, 'ok');
 }
@@ -210,17 +260,70 @@ function choosePlace(pl, button) {
   if (pl.lga && !$('p-lga').value.trim()) $('p-lga').value = pl.lga.replace(/ (Local Government( Area)?|LGA)$/i, '');
   if (pl.town && !$('p-town').value.trim()) $('p-town').value = pl.town;
   setPin(pl.lat, pl.lon, 18);
+  userTyped = false;
+  showDetails(false);
   if (!$('p-state').value || !$('p-lga').value.trim()) {
     NYSC_MAP.whereIs(pl.lat, pl.lon).then((w) => {
       if (!w) return;
       if (!$('p-state').value && NG_STATES.includes(w.state)) $('p-state').value = w.state;
       if (!$('p-lga').value.trim() && w.lga) $('p-lga').value = w.lga.replace(/ (Local Government( Area)?|LGA)$/i, '');
       if (!$('p-town').value.trim() && w.town) $('p-town').value = w.town;
+      refreshSummary();
+      if (!userTyped && !missingDetails()) openFields(false);   // everything is known now: tidy the fields away
     }).catch(() => { /* the corper can fill these in by hand */ });
   }
   pickMap.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   say('pin-notice', `Showing ${pl.name}. If the pin is not on your building, drag it, or use the Satellite button on the map.`, 'ok');
 }
+
+// ---------- browse by area: every school / hospital we know in one LGA ----------
+let areaTimer = null;
+async function initBrowse() {
+  try {
+    const a = await api('GET', '/api/places/areas');
+    if (!a.total || !(a.states || []).length) return;               // nothing loaded: keep the page simple
+    if (!$('browse') || !$('b-state')) return;
+    $('browse').hidden = false;
+    fillSelect('b-state', a.states.map((s) => s.state), 'Choose state');
+  } catch (e) { /* the browse link just stays hidden */ }
+}
+on('browse-link', 'click', (e) => {
+  e.preventDefault();
+  $('browse-box').hidden = !$('browse-box').hidden;
+  if (!$('browse-box').hidden && !$('b-state').value && $('p-state').value) { $('b-state').value = $('p-state').value; $('b-state').dispatchEvent(new Event('change')); }
+});
+on('b-state', 'change', async () => {
+  $('b-lga').innerHTML = '<option value="">Choose LGA</option>';
+  $('b-results').innerHTML = '';
+  say('b-notice', '', '');
+  if (!$('b-state').value) return;
+  try {
+    const r = await api('GET', '/api/places/areas?state=' + encodeURIComponent($('b-state').value));
+    $('b-lga').innerHTML = '<option value="">Choose LGA</option>' + r.lgas.map((l) => `<option value="${esc(l.lga)}">${esc(l.lga)} (${l.count})</option>`).join('');
+  } catch (err) { say('b-notice', err.message, 'bad'); }
+});
+async function loadArea() {
+  if (!$('b-state').value || !$('b-lga').value) { $('b-results').innerHTML = ''; return; }
+  try {
+    const r = await api('GET', '/api/places/area?state=' + encodeURIComponent($('b-state').value) + '&lga=' + encodeURIComponent($('b-lga').value) +
+                        '&q=' + encodeURIComponent($('b-q').value.trim()) + '&kind=' + encodeURIComponent($('b-kind').value));
+    $('b-results').innerHTML = '';
+    say('b-notice', r.results.length ? `${r.results.length}${r.results.length === 300 ? '+' : ''} found. Tap yours.` : 'Nothing matches. Clear the name box, or enter your PPA yourself.', r.results.length ? 'ok' : 'warn');
+    r.results.forEach((pl) => {
+      const li = document.createElement('li');
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = '<b>' + esc(pl.name) + '</b><span>' + esc(pl.address || '') + '</span>';
+      b.addEventListener('click', () => choosePlace(pl, b));
+      li.appendChild(b);
+      $('b-results').appendChild(li);
+    });
+  } catch (err) { say('b-notice', err.message, 'bad'); }
+}
+on('b-lga', 'change', loadArea);
+on('b-kind', 'change', loadArea);
+on('b-q', 'input', () => { clearTimeout(areaTimer); areaTimer = setTimeout(loadArea, 300); });
+initBrowse();
 
 $('s-go').addEventListener('click', runSearch);
 $('s-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); runSearch(); } });
@@ -262,6 +365,7 @@ async function loadSavedPpa() {
       $('p-lga').value = p.lga || '';
       $('p-town').value = p.town || '';
       $('view-map').hidden = false;
+      showDetails(false);
       if (p.lat != null && p.lon != null) { hadPin = true; setPin(p.lat, p.lon, 17); }
       if (p.photo) { savedPhoto = p.photo; showPhoto('/uploads/ppa/' + encodeURIComponent(p.photo)); }
     }
@@ -295,6 +399,10 @@ $('ppa-form').addEventListener('submit', async (e) => {
     town: $('p-town').value.trim(),
   };
 
+  if (missingDetails()) {
+    showDetails(true);
+    if (!$('p-name').value.trim() && !userTyped) { say('ppa-notice', 'Search for your PPA above and tap it, or enter the details yourself.', 'warn'); }
+  }
   // setBad marks a field red and returns true when something is wrong.
   const problems = [
     setBad('f-name', !body.ppa_name),

@@ -7,6 +7,7 @@ from api_routes import router as api_router
 from locator_routes import router as locator_router
 from config_routes import router as config_router
 from ppa_directory import router as directory_router
+from known_places import router as places_router
 from checklist_routes import router as checklist_router
 from cds_routes import router as cds_router
 from board_routes import router as board_router
@@ -38,6 +39,7 @@ app = FastAPI()
 app.include_router(locator_router)
 app.include_router(config_router)
 app.include_router(directory_router)
+app.include_router(places_router)
 app.include_router(checklist_router)
 app.include_router(cds_router)
 app.include_router(board_router)

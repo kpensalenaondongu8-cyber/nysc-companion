@@ -23,6 +23,16 @@
   .row { display: flex; gap: 12px; }
   .row > .field { flex: 1; }
   @media (max-width: 520px) { .row { flex-direction: column; } }
+  #details[hidden], #fields[hidden] { display: none; }
+  #fields { display: grid; gap: 14px; margin-top: 14px; }
+  .ppa-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--green-tint); border: 1px solid var(--line); border-left: 4px solid var(--green); border-radius: 12px; padding: 12px 14px; }
+  .ppa-summary b { display: block; overflow-wrap: anywhere; }
+  .ppa-summary span { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+  .ppa-summary .btn { flex: none; }
+  .manual { font-size: 14px; margin: 10px 0 0; }
+  .browse-box { display: grid; gap: 10px; margin-top: 6px; }
+  .browse-box[hidden] { display: none; }
+  .tag-list { display: inline-block; margin-left: 6px; font-size: 12px; color: var(--muted); }
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#014a21">
@@ -49,33 +59,57 @@
 
   <div class="page-head">
     <div>
-      <h1>Set up your PPA</h1>
-      <p>Search for your PPA or type the details from your posting letter, then check the pin on the map.</p>
+      <h3>Set up your PPA</h3>
+      <p>Search for your PPA, tap it in the list, then check the pin on the map.</p>
     </div>
   </div>
 
-  <section class="panel" id="ppa-form-panel" style="max-width: 720px; margin: 0 auto;">
+  <section class="panel" id="ppa-form-panel" style="max-width: 500px; margin: 0 auto;">
     <header>
       <h2>Where is your PPA?</h2>
-      <span class="hint">Copy the details from your posting letter</span>
+      <span class="hint">Take the name from your posting letter</span>
     </header>
     <div class="body">
-      <form id="ppa-form" novalidate style="display: grid; gap: 14px;">
+      <form id="ppa-form" novalidate style="display: grid; gap: 10px;">
         <!-- SEARCH FOR YOUR PPA -->
         <div class="field">
           <label for="s-name">Search for your PPA</label>
-          <p class="hint-small" style="margin: 0 0 8px;">Type the PPA name, the town and the state, all in one line,  We search PPAs that other corps members have already pinned, plus the map data. Tap yours in the list and the map takes you there. Not listed? Pin it yourself and save: it will then show up for the next corps member.</p>
-          <!-- <div style="display:flex; gap:8px;">
+          <p class="hint-small" style="margin: 0 0 8px;">Type the PPA name, the town and state</p>
+          <div style="display:flex; gap:2px;">
             <input class="input" id="s-name" maxlength="150" style="flex:1;" placeholder="PPA name, town, state">
             <button class="btn sm" type="button" id="s-go">🔍 Search</button>
-          </div> -->
-          <div class="notice" id="s-notice" role="status" style="margin-top:10px;"></div>
+          </div>
+          <div class="notice" id="s-notice" role="status" style="margin-top:7px;"></div>
           <ul class="place-results" id="s-results"></ul>
         </div>
 
+        <div id="browse" hidden>
+          <p class="manual"><a class="link" href="#" id="browse-link">Browse schools and hospitals in an LGA</a></p>
+          <div class="browse-box" id="browse-box" hidden>
+            <div class="row">
+              <div class="field"><label for="b-state">State</label><select class="input" id="b-state"></select></div>
+              <div class="field"><label for="b-lga">LGA</label><select class="input" id="b-lga"><option value="">Choose LGA</option></select></div>
+            </div>
+            <div class="row">
+              <div class="field"><label for="b-q">Narrow by name <span class="opt">(optional)</span></label><input class="input" id="b-q" maxlength="80" placeholder="e.g. Government Secondary"></div>
+              <div class="field"><label for="b-kind">Type</label><select class="input" id="b-kind"><option value="">All</option><option value="school">Schools</option><option value="health">Hospitals and clinics</option><option value="other">Other</option></select></div>
+            </div>
+            <div class="notice" id="b-notice" role="status"></div>
+            <ul class="place-results" id="b-results"></ul>
+          </div>
+        </div> 
+
+        <p class="manual">Can't find it? <a class="link" href="#" id="manual-link">Enter the details yourself</a></p>
+        </div>
+        <div id="details" hidden>
+          <div class="ppa-summary" id="summary">
+            <div><b id="sum-name"></b><span id="sum-where"></span></div>
+            <button class="btn sm ghost" type="button" id="edit-details" aria-expanded="false" aria-controls="fields">Edit details</button>
+          </div>
+          <div id="fields" hidden>
         <div class="field" id="f-name">
           <label for="p-name">PPA name</label>
-          <input class="input" id="p-name" maxlength="100" placeholder="e.g. Government Secondary School">
+          <input class="input" id="p-name" maxlength="100" placeholder="e.g. Government Secondary School, Gboko">
           <span class="err">Enter the name of your PPA.</span>
         </div>
         <div class="field">
@@ -137,20 +171,23 @@
           <label for="p-town">Town or area <span class="opt">(optional)</span></label>
           <input class="input" id="p-town" maxlength="60" placeholder="e.g. Yandev">
         </div>
+            <div><button class="btn sm ghost" type="button" id="pin-find">🔍 Find these details on the map</button></div>
+          </div>
+        </div>
 
-        <!-- PIN THE EXACT SPOT -->
-        <div class="field">
+         <!-- PIN THE EXACT SPOT -->
+
+         <div class="field">
           <label>Pin the exact spot <span class="opt">(recommended)</span></label>
-          <p class="hint-small" style="margin: 0 0 8px;">Tap <b>Find my PPA</b> (or pick it from the search above), then tap or drag the pin onto your PPA building. Houses and routes will use this exact spot.</p>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
-            <button class="btn sm" type="button" id="pin-find">🔍 Find my PPA</button>
-            <button class="btn sm ghost" type="button" id="pin-here">📍 I am at my PPA now</button>
+          <p class="hint-small" style="margin: 0 0 8px;">Pick your PPA from the search above, or tap the map, then drag the pin onto your PPA building. Houses and routes will use this exact spot.</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:7px;">
+            <button class="btn sm" type="button" id="pin-here">📍 I am at my PPA now</button>
             <button class="btn sm ghost" type="button" id="pin-clear" hidden>Clear pin</button>
           </div>
           <div id="pick-map" aria-label="Map for placing your PPA pin"></div>
           <div class="notice" id="pin-notice" role="status" style="margin-top:10px;"></div>
           <div class="hint-small" id="pin-readout" style="margin-top:6px;">No pin yet.</div>
-        </div>
+        </div> 
 
         <!-- PHOTO OF THE GATE -->
         <div class="field">
