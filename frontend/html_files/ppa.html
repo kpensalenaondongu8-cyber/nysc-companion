@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="/frontend/css/base.css">
 <link rel="stylesheet" href="/frontend/css/app.css">
 <link rel="stylesheet" href="/frontend/css/extra.css">
+<link rel="stylesheet" href="/frontend/css/ppa-reviews.css">
 <title>NYSC Companion · Configure PPA</title>
 <style>
   .subnav { display: flex; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 8px; margin: 20px 0 8px; overflow-x: auto; }
@@ -169,6 +170,7 @@
           <div id="pick-map" aria-label="Map for placing your PPA pin"></div>
           <div class="notice" id="pin-notice" role="status" style="margin-top:10px;"></div>
           <div class="hint-small" id="pin-readout" style="margin-top:6px;">No pin yet.</div>
+          <div class="rv-box" id="rv-place" hidden></div>
         </div>
 
         <!-- PHOTO OF THE GATE -->
@@ -187,10 +189,17 @@
           <span><b>Share this PPA with other corps members.</b> If you pinned the spot, others who search for this PPA will find it. Your name is never shown.</span>
         </label>
 
-        <button class="btn gold block" type="submit" id="ppa-save">Save &amp; view map route ➔</button>
-        <a class="btn ghost block" id="view-map" href="/ppa-route" hidden>View my saved PPA on the map</a>
+        <button class="btn gold block" type="submit" id="ppa-save">Save my PPA</button>
       </form>
       <div class="notice" id="ppa-notice" role="status"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="rv-panel" style="margin-top: 16px;" hidden>
+    <header><h2>Reviews of your PPA</h2><span class="hint">Help the next corps member</span></header>
+    <div class="body">
+      <div class="rv-box" id="rv-here" style="margin-top:0;" hidden></div>
+      <div class="rv-box" id="rv-mine"></div>
     </div>
   </section>
 </div>
@@ -199,6 +208,7 @@
 <script src="/frontend/js/nav.js"></script>
 <script src="/frontend/js/ui.js"></script>
 <script src="/frontend/js/map.js"></script>
+<script src="/frontend/js/ppa-reviews.js"></script>
 <script src="/frontend/js/ppa.js"></script>
 <script src="/frontend/js/pwa.js"></script>
 </body>

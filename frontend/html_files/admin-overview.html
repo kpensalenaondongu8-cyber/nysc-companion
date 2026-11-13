@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="/frontend/css/app.css">
 <link rel="stylesheet" href="/frontend/css/agent-dash.css">
 <link rel="stylesheet" href="/frontend/css/admin-overview.css">
+<link rel="stylesheet" href="/frontend/css/ppa-reviews.css">
 <title>NYSC Companion · Overview</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#014a21">
@@ -49,6 +50,10 @@
         <div class="tablewrap"><table class="lga" id="places"></table></div>
         <div class="short" id="short" hidden></div>
       </div>
+    </section>
+    <section class="panel" id="ppa-reviews" aria-labelledby="h-rv" style="margin-top:16px" hidden>
+      <header><h2 id="h-rv">Reported PPA reviews</h2><span class="hint">Hidden after 3 reports</span></header>
+      <div class="body"><ul class="mod-list" id="mod-list"></ul></div>
     </section>
     <p class="fine">Corps members are counted from the PPA they saved. Houses are the ones on offer from approved agents.</p>
   </div>

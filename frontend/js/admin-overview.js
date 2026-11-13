@@ -12,6 +12,7 @@ function attention(a) {
   if (a.agents_waiting) rows.push(`<a href="/admin"><span><b>${a.agents_waiting}</b> ${a.agents_waiting === 1 ? 'agent is' : 'agents are'} waiting for approval</span><span class="go">Review</span></a>`);
   const hidden = a.hidden_posts + a.hidden_replies;
   if (hidden) rows.push(`<a href="/admin#reported"><span><b>${hidden}</b> board ${hidden === 1 ? 'item was' : 'items were'} hidden after reports</span><span class="go">Review</span></a>`);
+  if (a.ppa_reviews_reported) rows.push(`<a href="#ppa-reviews"><span><b>${a.ppa_reviews_reported}</b> PPA ${a.ppa_reviews_reported === 1 ? 'review was' : 'reviews were'} reported</span><span class="go">Review</span></a>`);
   $('attention').innerHTML = rows.length ? `<div class="attn">${rows.join('')}</div>` : '<div class="attn"><div class="ok">Nothing is waiting for you.</div></div>';
 }
 
@@ -57,8 +58,28 @@ function drawPlaces(places, none) {
     drawChart(d.chart);
     drawPlaces(d.places, d.no_houses);
     $('content').hidden = false;
+    loadReported();
   } catch (err) {
     $('load-error').textContent = err.message;
     $('load-error').hidden = false;
   }
 })();
+
+// Reported PPA reviews: keep (they are fine) or delete.
+async function loadReported() {
+  try {
+    const r = await api('GET', '/api/ppa-reviews/admin/reported');
+    const sec = $('ppa-reviews');
+    if (!sec) return;
+    sec.hidden = !r.reviews.length;
+    $('mod-list').innerHTML = r.reviews.map((v) => `
+      <li>
+        <b>${esc(v.ppa_name)}</b> <span class="muted">${esc([v.lga, v.state].filter(Boolean).join(', '))}</span>
+        <div>${stars(v.rating)} <span class="muted">${plural(v.reports, 'report', 'reports')}${v.hidden ? ' · hidden' : ''}</span></div>
+        ${v.comment ? `<p style="margin:6px 0;overflow-wrap:anywhere;">${esc(v.comment)}</p>` : '<p class="muted" style="margin:6px 0;">No comment, rating only.</p>'}
+        <div class="acts"><button class="btn sm" data-keep="${v.id}" type="button">Keep it</button><button class="btn sm ghost" data-del="${v.id}" type="button">Delete</button></div>
+      </li>`).join('');
+    document.querySelectorAll('[data-keep]').forEach((b) => b.addEventListener('click', async () => { await api('POST', '/api/ppa-reviews/admin/' + b.dataset.keep + '/keep'); loadReported(); }));
+    document.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Delete this review for good?')) { await api('DELETE', '/api/ppa-reviews/admin/' + b.dataset.del); loadReported(); } }));
+  } catch (e) { /* the panel just stays hidden */ }
+}

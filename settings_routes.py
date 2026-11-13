@@ -200,7 +200,7 @@ def delete_account(body: PasswordOnly, user_id: int = Depends(current_user_id)):
         conn.execute("DELETE FROM board_replies WHERE user_id = ? OR post_id IN (SELECT id FROM board_posts WHERE user_id = ?)",
                      (user_id, user_id))
         for table in ("board_posts", "house_events", "checklist_settings", "checklist_done", "checklist_custom",
-                      "cds_profile", "cds_sessions", "cds_updates", "password_resets"):
+                      "cds_profile", "cds_sessions", "cds_updates", "password_resets", "ppa_review_reports", "ppa_reviews"):
             try:
                 conn.execute(f"DELETE FROM {table} WHERE user_id = ?", (user_id,))
             except sqlite3.OperationalError:

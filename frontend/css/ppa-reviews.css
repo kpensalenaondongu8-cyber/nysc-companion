@@ -1,0 +1,30 @@
+/* PPA reviews (ppa.html, ppa-route.html, admin-overview.html) */
+.rv-box { margin-top: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.rv-title { margin: 0 0 8px; font-size: 16px; font-family: var(--font-display); }
+.rv-muted { color: var(--muted); font-size: 13px; }
+.rv-empty { color: var(--muted); margin: 0; font-size: 14px; }
+.rv-sum { margin: 0 0 8px; }
+.rv-sum .stars, .rv-head .stars { color: #b78900; }
+.rv-list { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 12px; }
+.rv-list li { border-top: 1px solid var(--line); padding-top: 10px; }
+.rv-head { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.rv-text { margin: 6px 0; overflow-wrap: anywhere; }
+.rv-tags { margin: 6px 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.rv-tag { background: var(--green-tint); color: var(--green-text); border-radius: 999px; padding: 2px 10px; font-size: 13px; }
+.rv-link { background: none; border: 0; padding: 4px 0; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
+.rv-warn { background: var(--gold-soft); border-left: 4px solid var(--gold); border-radius: 8px; padding: 8px 12px; margin: 0 0 10px; font-size: 14px; }
+.rv-stars { display: flex; gap: 2px; }
+.rv-star { background: none; border: 0; padding: 4px 6px; font-size: 32px; line-height: 1; cursor: pointer; color: var(--line); }
+.rv-star.on { color: #d19a00; }
+.rv-star:focus-visible, .rv-chip input:focus-visible + span { outline: 3px solid var(--green); outline-offset: 2px; }
+.rv-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+.rv-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.rv-chip span { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 14px; cursor: pointer; background: var(--surface); }
+.rv-chip input:checked + span { background: var(--green); border-color: var(--green); color: #fff; }
+.rv-chip { position: relative; }
+.rv-badge { display: inline-block; margin-left: 6px; color: #8a6400; font-weight: 600; font-size: 13px; }
+.rv-badge span { font-weight: 400; color: var(--muted); }
+:root[data-theme="dark"] .rv-sum .stars, :root[data-theme="dark"] .rv-head .stars, :root[data-theme="dark"] .rv-badge { color: #e0b53a; }
+.mod-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.mod-list li { border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.mod-list .acts { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }

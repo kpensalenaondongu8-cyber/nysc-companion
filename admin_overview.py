@@ -44,6 +44,10 @@ def overview(admin_id: int = Depends(current_admin_id)):
             "taken": _one(conn, f"SELECT COUNT(*) FROM houses h WHERE {live} AND h.status = 'taken'"),
         }
         reviews = _one(conn, "SELECT COUNT(*) FROM reviews")
+        ppa_reports = 0
+        if _table_exists(conn, "ppa_reviews"):
+            ppa_reports = _one(conn, "SELECT COUNT(*) FROM ppa_reviews r WHERE r.hidden = 1 OR EXISTS "
+                                     "(SELECT 1 FROM ppa_review_reports x WHERE x.review_id = r.id)")
         active_week = _one(conn, """SELECT COUNT(DISTINCT s.user_id) FROM sessions s JOIN users u ON u.id = s.user_id
                                     WHERE u.role != 'admin' AND s.created_at >= ?""", (week_ago,))
 
@@ -85,7 +89,7 @@ def overview(admin_id: int = Depends(current_admin_id)):
         "totals": {"corpers": corpers, "agents": agents, "houses": houses, "reviews": reviews,
                    "posts": posts, "active_week": active_week, "new_week": new_week},
         "attention": {"agents_waiting": agents["pending"], "hidden_posts": hidden_posts,
-                      "hidden_replies": hidden_replies},
+                      "hidden_replies": hidden_replies, "ppa_reviews_reported": ppa_reports},
         "chart": chart,
         "places": places,
         "no_houses": [{"state": p["state"], "lga": p["lga"], "corpers": p["corpers"]} for p in short[:LGA_ROWS]],

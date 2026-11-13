@@ -8,8 +8,6 @@
     $('hello').textContent = 'Welcome, ' + user.first_name;
 
     if (ppa) {
-      $('hero-main').textContent = 'Open my route';
-      $('hero-main').href = '/ppa-route';
       $('ppa-strip').hidden = false;
       $('ppa-title').textContent = ppa.ppa_name;
       $('ppa-where').textContent = [ppa.address, ppa.town, ppa.lga, ppa.state].filter(Boolean).join(', ');

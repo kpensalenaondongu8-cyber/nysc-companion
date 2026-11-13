@@ -14,6 +14,7 @@ from board_routes import router as board_router
 from agent_dash import router as agent_dash_router
 from admin_overview import router as admin_overview_router
 from password_reset import router as password_reset_router
+from ppa_reviews import router as ppa_reviews_router
 from settings_routes import router as settings_router
 from locator_db import seed_samples
 from budget_tracking.budget import budget_track
@@ -46,6 +47,7 @@ app.include_router(board_router)
 app.include_router(agent_dash_router)
 app.include_router(admin_overview_router)
 app.include_router(password_reset_router)
+app.include_router(ppa_reviews_router)
 app.include_router(settings_router)
 app.include_router(api_router)                      # the /api routes the pages use
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
@@ -120,8 +122,9 @@ def home():
     return RedirectResponse("/login")
 
 @app.get("/ppa-route")
-def ppa_route_page():
-    return FileResponse("frontend/html_files/ppa-route.html")
+def old_route_page():
+    """The route page was removed. Old bookmarks go to the PPA search page."""
+    return RedirectResponse("/ppa-locator")
 
 @app.get("/ppa-locator")
 def ppa_locator_page():

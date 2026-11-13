@@ -187,6 +187,7 @@ function runSearch() {
       add(b);
     };
 
+    const rated = [];                      // [place, its button] pairs, to add star ratings once they load
     // shared PPAs first, each with a "wrong location?" button
     shared.forEach((pl) => {
       const wrap = document.createElement('div');
@@ -196,6 +197,7 @@ function runSearch() {
       b.innerHTML = '<b>' + esc(pl.name) + '</b><span>' + esc(pl.address) + '</span><span class="tag-shared">Pinned by ' +
                     pl.confirmations + (pl.confirmations === 1 ? ' corps member' : ' corps members') + '</span>';
       b.addEventListener('click', () => choosePlace(pl, b));
+      rated.push([pl, b]);
       const rep = document.createElement('button');
       rep.type = 'button'; rep.className = 'small'; rep.textContent = 'Wrong spot?';
       rep.addEventListener('click', async () => {
@@ -214,8 +216,16 @@ function runSearch() {
       b.type = 'button';
       b.innerHTML = '<b>' + esc(pl.name) + '</b><span>' + esc(pl.address || 'No address listed') + '</span>';
       b.addEventListener('click', () => choosePlace(pl, b));
+      rated.push([pl, b]);
       add(b);
     });
+
+    if (typeof PPA_REVIEWS !== 'undefined' && rated.length) {
+      PPA_REVIEWS.lookup(rated.map((x) => x[0])).then((res) => res.forEach((r, i) => {
+        const title = rated[i][1].querySelector('b');
+        if (r.count && title) title.insertAdjacentHTML('beforeend', PPA_REVIEWS.badge(r.avg, r.count));
+      }));
+    }
 
     if (!haveOurs && !places.length) {
       if (places.problem || places.googleProblem) say('s-notice', '⚠️ ' + [places.googleProblem, places.problem].filter(Boolean).join(' ') + addOwn, 'bad');
@@ -261,6 +271,7 @@ function choosePlace(pl, button) {
   if (pl.lga && !$('p-lga').value.trim()) $('p-lga').value = pl.lga.replace(/ (Local Government( Area)?|LGA)$/i, '');
   if (pl.town && !$('p-town').value.trim()) $('p-town').value = pl.town;
   setPin(pl.lat, pl.lon, 18);
+  if (typeof PPA_REVIEWS !== 'undefined' && $('rv-place')) PPA_REVIEWS.showList('rv-place', pl);
   userTyped = false;
   showDetails(false);
   if (!$('p-state').value || !$('p-lga').value.trim()) {
@@ -305,6 +316,16 @@ $('photo-remove').addEventListener('click', () => {
   showPhoto('');
 });
 
+// ---------- reviews of my own PPA ----------
+async function showMyReviews(p) {
+  if (typeof PPA_REVIEWS === 'undefined' || !$('rv-panel')) return;
+  $('rv-panel').hidden = false;
+  const refresh = () => (p.lat != null && p.lon != null)
+    ? PPA_REVIEWS.showList('rv-here', { name: p.ppa_name, lat: p.lat, lon: p.lon }) : null;
+  await refresh();
+  await PPA_REVIEWS.mountMine('rv-mine', refresh);
+}
+
 // ---------- load the saved PPA ----------
 async function loadSavedPpa() {
   try {
@@ -316,16 +337,23 @@ async function loadSavedPpa() {
       $('p-state').value = p.state || '';
       $('p-lga').value = p.lga || '';
       $('p-town').value = p.town || '';
-      $('view-map').hidden = false;
       showDetails(false);
       if (p.lat != null && p.lon != null) { hadPin = true; setPin(p.lat, p.lon, 17); }
       if (p.photo) { savedPhoto = p.photo; showPhoto('/uploads/ppa/' + encodeURIComponent(p.photo)); }
+      showMyReviews(p);
     }
   } catch (err) {
     $('load-error').textContent = 'Could not load your saved PPA: ' + err.message;
     $('load-error').hidden = false;
   }
 }
+
+try {
+  if (sessionStorage.getItem('ppa_just_saved')) {
+    sessionStorage.removeItem('ppa_just_saved');
+    say('ppa-notice', '✅ PPA saved. Your pin is on the map above.', 'ok');
+  }
+} catch (e) { /* no storage: just no message */ }
 
 // Start: make the map, then load the saved PPA onto it.
 (async function start() {
@@ -373,8 +401,8 @@ $('ppa-form').addEventListener('submit', async (e) => {
   say('ppa-notice', 'Saving…', 'warn');
   try {
     await api('PUT', '/api/ppa', body);
-    say('ppa-notice', pin && body.share ? '✅ PPA saved and shared. Opening the map…' : '✅ PPA saved. Opening the map…', 'ok');
-    window.location.href = '/ppa-route';
+    try { sessionStorage.setItem('ppa_just_saved', '1'); } catch (e) { /* the page still reloads */ }
+    window.location.reload();                          // start again with the saved PPA on the map
   } catch (err) {
     say('ppa-notice', err.message, 'bad');
     $('ppa-save').disabled = false;
