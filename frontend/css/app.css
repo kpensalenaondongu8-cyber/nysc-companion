@@ -26,6 +26,14 @@
 .panel > header h2 { font-size: 20px; }
 .panel .body { padding: 18px 20px; }
 .panel form.stack { margin-top: 0; }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* boxes that fold on phones (foldPanels in ui.js) */
+.fold-head { cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+.fold-head::after { content: "▾"; margin-left: auto; color: var(--muted); }
+.fold-head[aria-expanded="true"]::after { content: "▴"; }
+.panel.folded > header { border-bottom: 0; }
+@media (max-width: 600px) { .panel > header { padding: 14px 16px; } .panel .body { padding: 14px 16px; } .panel > header h2 { font-size: 18px; } }
 
 
 /* ---------- navigation inside the top bar ---------- */
@@ -102,10 +110,13 @@ a.feature p { color: var(--muted); font-size: 13.5px; margin-top: 6px; }
   .who, .topbar-actions #logout { display: none; }
   .avatar { width: 28px; height: 28px; font-size: 11px; }
   .menu-btn { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.12); color: #fff; cursor: pointer; }
-  .topnav { display: none; order: 3; width: 100%; flex-direction: column; gap: 2px; margin: 8px 0 4px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.2); }
-  .topbar.open .topnav { display: flex; }
-  .topnav a { font-size: 15px; padding: 11px 12px; }
-  .menu-logout { display: block; margin-top: 4px; text-align: left; background: transparent; border: 0; border-top: 1px solid rgba(255,255,255,.2); color: #ffd6da; font: inherit; font-weight: 600; font-size: 15px; padding: 12px; cursor: pointer; }
+  .topbar { position: sticky; }
+  .topnav { display: none; }
+  /* the menu floats over the page under the button, like in a normal app, and does not push the page down */
+  .topbar.open .topnav { display: flex; flex-direction: column; gap: 0; position: absolute; top: calc(100% + 8px); right: 0; width: min(224px, 100%);
+    z-index: 60; margin: 0; padding: 6px; background: #0b4a22; border: 1px solid rgba(255,255,255,.22); border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+  .topnav a { font-size: 14.5px; padding: 10px 12px; border-radius: 8px; }
+  .menu-logout { display: block; margin-top: 4px; text-align: left; background: transparent; border: 0; border-top: 1px solid rgba(255,255,255,.2); color: #ffd6da; font: inherit; font-weight: 600; font-size: 14.5px; padding: 10px 12px; cursor: pointer; }
 }
 
 /* ---------- profile picture in the top bar ---------- */
