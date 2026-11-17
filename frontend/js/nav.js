@@ -53,6 +53,9 @@ if (!Session.token()) window.location.href = '/login';
     const open = bar.classList.toggle('open');
     $('menu-btn').setAttribute('aria-expanded', String(open));
   });
+  const closeMenu = () => { bar.classList.remove('open'); $('menu-btn').setAttribute('aria-expanded', 'false'); };
+  document.addEventListener('click', (e) => { if (bar.classList.contains('open') && !bar.contains(e.target)) closeMenu(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 
   const logOut = async () => {
     try { await api('POST', '/api/logout'); } catch (err) { /* leave anyway */ }

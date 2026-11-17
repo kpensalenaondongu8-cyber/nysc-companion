@@ -140,3 +140,4 @@ $('review-form').addEventListener('submit', async (e) => {
   } catch (err) { /* the list below shows any problem */ }
   load();
 })();
+foldPanels('#write-panel');
